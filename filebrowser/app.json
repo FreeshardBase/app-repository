@@ -1,0 +1,10 @@
+{
+  "name": "foo",
+  "description": "the foo application",
+  "image": "portalapps.azurecr.io/ptl-apps/foo:1.2.3",
+  "port": 80,
+  "data_dirs": [
+    "/data",
+    "/config"
+  ]
+}
