@@ -1,10 +1,9 @@
 {
-  "name": "foo",
-  "description": "the foo application",
-  "image": "portalapps.azurecr.io/ptl-apps/foo:1.2.3",
+  "name": "filebrowser",
+  "description": "A simple file browser; https://filebrowser.org/",
+  "image": "portalapps.azurecr.io/ptl-apps/filebrowser:master",
   "port": 80,
   "data_dirs": [
-    "/data",
-    "/config"
+    "/data"
   ]
 }
