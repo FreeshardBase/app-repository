@@ -8,6 +8,7 @@
   ],
   "env_vars": {
     "SIGNUPS_ALLOWED": "false",
+    "ADMIN_TOKEN": "unused",
     "DISABLE_ADMIN_TOKEN": "true"
   }
 }
