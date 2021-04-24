@@ -24,6 +24,9 @@ The `app.json` file must have the following structure.
   "data_dirs": [
     "/data",
     "/config"
-  ]
+  ],
+  "env_vars": {
+    "FOO": "bar"
+  }
 }
 ```
