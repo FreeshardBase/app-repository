@@ -1,0 +1,10 @@
+{
+  "name": "ghost",
+  "description": "A free and open source blogging platform, designed to simplify the process of online publishing for individual bloggers as well as online publications",
+  "image": "ghost:alpine",
+  "port": 2368,
+  "data_dirs": [
+    "/var/lib/ghost/content"
+  ],
+  "prefix_protected": "/ghost/"
+}
