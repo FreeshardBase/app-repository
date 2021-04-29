@@ -6,5 +6,8 @@
   "data_dirs": [
     "/var/lib/ghost/content"
   ],
+  "env_vars": {
+    "url": "https://ghost.{{ portal.domain }}/"
+  },
   "prefix_protected": "/ghost/"
 }
