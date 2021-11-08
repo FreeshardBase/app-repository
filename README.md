@@ -28,7 +28,11 @@ The `app.json` file must have the following structure.
   "env_vars": {
     "FOO": "bar"
   },
-  "prefix_public": "/public/"
+  "authentication": {
+    "default_access": "private",
+    "public_paths": ["/public/"],
+    "peer_paths": ["/peer/"]
+  }
 }
 ```
 
