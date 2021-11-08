@@ -9,5 +9,8 @@
   "env_vars": {
     "url": "https://ghost.{{ portal.domain }}/"
   },
-  "prefix_protected": "/ghost/"
+  "authentication": {
+    "default_access": "public",
+    "private_paths": ["/ghost/"]
+  }
 }
