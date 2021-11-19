@@ -1,6 +1,6 @@
 {
   "name": "element",
-  "description": "Element (formerly known as Vector and Riot) is a Matrix web client built using the Matrix React SDK.",
+  "description": "Element (formerly known as Vector and Riot) is a Matrix web client built using the Matrix React SDK. Hint: this app has not been adapted to the Portal yet so you still need to create an account. After adaptation this will no longer be the case.",
   "image": "vectorim/element-web",
   "port": 80,
   "data_dirs": []

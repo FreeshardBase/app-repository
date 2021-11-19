@@ -1,6 +1,6 @@
 {
   "name": "ghost",
-  "description": "A free and open source blogging platform, designed to simplify the process of online publishing for individual bloggers as well as online publications",
+  "description": "A free and open source blogging platform, designed to simplify the process of online publishing for individual bloggers as well as online publications. Hint: this app has not been adapted to the Portal yet so you still need to create an account. After adaptation this will no longer be the case.",
   "image": "ghost:alpine",
   "port": 2368,
   "data_dirs": [
