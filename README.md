@@ -7,33 +7,4 @@ Public list of Portal-Apps with configuration and metadata; to be consumed by ap
 The Portal app store uses this repository to populate the list of apps that are available for installation.
 It uses the state of the master branch by default but can be switched over to the other branches if the user wants to.
 
-## Format
-
-Each app has its own directory. Inside, the following files are expected.
-* `app.json` contains metadata and configuration
-* `icon.*` is an image file with the app's icon which shall be displayed in the app store and on the home screen
-
-The `app.json` file must have the following structure.
-
-```json
-{
-  "name": "foo",
-  "description": "the foo application",
-  "image": "portalapps.azurecr.io/ptl-apps/foo:1.2.3",
-  "port": 80,
-  "data_dirs": [
-    "/data",
-    "/config"
-  ],
-  "env_vars": {
-    "FOO": "bar"
-  },
-  "authentication": {
-    "default_access": "private",
-    "public_paths": ["/public/"],
-    "peer_paths": ["/peer/"]
-  }
-}
-```
-
-Add either `prefix_publc` or `prefix_protected` but not both to control which parts of the app can be viewed publicly. Include the starting slash!
+See the [Portal developer docs](https://docs.getportal.org/) for more information.
