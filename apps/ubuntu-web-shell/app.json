@@ -1,0 +1,9 @@
+{
+  "name": "ubuntu-web-shell",
+  "description": "ttyd running bash on Ubuntu 20.04",
+  "image": "atdlewis/ubuntu-ttyd:latest",
+  "port": 80,
+  "data_dirs": [
+    "/user_data"
+  ],
+}
