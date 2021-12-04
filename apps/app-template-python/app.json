@@ -1,0 +1,13 @@
+{
+  "name": "app-template-python",
+  "description": "A fully functional and minimal Portal app that can be used to quickly bootstrap a new app using Python",
+  "image": "registry.gitlab.com/ptl-public/app-template-python:master",
+  "port": 80,
+  "data_dirs": [
+    "/user_data"
+  ],
+  "authentication": {
+    "default_access": "private",
+    "public_paths": ["/public/"]
+  }
+}
