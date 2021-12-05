@@ -1,0 +1,9 @@
+{
+  "name": "jupyter-notebook",
+  "description": "Jupyter notebook server using python3.8. Numpy, scipy, pandas and matplotlib are installed.",
+  "image": "atdlewis/jupyter-notebook-no-auth:latest",
+  "port": 80,
+  "data_dirs": [
+    "/workspace"
+  ]
+}
