@@ -5,5 +5,5 @@
   "port": 80,
   "data_dirs": [
     "/user_data"
-  ],
+  ]
 }
