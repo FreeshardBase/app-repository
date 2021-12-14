@@ -1,0 +1,6 @@
+{
+  "name": "excalidraw",
+  "description": "Virtual whiteboard for sketching hand-drawn like diagrams.",
+  "image": "excalidraw/excalidraw:latest",
+  "port": 80
+}
