@@ -1,0 +1,6 @@
+{
+  "name": "moodle",
+  "description": "The Moodle App helps users make the best of their Moodle sites. Hint: this app is not optimized for Portal and does not save its state on the Portal. It works best on Chrome-based browsers",
+  "image": "moodlehq/moodleapp",
+  "port": 80
+}
