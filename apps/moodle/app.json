@@ -1,0 +1,6 @@
+{
+  "name": "Moodle",
+  "description": "The Moodle App helps users make the best of their Moodle sites.",
+  "image": "moodlehq/moodleapp",
+  "port": 80
+}
