@@ -4,6 +4,6 @@
   "image": "convos/convos:stable",
   "port": 3000,
   "data_dirs": [
-    "~/convos/data"
+    "/data"
   ]
 }
