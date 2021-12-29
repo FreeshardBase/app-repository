@@ -1,0 +1,12 @@
+{
+  "name": "convos",
+  "description": "Convos is an IRC client that runs in your browser and brings the IRC experience into the 21st century. Hint: this app has not been adapted to the Portal yet so you still need to create an account. After adaptation this will no longer be the case.",
+  "image": "convos/convos:stable",
+  "port": 3000,
+  "data_dirs": [
+    "/data"
+  ],
+  "env_vars": {
+    "CONVOS_REVERSE_PROXY": "1"
+  }
+}
