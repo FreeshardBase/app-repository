@@ -5,5 +5,8 @@
   "port": 3000,
   "data_dirs": [
     "/data"
-  ]
+  ],
+  "env_vars": {
+    "CONVOS_REVERSE_PROXY": "1"
+  }
 }
