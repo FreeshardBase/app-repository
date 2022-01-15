@@ -1,0 +1,18 @@
+{
+  "name": "redmine",
+  "description": "Redmine is a flexible project management web application written using Ruby on Rails framework. Hint: this app has not been adapted to the Portal yet so you still need to create an account. The default login is admin/admin. After adaptation, no additional login will be needed.",
+  "image": "redmine:4-alpine",
+  "port": 3000,
+  "data_dirs": [
+    {
+      "path": "/usr/src/redmine/files",
+      "uid": 999,
+      "gid": 1000
+    },
+    {
+      "path": "/usr/src/redmine/sqlite",
+      "uid": 999,
+      "gid": 1000
+    }
+  ]
+}
