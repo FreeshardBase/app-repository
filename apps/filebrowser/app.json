@@ -1,9 +1,17 @@
 {
   "name": "filebrowser",
-  "description": "A simple file browser; https://filebrowser.org/",
+  "description": "filebrowser provides a file managing interface within a specified directory and it can be used to upload, delete, preview, rename and edit your files.",
   "image": "portalapps.azurecr.io/ptl-apps/filebrowser:master",
   "port": 80,
   "data_dirs": [
     "/data"
-  ]
+  ],
+  "authentication": {
+    "default_access": "private",
+    "public_paths": [
+      "/share/",
+      "/static/",
+      "/api/public/"
+    ]
+  }
 }
