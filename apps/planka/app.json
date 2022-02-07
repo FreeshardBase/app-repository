@@ -1,0 +1,17 @@
+{
+  "name": "planka",
+  "description": "A Trello-like kanban board built with React and Redux. The default user is 'demo@demo.demo', password: 'demo'",
+  "image": "meltyshev/planka:latest",
+  "port": 1337,
+  "data_dirs": [
+    "/app/public/user-avatars",
+    "/app/public/project-background-images",
+    "/app/public/attachments"
+  ],
+  "services": ["postgres"],
+  "env_vars": {
+    "BASE_URL": "https://planka.{{ portal.domain }}/",
+    "TRUST_PROXY": 1,
+    "DATABASE_URL": "{{ apps[\"planka\"].postgres.connection_string }}"
+  }
+}
