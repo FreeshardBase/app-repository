@@ -1,0 +1,18 @@
+{
+  "name": "huginn",
+  "description": "Huginn is a system for building agents that perform automated tasks for you online. The default user is 'admin', password: 'password'",
+  "image": "huginn/huginn",
+  "port": 3000,
+  "services": ["postgres"],
+  "env_vars": {
+    "HUGINN_DOMAIN": "https://huginn.{{ portal.domain }}/",
+    "HUGINN_PORT": "443",
+    "HUGINN_DATABASE_ADAPTER": "postgresql",
+    "HUGINN_DATABASE_NAME": "{{ apps[\"huginn\"].postgres.user }}",
+    "HUGINN_DATABASE_HOST": "{{ apps[\"huginn\"].postgres.host }}",
+    "HUGINN_DATABASE_PORT": "{{ apps[\"huginn\"].postgres.port }}",
+    "HUGINN_DATABASE_USERNAME": "{{ apps[\"huginn\"].postgres.user }}",
+    "HUGINN_DATABASE_PASSWORD": "{{ apps[\"huginn\"].postgres.password }}",
+    "HUGINN_DO_NOT_CREATE_DATABASE": "true"
+  }
+}
