@@ -1,0 +1,19 @@
+{
+  "name": "tandoor",
+  "description": "The recipe manager that allows you to manage your ever growing collection of digital recipes.",
+  "image": "vabene1111/recipes",
+  "port": 8080,
+  "data_dirs": [
+    "/opt/recipes/staticfiles",
+    "/opt/recipes/mediafiles"
+  ],
+  "services": ["postgres"],
+  "env_vars": {
+    "DB_ENGINE": "django.db.backends.postgresql",
+    "POSTGRES_HOST": "{{ apps[\"tandoor\"].postgres.host }}",
+    "POSTGRES_PORT": "{{ apps[\"tandoor\"].postgres.port }}",
+    "POSTGRES_USER": "{{ apps[\"tandoor\"].postgres.user }}",
+    "POSTGRES_PASSWORD": "{{ apps[\"tandoor\"].postgres.password }}",
+    "POSTGRES_DB": "{{ apps[\"tandoor\"].postgres.user }}"
+  }
+}
