@@ -7,7 +7,7 @@
     "/data/"
   ],
   "env_vars": {
-    "SIGNUPS_ALLOWED": "false",
+    "DOMAIN": "https://bitwarden.{{ portal.domain }}/",
     "ADMIN_TOKEN": "unused",
     "DISABLE_ADMIN_TOKEN": "true"
   }
