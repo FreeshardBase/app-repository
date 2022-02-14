@@ -1,0 +1,16 @@
+{
+  "name": "wallabag",
+  "description": "wallabag is a self hostable application for saving web pages. Login with wallabag/wallabag",
+  "image": "wallabag/wallabag",
+  "port": 80,
+  "data_dirs": [
+    "/var/www/wallabag/data",
+    "/var/www/wallabag/web/assets/images"
+  ],
+  "env_vars": {
+    "SYMFONY__ENV__DOMAIN_NAME": "https://wallabag.{{ portal.domain }}",
+    "SYMFONY__ENV__MAILER_TRANSPORT": "null",
+    "SYMFONY__ENV__TWOFACTOR_AUTH": "false",
+    "SYMFONY__ENV__FOSUSER_REGISTRATION": "false"
+  }
+}
