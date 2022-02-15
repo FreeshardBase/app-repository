@@ -1,0 +1,10 @@
+{
+  "name": "kavita",
+  "description": "Kavita is a fast, feature rich, cross platform reading server.",
+  "image": "kizaing/kavita:latest",
+  "port": 5000,
+  "data_dirs": [
+    "/manga",
+    "/kavita/config"
+  ]
+}
