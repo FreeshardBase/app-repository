@@ -1,0 +1,12 @@
+{
+  "name": "openbudgeteer",
+  "description": "OpenBudgeteer is a budgeting app based on the Bucket Budgeting Principle and inspired by YNAB and Buckets.",
+  "image": "axelander/openbudgeteer:latest",
+  "port": 80,
+  "data_dirs": [
+    "/app/database"
+  ],
+  "env_vars": {
+    "Connection:Provider": "sqlite"
+  }
+}
