@@ -1,0 +1,28 @@
+{
+  "v": "1.0",
+  "name": "etherpad",
+  "description": "Etherpad is a highly customizable open source online editor providing collaborative editing in really real-time. All documents are public!",
+  "image": "etherpad/etherpad",
+  "port": 9001,
+  "data_dirs": [
+    "/var"
+  ],
+  "env_vars": {
+    "DB_TYPE": "postgres",
+    "DB_NAME": "etherpad",
+    "DB_HOST": "{{ apps[\"etherpad\"].postgres.host }}",
+    "DB_PORT": "{{ apps[\"etherpad\"].postgres.port }}",
+    "DB_USER": "{{ apps[\"etherpad\"].postgres.user }}",
+    "DB_PASS": "{{ apps[\"etherpad\"].postgres.password }}",
+    "ADMIN_PASSWORD": "admin"
+  },
+  "services": ["postgres"],
+  "paths": {
+    "": {
+      "access": "public"
+    },
+    "/admin/": {
+      "access": "private"
+    }
+  }
+}
