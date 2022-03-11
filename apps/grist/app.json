@@ -1,0 +1,25 @@
+{
+  "v": "1.0",
+  "name": "grist",
+  "description": "Grist is a modern relational spreadsheet. It combines the flexibility of a spreadsheet with the robustness of a database to organize your data and make you more productive.",
+  "image": "gristlabs/grist",
+  "port": 8484,
+  "data_dirs": [
+    "/persist"
+  ],
+  "env_vars": {
+    "APP_HOME_URL": "https://grist.{{ portal.domain }}",
+    "GRIST_SINGLE_ORG": "docs"
+  },
+  "paths": {
+    "": {
+      "access": "private",
+      "headers": {
+        "X-Ptl-Client-Id": "{{ client_id }}",
+        "X-Ptl-Client-Name": "{{ client_name }}",
+        "X-Ptl-Client-Type": "terminal",
+        "X-Ptl-Foo": "bar"
+      }
+    }
+  }
+}
