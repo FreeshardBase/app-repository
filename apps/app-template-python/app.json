@@ -1,11 +1,6 @@
 {
   "v": "1.0",
   "name": "app-template-python",
-  "description": "A fully functional and minimal Portal app that can be used to quickly bootstrap a new app using Python.",
-  "long_description": [
-    "A fully functional and minimal Portal app that can be used to quickly bootstrap a new app using Python.",
-    "See the Portal documentation to learn about how to fork and adapt it to your own needs: https://docs.getportal.org/app_template/"
-  ],
   "image": "registry.gitlab.com/ptl-public/app-template-python:master",
   "port": 80,
   "data_dirs": [
@@ -28,5 +23,14 @@
         "X-Ptl-Foo": "bar"
       }
     }
+  },
+  "store_info": {
+    "description_short": "A fully functional and minimal Portal app that can be used to quickly bootstrap a new app using Python.",
+    "description_long": [
+      "A fully functional and minimal Portal app that can be used to quickly bootstrap a new app using Python.",
+      "See the Portal documentation to learn about how to fork and adapt it to your own needs: https://docs.getportal.org/app_template/"
+    ],
+    "hint": "This app is not meant to be used as anything else than a demonstrator.",
+    "is_featured": true
   }
 }
