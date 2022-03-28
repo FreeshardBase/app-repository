@@ -1,0 +1,12 @@
+{
+  "v": "1.0",
+  "name": "mirotalk",
+  "description": "Free browser based real-time video calls.",
+  "image": "portalapps.azurecr.io/ptl-apps/mirotalk:master",
+  "port": 3000,
+  "paths": {
+    "": {
+      "access": "public"
+    }
+  }
+}
