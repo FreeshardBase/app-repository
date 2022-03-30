@@ -1,17 +1,44 @@
 {
+  "v": "2.0",
   "name": "filebrowser",
-  "description": "filebrowser provides a file managing interface within a specified directory and it can be used to upload, delete, preview, rename and edit your files.",
   "image": "portalapps.azurecr.io/ptl-apps/filebrowser:master",
   "port": 80,
   "data_dirs": [
     "/data"
   ],
-  "authentication": {
-    "default_access": "private",
-    "public_paths": [
-      "/share/",
-      "/static/",
-      "/api/public/"
-    ]
+  "env_vars": null,
+  "services": null,
+  "paths": {
+    "": {
+      "access": "private",
+      "headers": {
+        "X-Ptl-Client-Type": "terminal",
+        "X-Ptl-Client-Id": "{{ client_id }}",
+        "X-Ptl-Client-Name": "{{ client_name }}"
+      }
+    },
+    "/share/": {
+      "access": "public",
+      "headers": {
+        "X-Ptl-Client-Type": "public"
+      }
+    },
+    "/static/": {
+      "access": "public",
+      "headers": {
+        "X-Ptl-Client-Type": "public"
+      }
+    },
+    "/api/public/": {
+      "access": "public",
+      "headers": {
+        "X-Ptl-Client-Type": "public"
+      }
+    }
+  },
+  "store_info": {
+    "description_short": "filebrowser provides a file managing interface.",
+    "description_long": "filebrowser provides a file managing interface within a specified directory and it can be used to upload, delete, preview, rename and edit your files.",
+    "is_featured": true
   }
 }
