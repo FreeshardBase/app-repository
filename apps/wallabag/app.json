@@ -1,6 +1,6 @@
 {
+  "v": "2.0",
   "name": "wallabag",
-  "description": "wallabag is a self hostable application for saving web pages. Login with wallabag/wallabag",
   "image": "wallabag/wallabag",
   "port": 80,
   "data_dirs": [
@@ -12,5 +12,15 @@
     "SYMFONY__ENV__MAILER_TRANSPORT": "null",
     "SYMFONY__ENV__TWOFACTOR_AUTH": "false",
     "SYMFONY__ENV__FOSUSER_REGISTRATION": "false"
+  },
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "store_info": {
+    "description_short": "Save web articles. Read them later. Read them anywhere.",
+    "description_long": "wallabag is an open source application to save your web articles and allows you to read them later, on your smartphone, your tablet or your ereader.",
+    "hint": "You have to login as the default user with name 'wallabag' and password 'wallabag'"
   }
 }
