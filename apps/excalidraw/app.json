@@ -1,6 +1,16 @@
 {
+  "v": "2.0",
   "name": "excalidraw",
-  "description": "Virtual whiteboard for sketching hand-drawn like diagrams.",
   "image": "excalidraw/excalidraw:latest",
-  "port": 80
+  "port": 80,
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "store_info": {
+    "description_short": "Virtual whiteboard for sketching hand-drawn like diagrams.",
+    "description_long": "Excalidraw is a whiteboard tool that lets you easily sketch diagrams that have a hand-drawn feel to them.",
+    "hint": "Drawings are stored in your browser, not on the Portal."
+  }
 }

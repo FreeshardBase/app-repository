@@ -1,9 +1,19 @@
 {
+  "v": "2.0",
   "name": "libreoffice",
-  "description": "LibreOffice is a free and powerful office suite, and a successor to OpenOffice.org (commonly known as OpenOffice). Its clean interface and feature-rich tools help you unleash your creativity and enhance your productivity. This app uses Apache Guacamole to provide a remote desktop experience.",
   "image": "lscr.io/linuxserver/libreoffice",
   "port": 3000,
   "data_dirs": [
     "/config"
-  ]
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "store_info": {
+    "description_short": "LibreOffice is a free and powerful office suite, and a successor to OpenOffice OpenOffice.",
+    "description_long": "LibreOffice is a free and powerful office suite, and a successor to OpenOffice.org (commonly known as OpenOffice). Its clean interface and feature-rich tools help you unleash your creativity and enhance your productivity. This app uses Apache Guacamole to provide a remote desktop experience.",
+    "hint": "This app uses Apache Guacamole to provide a remote desktop experience."
+  }
 }

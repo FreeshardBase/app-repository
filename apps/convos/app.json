@@ -1,7 +1,6 @@
 {
-  "v": "1.0",
+  "v": "2.0",
   "name": "convos",
-  "description": "Convos is an IRC client that runs in your browser and brings the IRC experience into the 21st century. Hint: this app has not been adapted to the Portal yet so you still need to create an account. After adaptation this will no longer be the case.",
   "image": "convos/convos:stable",
   "port": 3000,
   "data_dirs": [
@@ -14,6 +13,7 @@
     "CONVOS_AUTH_HEADER": "X-Ptl-User",
     "CONVOS_LOG_LEVEL": "trace"
   },
+  "services": null,
   "paths": {
     "": {
       "access": "private",
@@ -21,5 +21,13 @@
         "X-Ptl-User": "{{ portal.id[:6] }}@example.com"
       }
     }
+  },
+  "store_info": {
+    "description_short": "Convos is an IRC client that brings the IRC experience into the 21st century.",
+    "description_long": [
+      "Convos is an IRC client that runs in your browser and brings the IRC experience into the 21st century.",
+      "It features a persistent bouncer on the server side that will keep you online even after you close your browser window."
+    ],
+    "is_featured": true
   }
 }

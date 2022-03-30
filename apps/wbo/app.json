@@ -1,6 +1,6 @@
 {
+  "v": "2.0",
   "name": "wbo",
-  "description": "WBO is an online collaborative whiteboard that allows many users to draw simultaneously on a large virtual board.",
   "image": "lovasoa/wbo:latest",
   "port": 80,
   "data_dirs": [
@@ -10,7 +10,17 @@
       "gid": 1000
     }
   ],
-  "authentication": {
-    "default_access": "public"
+  "paths": {
+    "": {
+      "access": "public",
+      "headers": {
+        "X-Ptl-Client-Type": "public"
+      }
+    }
+  },
+  "store_info": {
+    "description_short": "An online collaborative whiteboard that allows many users to draw simultaneously on a large virtual board.",
+    "description_long": "WBO is an online collaborative whiteboard that allows many users to draw simultaneously on a large virtual board. The board is updated in real time for all connected users, and its state is always persisted. It can be used for many different purposes, including art, entertainment, design, teaching.",
+    "hint": "All boards are public, so you should chose hard-to-guess names for sensitive boards."
   }
 }
