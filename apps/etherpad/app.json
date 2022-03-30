@@ -1,7 +1,6 @@
 {
-  "v": "1.0",
+  "v": "2.0",
   "name": "etherpad",
-  "description": "Etherpad is a highly customizable open source online editor providing collaborative editing in really real-time. All documents are public!",
   "image": "etherpad/etherpad",
   "port": 9001,
   "data_dirs": [
@@ -16,13 +15,26 @@
     "DB_PASS": "{{ apps[\"etherpad\"].postgres.password }}",
     "ADMIN_PASSWORD": "admin"
   },
-  "services": ["postgres"],
+  "services": [
+    "postgres"
+  ],
   "paths": {
     "": {
-      "access": "public"
+      "access": "public",
+      "headers": null
     },
     "/admin/": {
-      "access": "private"
+      "access": "private",
+      "headers": null
     }
+  },
+  "store_info": {
+    "description_short": "Etherpad is an open source online editor providing collaborative editing in really real-time.",
+    "description_long": [
+      "No more sending your stuff back and forth via email, just set up a pad, share the link and start collaborating!",
+      "Etherpad allows you to edit documents collaboratively in real-time, much like a live multi-player editor that runs in your browser. Write articles, press releases, to-do lists, etc. together with your friends, fellow students or colleagues, all working on the same document at the same time."
+    ],
+    "hint": "All documents are public, so you should chose hard-to-guess names for sensitive docs.",
+    "is_featured": true
   }
 }
