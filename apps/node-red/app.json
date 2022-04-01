@@ -1,0 +1,30 @@
+{
+  "v": "1.0",
+  "name": "node-red",
+  "image": "nodered/node-red",
+  "port": 1880,
+  "data_dirs": [
+    {
+      "path": "/data",
+      "uid": 1000,
+      "gid": 1000
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "store_info": {
+    "description_short": "Low-code programming for event-driven applications",
+    "description_long": [
+      "Node-RED is a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways.",
+      "It provides a browser-based editor that makes it easy to wire together flows using the wide range of nodes in the palette that can be deployed to its runtime in a single-click."
+    ],
+    "hint": [
+      "The 'http in' node can only be called from a paired terminal",
+      "Protocols except http are not supported yet"
+    ],
+    "is_featured": true
+  }
+}
