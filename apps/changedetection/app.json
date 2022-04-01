@@ -1,0 +1,26 @@
+{
+  "v": "1.0",
+  "name": "changedetection",
+  "image": "dgtlmoon/changedetection.io",
+  "port": 5000,
+  "data_dirs": [
+    "/datastore"
+  ],
+  "env_vars": {
+    "BASE_URL": "https://changedetection.{{ portal.domain }}/"
+  },
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "store_info": {
+    "description_short": "Know when web pages change! Stay ontop of new information!",
+    "description_long": [
+      "Know when web pages change! Stay ontop of new information!",
+      "Live your data-life pro-actively instead of re-actively.",
+      "Free, Open-source web page monitoring, notification and change detection."
+    ],
+    "is_featured": true
+  }
+}
