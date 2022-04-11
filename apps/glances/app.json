@@ -4,7 +4,7 @@
   "image": "nicolargo/glances:latest-full",
   "port": 61208,
   "env_vars": {
-    "GLANCES_OPT":"-w --disable-plugin network,connections,processlist,fs"
+    "GLANCES_OPT":"-w --disable-plugin network,connections,processlist,fs,diskio"
   },
   "services": [
     "docker_sock_ro"
@@ -19,6 +19,7 @@
     "description_long": [
       "Glances is a cross-platform monitoring tool which aims to present a maximum of information in a minimum of space through a curses or Web based interface. It can adapt dynamically the displayed information depending on the terminal size.",
       "Glances is written in Python and uses the psutil library to get information from your system."
-    ]
+    ],
+    "is_featured": true
   }
 }
