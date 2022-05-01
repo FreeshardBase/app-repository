@@ -4,7 +4,7 @@
   "image": "nicolargo/glances:latest-full",
   "port": 61208,
   "env_vars": {
-    "GLANCES_OPT":"-w --disable-plugin network,connections,processlist,fs,diskio"
+    "GLANCES_OPT":"-w --disable-plugin network,connections,processlist,diskio"
   },
   "services": [
     "docker_sock_ro"
