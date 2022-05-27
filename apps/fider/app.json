@@ -1,0 +1,19 @@
+{
+  "v": "3.1",
+  "name": "fider",
+  "image": "getfider/fider:stable",
+  "port": 3000,
+  "env_vars": {
+    "DATABASE_URL": "{{ postgres.connection_string }}",
+    "JWT_SECRET": "foobar"
+  },
+  "services": [
+    "postgres"
+  ],
+  "paths": {
+    "": {
+      "access": "public",
+      "headers": null
+    }
+  }
+}
