@@ -5,7 +5,8 @@
   "port": 3000,
   "env_vars": {
     "DATABASE_URL": "{{ postgres.connection_string }}",
-    "JWT_SECRET": "foobar"
+    "JWT_SECRET": "foobar",
+    "EMAIL_NOREPLY": "foo@bar.com"
   },
   "services": [
     "postgres"
