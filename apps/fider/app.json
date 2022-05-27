@@ -15,5 +15,11 @@
       "access": "public",
       "headers": null
     }
+  },
+  "store_info": {
+    "description_short": "Fider",
+    "description_long": [
+      "Fider"
+    ]
   }
 }
