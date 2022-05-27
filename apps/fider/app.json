@@ -6,7 +6,8 @@
   "env_vars": {
     "DATABASE_URL": "{{ postgres.connection_string }}",
     "JWT_SECRET": "foobar",
-    "EMAIL_NOREPLY": "foo@bar.com"
+    "EMAIL_NOREPLY": "foo@bar.com",
+    "BASE_URL": "https://fider.{{ portal.domain }}/"
   },
   "services": [
     "postgres"
