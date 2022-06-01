@@ -1,0 +1,30 @@
+{
+  "v": "2.0",
+  "name": "vaultwarden",
+  "image": "vaultwarden/server:alpine",
+  "port": 80,
+  "data_dirs": [
+    "/data/"
+  ],
+  "env_vars": {
+    "DOMAIN": "https://vaultwarden.{{ portal.domain }}/",
+    "ADMIN_TOKEN": "unused",
+    "DISABLE_ADMIN_TOKEN": "true"
+  },
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "store_info": {
+    "description_short": "Unofficial Bitwarden compatible server",
+    "description_long": [
+      "Bitwarden is a free and open-source password management service that stores sensitive information such as website credentials in an encrypted vault."
+    ],
+    "hint": [
+      "At first use, you will have to create an account. This helps encrypt your secrets at rest",
+      "Only one account can be created, all following attempts will cause an error. This is by design.",
+      "Multi-user features (like sends) are not functional yet, only you can use the app."
+    ]
+  }
+}
