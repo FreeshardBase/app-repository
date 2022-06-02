@@ -26,8 +26,7 @@
     ],
     "hint": [
       "At first use, you will have to create an account. This helps encrypt your secrets at rest",
-      "Only one account can be created, all following attempts will cause an error. This is by design.",
-      "Multi-user features (like sends) are not functional yet, only you can use the app."
+      "Only one account can be created, all following attempts will cause an error. This is by design."
     ]
   }
 }
