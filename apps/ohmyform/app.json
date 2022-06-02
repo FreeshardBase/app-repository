@@ -1,0 +1,36 @@
+{
+  "v": "2.0",
+  "name": "ohmyform",
+  "image": "ohmyform/ohmyform",
+  "port": 3000,
+  "data_dirs": [
+    "/data/"
+  ],
+  "env_vars": {
+    "CREATE_ADMIN": "TRUE",
+    "ADMIN_USERNAME": "admin",
+    "ADMIN_PASSWORD": "admin",
+    "DATABASE_DRIVER": "sqlite",
+    "DATABASE_URL": "sqlite:///data/data.sqlite",
+    "LOGIN_NOTE": "Please login with admin/admin"
+  },
+  "paths": {
+    "": {
+      "access": "private"
+    },
+    "/form/": {
+      "access": "public"
+    }
+  },
+  "store_info": {
+    "description_short": "Create stunning embedable forms for recruiting, market research, surveys and more.",
+    "description_long": [
+      "Create stunning embedable forms for recruiting, market research, surveys and more.",
+      "With OhMyForm you'll get all the features you need to run, administer, analyze and distribute forms for free."
+    ],
+    "hint": [
+      "Login with admin/admin",
+      "Multi-User features are not supported"
+    ]
+  }
+}
