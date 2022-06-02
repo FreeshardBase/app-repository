@@ -20,6 +20,9 @@
     },
     "/form/": {
       "access": "public"
+    },
+    "/_next/static/": {
+      "access": "public"
     }
   },
   "store_info": {
