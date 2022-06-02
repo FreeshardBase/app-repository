@@ -13,6 +13,9 @@
   },
   "paths": {
     "": {
+      "access": "public"
+    },
+    "/admin": {
       "access": "private"
     }
   },
