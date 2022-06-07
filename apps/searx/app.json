@@ -1,0 +1,24 @@
+{
+  "v": "3.1",
+  "name": "searx",
+  "image": "searx/searx",
+  "port": 8080,
+  "data_dirs": [
+    "/etc/searx"
+  ],
+  "env_vars": {
+    "BASE_URL": "https://searx.{{ portal.domain }}/"
+  },
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "store_info": {
+    "description_short": "Privacy-respecting metasearch engine",
+    "description_long": [
+      "Searx is a free internet metasearch engine which aggregates results from more than 70 search services. Users are neither tracked nor profiled."
+    ],
+    "is_featured": true
+  }
+}
