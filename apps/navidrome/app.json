@@ -1,0 +1,29 @@
+{
+  "v": "3.2",
+  "name": "navidrome",
+  "image": "deluan/navidrome:latest",
+  "port": 4533,
+  "data_dirs": [
+    "/data",
+    {
+      "path": "/music",
+      "shared_dir": "music"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 60
+  },
+  "store_info": {
+    "description_short": "Navidrome is a self-hosted, open source music server and streamer.",
+    "description_long": [
+      "Navidrome is a self-hosted, open source music server and streamer. It gives you freedom to listen to your music collection from any browser or mobile device."
+    ],
+    "is_featured": true
+  }
+}
