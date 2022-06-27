@@ -1,5 +1,5 @@
 {
-  "v": "3.1",
+  "v": "3.2",
   "name": "photoprism",
   "image": "photoprism/photoprism:latest",
   "port": 2342,
@@ -32,8 +32,7 @@
       "PhotoPrism is an AI-Powered Photos App for the Decentralized Web. It makes use of the latest technologies to tag and find pictures automatically without getting in your way."
     ],
     "hint": [
-      "This app is not really part of the app store",
-      "In fact, this app does not really exist"
+      "AI-based image recognition is disabled due to performance constraints"
     ],
     "is_featured": true
   }
