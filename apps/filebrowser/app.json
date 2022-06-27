@@ -1,6 +1,6 @@
 {
   "v": "2.0",
-  "name": "filebrowser2",
+  "name": "filebrowser",
   "image": "portalapps.azurecr.io/ptl-apps/filebrowser:master",
   "port": 80,
   "data_dirs": [
