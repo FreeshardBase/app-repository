@@ -14,7 +14,8 @@
   "env_vars": {
     "PHOTOPRISM_SITE_URL": "https://photoprism.{{ portal.domain }}/",
     "PHOTOPRISM_PUBLIC": "true",
-    "PHOTOPRISM_WORKERS": 1
+    "PHOTOPRISM_WORKERS": 1,
+    "PHOTOPRISM_DISABLE_TENSORFLOW": "true"
   },
   "paths": {
     "": {
@@ -23,7 +24,7 @@
   },
   "lifecycle": {
     "always_on": false,
-    "idle_time_for_shutdown": 120
+    "idle_time_for_shutdown": 600
   },
   "store_info": {
     "description_short": "PhotoPrism is an AI-Powered Photos App for the Decentralized Web.",
