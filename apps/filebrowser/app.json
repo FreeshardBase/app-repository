@@ -1,10 +1,22 @@
 {
   "v": "2.0",
-  "name": "filebrowser",
+  "name": "filebrowser2",
   "image": "portalapps.azurecr.io/ptl-apps/filebrowser:master",
   "port": 80,
   "data_dirs": [
-    "/data"
+    "/data",
+    {
+      "path": "/data/documents",
+      "shared_dir": "documents"
+    },
+    {
+      "path": "/data/media",
+      "shared_dir": "media"
+    },
+    {
+      "path": "/data/music",
+      "shared_dir": "music"
+    }
   ],
   "env_vars": null,
   "services": null,
