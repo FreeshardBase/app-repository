@@ -1,0 +1,54 @@
+{
+  "v": "3.1",
+  "name": "little link",
+  "image": "julianprieber/littlelink-custom",
+  "port": 80,
+  "data_dirs": [
+    "/user_data",
+    {
+      "path": "/more_data",
+      "uid": 1000,
+      "gid": 1000
+    }
+  ],
+  "services": ["postgres"],
+  "env_vars": {
+    "BASE_URL": "https://myapp.{{ portal.domain }}/",
+    "DATABASE_URL": "{{ postgres.connection_string }}",
+    "DEBUG": "true"
+  },
+  "paths": {
+    "": {
+      "access": "private",
+      "headers": {
+        "X-Ptl-Client-Id": "{{ client_id }}",
+        "X-Ptl-Client-Name": "{{ client_name }}",
+        "X-Ptl-Client-Type": "{{ client_type }}",
+        "X-Ptl-Foo": "bar"
+      }
+    },
+    "/public/": {
+      "access": "public",
+      "headers": {
+        "X-Ptl-Client-Type": "{{ client_type }}",
+        "X-Ptl-Foo": "baz"
+      }
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 60
+  },
+  "store_info": {
+    "description_short": "A great app",
+    "description_long": [
+      "A really great app that serves as an example.",
+      "It also has a description that is two paragraphs long."
+    ],
+    "hint": [
+      "This app is not really part of the app store",
+      "In fact, this app does not really exist"
+    ],
+    "is_featured": true
+  }
+}
