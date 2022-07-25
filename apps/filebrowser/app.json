@@ -1,5 +1,5 @@
 {
-  "v": "2.0",
+  "v": "3.2",
   "name": "filebrowser",
   "image": "portalapps.azurecr.io/ptl-apps/filebrowser:master",
   "port": 80,
@@ -47,6 +47,10 @@
         "X-Ptl-Client-Type": "public"
       }
     }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
   },
   "store_info": {
     "description_short": "filebrowser provides a file managing interface.",
