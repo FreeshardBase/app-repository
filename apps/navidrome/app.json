@@ -10,9 +10,15 @@
       "shared_dir": "music"
     }
   ],
+  "env_vars": {
+    "ND_REVERSEPROXYUSERHEADER": "X-Ptl-User"
+  },
   "paths": {
     "": {
-      "access": "private"
+      "access": "private",
+      "headers": {
+        "X-Ptl-User": "admin"
+      }
     }
   },
   "lifecycle": {
