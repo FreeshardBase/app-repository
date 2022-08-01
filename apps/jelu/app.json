@@ -26,7 +26,8 @@
       "All your data is now located into a single-file database which can be saved anywhere."
     ],
     "hint": [
-      "Due to missing features, you have to create a user on first use. However, the password need not be secure since Portal protects the app."
+      "Due to missing features, you have to create a user on first use. However, the password need not be secure since Portal protects the app.",
+      "This app uses a lot of resources and slows down your Portal while running."
     ]
   }
 }
