@@ -1,7 +1,7 @@
 {
   "v": "2.0",
   "name": "etherpad",
-  "image": "portalapps.azurecr.io/ptl-apps/etherpad-lite:0.1.0",
+  "image": "portalapps.azurecr.io/ptl-apps/etherpad-lite:0.2.0",
   "port": 9001,
   "data_dirs": [
     "/var"
