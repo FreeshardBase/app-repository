@@ -20,9 +20,9 @@
     }
   },
   "store_info": {
-    "description_short": "Unofficial Bitwarden compatible server",
+    "description_short": "Open source password manager (formerly known as BitWarden_RS)",
     "description_long": [
-      "Bitwarden is a free and open-source password management service that stores sensitive information such as website credentials in an encrypted vault."
+      "Vaultwarden is a free and open-source password management service that stores sensitive information such as website credentials in an encrypted vault."
     ],
     "hint": [
       "At first use, you will have to create an account. This helps encrypt your secrets at rest",
