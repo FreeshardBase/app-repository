@@ -1,7 +1,7 @@
 {
   "v": "3.1",
   "name": "jelu",
-  "image": "wabayang/jelu",
+  "image": "wabayang/jelu:0.0.27-proxy2",
   "port": 11111,
   "data_dirs": [
     "/config",
@@ -9,9 +9,18 @@
     "/files/images",
     "/files/imports"
   ],
+  "env_vars": {
+    "JELU_AUTH_LDAP_ENABLED": "false",
+    "JELU_AUTH_PROXY_ENABLED": "true",
+    "JELU_AUTH_PROXY_ADMINNAME": "admin",
+    "JELU_AUTH_PROXY_HEADER": "X-Ptl-User"
+  },
   "paths": {
     "": {
-      "access": "private"
+      "access": "private",
+      "headers": {
+        "X-Ptl-User": "admin"
+      }
     }
   },
   "lifecycle": {
