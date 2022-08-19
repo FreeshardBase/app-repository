@@ -23,7 +23,7 @@
       "access": "public",
       "headers": null
     },
-    "/admin/": {
+    "/list": {
       "access": "private",
       "headers": null
     }
