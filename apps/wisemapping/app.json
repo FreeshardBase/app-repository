@@ -22,7 +22,8 @@
     ],
     "hint": [
       "You need to login with user 'test@wisemapping.org' and password 'test'",
-      "Sharing and publishing features do not work yet"
+      "Sharing and publishing features do not work yet",
+      "This app uses a lot of resources and slows down your Portal while running."
     ]
   }
 }
