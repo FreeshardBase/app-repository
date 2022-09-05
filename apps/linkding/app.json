@@ -1,0 +1,38 @@
+{
+  "v": "3.1",
+  "name": "linkding",
+  "image": "sissbruecker/linkding:latest",
+  "port": 9090,
+  "data_dirs": [
+    "/etc/linkding/data"
+  ],
+  "env_vars": {
+    "LD_ENABLE_AUTH_PROXY": "True",
+    "LD_SUPERUSER_NAME": "admin",
+    "LD_AUTH_PROXY_USERNAME_HEADER": "HTTP_X_PTL_USER",
+    "DEBUG": "true"
+  },
+  "paths": {
+    "": {
+      "access": "private",
+      "headers": {
+        "X-Ptl-User": "admin"
+      }
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 60
+  },
+  "store_info": {
+    "description_short": "linkding is a simple bookmark service",
+    "description_long": [
+      "linkding is a simple bookmark service that you can host yourself. It's designed be to be minimal, fast, and easy to set up."
+    ],
+    "hint": [
+      "This app is not really part of the app store",
+      "In fact, this app does not really exist"
+    ],
+    "is_featured": true
+  }
+}
