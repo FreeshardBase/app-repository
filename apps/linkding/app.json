@@ -29,10 +29,6 @@
     "description_long": [
       "linkding is a simple bookmark service that you can host yourself. It's designed be to be minimal, fast, and easy to set up."
     ],
-    "hint": [
-      "This app is not really part of the app store",
-      "In fact, this app does not really exist"
-    ],
     "is_featured": true
   }
 }
