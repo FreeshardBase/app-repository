@@ -8,6 +8,7 @@
   ],
   "env_vars": {
     "LD_ENABLE_AUTH_PROXY": "True",
+    "LD_SUPERUSER_NAME": "admin",
     "LD_AUTH_PROXY_USERNAME_HEADER": "HTTP_REMOTE_USER",
     "DEBUG": "true"
   },
