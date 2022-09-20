@@ -20,6 +20,12 @@
   "paths": {
     "": {
       "access": "private"
+    },
+    "/s/": {
+      "access": "public"
+    },
+    "/static/": {
+      "access": "public"
     }
   },
   "lifecycle": {
