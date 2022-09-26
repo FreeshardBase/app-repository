@@ -1,0 +1,28 @@
+{
+  "v": "3.1",
+  "name": "lingva",
+  "image": "thedaviddelta/lingva-translate:latest",
+  "port": 3000,
+  "services": ["postgres"],
+  "env_vars": {
+    "site_domain": "https://lingva.{{ portal.domain }}/"
+  },
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 120
+  },
+  "store_info": {
+    "description_short": "Alternative front-end for Google Translate",
+    "description_long": [
+      "Alternative front-end for Google Translate, serving as a Free and Open Source translator with over a hundred languages available"
+    ],
+    "hint": [
+      "This app calls Google Translate, it does not do the translation itself."
+    ]
+  }
+}
