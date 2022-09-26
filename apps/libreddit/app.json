@@ -1,0 +1,25 @@
+{
+  "v": "3.1",
+  "name": "libreddit",
+  "image": "spikecodes/libreddit",
+  "port": 8080,
+  "services": ["postgres"],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 120
+  },
+  "store_info": {
+    "description_short": "Private front-end for Reddit",
+    "description_long": [
+      "Libreddit is a portmanteau of \"libre\" (meaning freedom) and \"Reddit\". It is a private front-end like Invidious but for Reddit. Browse the coldest takes of r/unpopularopinion without being tracked."
+    ],
+    "hint": [
+      "Personal settings are stored in the browser, not on the Portal. So they are not synced across devices."
+    ]
+  }
+}
