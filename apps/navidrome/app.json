@@ -12,7 +12,8 @@
   ],
   "env_vars": {
     "ND_REVERSEPROXYUSERHEADER": "X-Ptl-User",
-    "ND_REVERSEPROXYWHITELIST": "0.0.0.0/0"
+    "ND_REVERSEPROXYWHITELIST": "0.0.0.0/0",
+    "ND_DEVAUTOCREATEADMINPASSWORD": "admin"
   },
   "paths": {
     "": {
