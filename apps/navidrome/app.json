@@ -25,7 +25,7 @@
   },
   "lifecycle": {
     "always_on": false,
-    "idle_time_for_shutdown": 60
+    "idle_time_for_shutdown": 180
   },
   "store_info": {
     "description_short": "Navidrome is a self-hosted, open source music server and streamer.",
