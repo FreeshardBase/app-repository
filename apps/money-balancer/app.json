@@ -1,0 +1,29 @@
+{
+  "v": "3.1",
+  "name": "money-balancer",
+  "image": "ghcr.io/dorianim/money-balancer",
+  "port": 8000,
+  "data_dirs": [
+    "/data"
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 60
+  },
+  "store_info": {
+    "description_short": "A simple application for managing debt with your friends",
+    "description_long": [
+      "Have you ever been on a group trip and lost track of who paid for what and who owes money to whom? If so, money balancer is the perfect tool for you! It helps you to keep track of who paid for what and calculates your balance with all of your friends."
+    ],
+    "hint": [
+      "This app is not really part of the app store",
+      "In fact, this app does not really exist"
+    ],
+    "is_featured": true
+  }
+}
