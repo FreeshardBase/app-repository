@@ -1,14 +1,24 @@
 {
   "v": "3.1",
   "name": "money-balancer",
-  "image": "ghcr.io/dorianim/money-balancer",
+  "image": "ghcr.io/dorianim/money-balancer:preview",
   "port": 8000,
   "data_dirs": [
     "/data"
   ],
+  "env_vars": {
+    "MONEYBALANCER_AUTH_PROXY_ENABLED": "true",
+    "MONEYBALANCER_AUTH_PROXY_HEADERS_USERNAME": "x-ptl-authenticated-user",
+    "MONEYBALANCER_AUTH_LOCAL_ENABLED": "false",
+    "MONEYBALANCER_JWT_SECRET": "foo"
+  },
   "paths": {
     "": {
-      "access": "private"
+      "access": "private",
+      "headers": {
+        "x-ptl-authenticated-user": "{{ portal.id }}"
+      }
+
     }
   },
   "lifecycle": {
