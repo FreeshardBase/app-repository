@@ -1,0 +1,25 @@
+{
+  "v": "3.1",
+  "name": "drawio",
+  "image": "jgraph/drawio",
+  "port": 8080,
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 60
+  },
+  "store_info": {
+    "description_short": "A free online diagram software",
+    "description_long": [
+      "A free online diagram software",
+      "You can use it as a flowchart maker, network diagram software, to create UML online, as an ER diagram tool, to design database schema, to build BPMN online, as a circuit diagram maker, and more. diagrams.net can import .vsdx, Gliffy™ and Lucidchart™ files."
+    ],
+    "hint": [
+      "Diagrams cannot be stored on Portal, only on your local drive."
+    ]
+  }
+}
