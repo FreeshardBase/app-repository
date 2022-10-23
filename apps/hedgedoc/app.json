@@ -1,0 +1,38 @@
+{
+  "v": "3.1",
+  "name": "hedgedoc",
+  "image": "quay.io/hedgedoc/hedgedoc:1.9.4",
+  "port": 80,
+  "data_dirs": [
+    "/hedgedoc/public/uploads"
+  ],
+  "services": ["postgres"],
+  "env_vars": {
+    "CMD_DOMAIN": "hedgedoc.{{ portal.domain }}",
+    "CMD_PORT": 80,
+    "CMD_DB_URL": "{{ postgres.connection_string }}",
+    "CMD_ALLOW_FREEURL": true,
+    "CMD_ALLOW_ANONYMOUS_EDITS": true,
+    "CMD_EMAIL": false
+  },
+  "paths": {
+    "": {
+      "access": "public"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 120
+  },
+  "store_info": {
+    "description_short": "The best platform to write and share markdown.",
+    "description_long": [
+      "The best platform to write and share markdown.",
+      "HedgeDoc (formerly known as CodiMD) is an open-source, web-based, self-hosted, collaborative markdown editor.",
+      "You can use it to easily collaborate on notes, graphs and even presentations in real-time. All you need to do is to share your note-link to your co-workers and they’re ready to go."
+    ],
+    "hint": [
+      "This app is fully public, so everyone can create and edit documents if they know the URL."
+    ]
+  }
+}
