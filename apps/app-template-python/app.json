@@ -10,8 +10,8 @@
     "": {
       "access": "private",
       "headers": {
-        "X-Ptl-Client-Id": "{{ client_id }}",
-        "X-Ptl-Client-Name": "{{ client_name }}",
+        "X-Ptl-Client-Id": "{{ auth.client_id }}",
+        "X-Ptl-Client-Name": "{{ auth.client_name }}",
         "X-Ptl-Client-Type": "terminal",
         "X-Ptl-Foo": "bar"
       }
@@ -26,8 +26,8 @@
     "/peer/": {
       "access": "peer",
       "headers": {
-        "X-Ptl-Client-Id": "{{ client_id }}",
-        "X-Ptl-Client-Name": "{{ client_name }}",
+        "X-Ptl-Client-Id": "{{ auth.client_id }}",
+        "X-Ptl-Client-Name": "{{ auth.client_name }}",
         "X-Ptl-Client-Type": "peer"
       }
     }
