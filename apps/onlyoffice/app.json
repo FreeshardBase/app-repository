@@ -1,0 +1,29 @@
+{
+  "v": "3.1",
+  "name": "onlyoffice",
+  "image": "onlyoffice/documentserver:latest",
+  "port": 80,
+  "data_dirs": [
+    "/var/www/onlyoffice/Data",
+    "/var/log/onlyoffice"
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 120
+  },
+  "store_info": {
+    "description_short": "ONLYOFFICE Docs the most complete office suite",
+    "description_long": [
+      "Designed to make collaboration seamless"
+    ],
+    "hint": [
+      "This app is specifically configured to work with Owncloud"
+    ],
+    "is_featured": true
+  }
+}
