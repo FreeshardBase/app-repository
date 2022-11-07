@@ -10,9 +10,9 @@
   "env_vars": {
     "OWNCLOUD_DOMAIN": "owncloud.{{ portal.domain }}",
     "OWNCLOUD_TRUSTED_DOMAINS": "owncloud.{{ portal.domain }}",
-    "DOCUMENT_SERVER_URL": "onlyoffice.{{ portal.domain }}",
-    "DOCUMENT_SERVER_INTERNAL_URL": "onlyoffice",
-    "STORAGE_URL": "owncloud",
+    "DOCUMENT_SERVER_URL": "https://onlyoffice.{{ portal.domain }}",
+    "DOCUMENT_SERVER_INTERNAL_URL": "http://onlyoffice",
+    "STORAGE_URL": "http://owncloud",
     "OWNCLOUD_DB_TYPE": "pgsql",
     "OWNCLOUD_DB_NAME": "{{ postgres.user }}",
     "OWNCLOUD_DB_USERNAME": "{{ postgres.user }}",
