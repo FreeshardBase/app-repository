@@ -12,7 +12,7 @@
     "OWNCLOUD_TRUSTED_DOMAINS": "owncloud.{{ portal.domain }}",
     "DOCUMENT_SERVER_URL": "https://onlyoffice.{{ portal.domain }}",
     "DOCUMENT_SERVER_INTERNAL_URL": "http://onlyoffice",
-    "STORAGE_URL": "http://owncloud",
+    "STORAGE_URL": "http://owncloud:8080",
     "OWNCLOUD_DB_TYPE": "pgsql",
     "OWNCLOUD_DB_NAME": "{{ postgres.user }}",
     "OWNCLOUD_DB_USERNAME": "{{ postgres.user }}",
