@@ -1,0 +1,42 @@
+{
+  "v": "3.1",
+  "name": "owncloud",
+  "image": "portalapps.azurecr.io/ptl-apps/owncloud:init",
+  "port": 8080,
+  "data_dirs": [
+    "/mnt/data"
+  ],
+  "services": ["postgres"],
+  "env_vars": {
+    "OWNCLOUD_DOMAIN": "owncloud.{{ portal.domain }}",
+    "OWNCLOUD_TRUSTED_DOMAINS": "owncloud.{{ portal.domain }}",
+    "DOCUMENT_SERVER_URL": "onlyoffice.{{ portal.domain }}",
+    "DOCUMENT_SERVER_INTERNAL_URL": "onlyoffice",
+    "STORAGE_URL": "owncloud",
+    "OWNCLOUD_DB_TYPE": "pgsql",
+    "OWNCLOUD_DB_NAME": "{{ postgres.user }}",
+    "OWNCLOUD_DB_USERNAME": "{{ postgres.user }}",
+    "OWNCLOUD_DB_PASSWORD": "{{ postgres.password }}",
+    "OWNCLOUD_DB_HOST": "{{ postgres.host }}"
+  },
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 300
+  },
+  "store_info": {
+    "description_short": "Filesharing, trusted by 200 million users worldwide",
+    "description_long": [
+      "Give staff an easy, flexible and secure way to share files and folders. Safely involve contacts outside your organization with select documents. Share public links shielded by passwords and expiration dates.",
+      "Say goodbye to slow VPN connections, unversioned documents attached to emails and shadow IT in public clouds of questionable security."
+    ],
+    "hint": [
+      "This app works best with OnlyOffice"
+    ],
+    "is_featured": true
+  }
+}
