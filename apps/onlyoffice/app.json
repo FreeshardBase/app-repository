@@ -7,6 +7,9 @@
     "/var/www/onlyoffice/Data",
     "/var/log/onlyoffice"
   ],
+  "env_vars": {
+    "JWT_ENABLED": "false"
+  },
   "paths": {
     "": {
       "access": "private"
