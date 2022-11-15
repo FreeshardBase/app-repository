@@ -16,8 +16,7 @@
     }
   },
   "lifecycle": {
-    "always_on": false,
-    "idle_time_for_shutdown": 120
+    "always_on": true
   },
   "store_info": {
     "description_short": "ONLYOFFICE Docs the most complete office suite",
