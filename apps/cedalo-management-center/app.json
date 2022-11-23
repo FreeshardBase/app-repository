@@ -1,0 +1,34 @@
+{
+  "v": "3.1",
+  "name": "cedalo-management-center",
+  "image": "cedalo/management-center:2",
+  "port": 8088,
+  "env_vars": {
+    "CEDALO_MC_BROKER_ID": "mosquitto",
+    "CEDALO_MC_BROKER_NAME": "Mosquitto",
+    "CEDALO_MC_BROKER_URL": "mqtt://mosquitto:1883",
+    "CEDALO_MC_BROKER_USERNAME": "admin",
+    "CEDALO_MC_BROKER_PASSWORD": "admin",
+    "CEDALO_MC_USERNAME": "admin",
+    "CEDALO_MC_PASSWORD": "admin"
+  },
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 60
+  },
+  "store_info": {
+    "description_short": "The management center for Eclipse Mosquitto",
+    "description_long": [
+      "The management center for Eclipse Mosquitto"
+    ],
+    "hint": [
+      "The default login is admin/admin"
+    ],
+    "is_featured": true
+  }
+}

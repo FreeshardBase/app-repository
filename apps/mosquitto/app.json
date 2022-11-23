@@ -1,0 +1,43 @@
+{
+  "v": "4.0",
+  "name": "mosquitto",
+  "image": "portalapps.azurecr.io/ptl-apps/mosquitto:main",
+  "entrypoints": [
+    {"container_port": 1883, "entrypoint": "mqtt"}
+  ],
+  "data_dirs": [
+    "/mosquitto/config"
+  ],
+  "paths": {
+    "": {
+      "access": "private",
+      "headers": {
+        "X-Ptl-Client-Id": "{{ client_id }}",
+        "X-Ptl-Client-Name": "{{ client_name }}",
+        "X-Ptl-Client-Type": "{{ client_type }}",
+        "X-Ptl-Foo": "bar"
+      }
+    },
+    "/public/": {
+      "access": "public",
+      "headers": {
+        "X-Ptl-Client-Type": "{{ client_type }}",
+        "X-Ptl-Foo": "baz"
+      }
+    }
+  },
+  "lifecycle": {
+    "always_on": true
+  },
+  "store_info": {
+    "description_short": "An open source MQTT broker",
+    "description_long": [
+      "Eclipse Mosquitto is an open source (EPL/EDL licensed) message broker that implements the MQTT protocol versions 5.0, 3.1.1 and 3.1.",
+      "The MQTT protocol provides a lightweight method of carrying out messaging using a publish/subscribe model. This makes it suitable for Internet of Things messaging such as with low power sensors or mobile devices such as phones, embedded computers or microcontrollers."
+    ],
+    "hint": [
+      "In order to manage access for different clients, also install the Cedalo Management Center app"
+    ],
+    "is_featured": true
+  }
+}
