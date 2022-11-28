@@ -4,27 +4,17 @@
   "image": "portalapps.azurecr.io/ptl-apps/mosquitto:main",
   "entrypoints": [
     {"container_port": 1883, "entrypoint_port": "mqtt"},
-    {"container_port": 9001, "entrypoint_port": "ws"}
+    {"container_port": 9001, "entrypoint_port": "http"}
   ],
   "data_dirs": [
     "/mosquitto/config"
   ],
   "paths": {
     "": {
-      "access": "private",
-      "headers": {
-        "X-Ptl-Client-Id": "{{ client_id }}",
-        "X-Ptl-Client-Name": "{{ client_name }}",
-        "X-Ptl-Client-Type": "{{ client_type }}",
-        "X-Ptl-Foo": "bar"
-      }
+      "access": "private"
     },
-    "/public/": {
-      "access": "public",
-      "headers": {
-        "X-Ptl-Client-Type": "{{ client_type }}",
-        "X-Ptl-Foo": "baz"
-      }
+    "/mqtt": {
+      "access": "public"
     }
   },
   "lifecycle": {

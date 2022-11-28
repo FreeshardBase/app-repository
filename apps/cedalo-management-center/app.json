@@ -19,16 +19,14 @@
   },
   "lifecycle": {
     "always_on": false,
-    "idle_time_for_shutdown": 60
+    "idle_time_for_shutdown": 300
   },
   "store_info": {
     "description_short": "The management center for Eclipse Mosquitto",
     "description_long": [
       "The management center for Eclipse Mosquitto"
     ],
-    "hint": [
-      "The default login is admin/admin"
-    ],
+    "hint": "The default login is admin/admin",
     "is_featured": true
   }
 }
