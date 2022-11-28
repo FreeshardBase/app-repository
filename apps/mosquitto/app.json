@@ -3,8 +3,8 @@
   "name": "mosquitto",
   "image": "portalapps.azurecr.io/ptl-apps/mosquitto:main",
   "entrypoints": [
-    {"container_port": 1883, "entrypoint": "mqtt"},
-    {"container_port": 9001, "entrypoint": "ws"}
+    {"container_port": 1883, "entrypoint_port": "mqtt"},
+    {"container_port": 9001, "entrypoint_port": "ws"}
   ],
   "data_dirs": [
     "/mosquitto/config"
