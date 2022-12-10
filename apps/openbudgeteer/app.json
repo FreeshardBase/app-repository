@@ -7,7 +7,7 @@
     "/app/database"
   ],
   "env_vars": {
-    "Connection:Provider": "sqlite"
+    "CONNECTION_PROVIDER": "sqlite"
   },
   "paths": {
     "": {
@@ -17,6 +17,6 @@
   "store_info": {
     "description_short": "OpenBudgeteer is a budgeting app based on the Bucket Budgeting Principle",
     "description_long": "OpenBudgeteer is a budgeting app based on the Bucket Budgeting Principle and inspired by YNAB and Buckets.",
-    "is_featured": true
+    "is_featured": false
   }
 }

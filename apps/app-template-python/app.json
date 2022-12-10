@@ -39,6 +39,6 @@
       "See the Portal documentation to learn about how to fork and adapt it to your own needs: https://docs.getportal.org/app_template/"
     ],
     "hint": "This app is not meant to be used as anything else than a demonstrator.",
-    "is_featured": true
+    "is_featured": false
   }
 }

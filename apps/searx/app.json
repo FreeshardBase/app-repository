@@ -23,6 +23,6 @@
     "description_long": [
       "Searx is a free internet metasearch engine which aggregates results from more than 70 search services. Users are neither tracked nor profiled."
     ],
-    "is_featured": true
+    "is_featured": false
   }
 }
