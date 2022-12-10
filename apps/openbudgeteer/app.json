@@ -28,6 +28,6 @@
     "description_short": "OpenBudgeteer is a budgeting app based on the Bucket Budgeting Principle",
     "description_long": "OpenBudgeteer is a budgeting app based on the Bucket Budgeting Principle and inspired by YNAB and Buckets.",
     "hint": null,
-    "is_featured": false
+    "is_featured": true
   }
 }
