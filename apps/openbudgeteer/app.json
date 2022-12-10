@@ -1,22 +1,33 @@
 {
-  "v": "2.0",
+  "v": "4.0",
   "name": "openbudgeteer",
   "image": "axelander/openbudgeteer:latest",
-  "port": 80,
+  "entrypoints": [
+    {
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
   "data_dirs": [
     "/app/database"
   ],
   "env_vars": {
-    "Connection:Provider": "sqlite"
+    "CONNECTION_PROVIDER": "sqlite"
   },
   "paths": {
     "": {
-      "access": "private"
+      "access": "private",
+      "headers": null
     }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 300
   },
   "store_info": {
     "description_short": "OpenBudgeteer is a budgeting app based on the Bucket Budgeting Principle",
     "description_long": "OpenBudgeteer is a budgeting app based on the Bucket Budgeting Principle and inspired by YNAB and Buckets.",
+    "hint": null,
     "is_featured": true
   }
 }
