@@ -1,8 +1,13 @@
 {
-  "v": "1.0",
+  "v": "4.0",
   "name": "node-red",
   "image": "nodered/node-red",
-  "port": 1880,
+  "entrypoints": [
+    {
+      "container_port": 1880,
+      "entrypoint_port": "http"
+    }
+  ],
   "data_dirs": [
     {
       "path": "/data",
@@ -15,6 +20,9 @@
       "access": "private"
     }
   },
+  "lifecycle": {
+    "always_on": true
+  },
   "store_info": {
     "description_short": "Low-code programming for event-driven applications",
     "description_long": [
@@ -23,8 +31,8 @@
     ],
     "hint": [
       "The 'http in' node can only be called from a paired terminal",
-      "Protocols except http are not supported yet"
+      "If you have the Mosquitto app installed, you can connect to it using MQTT nodes: the server name is 'mosquitto' and the port is '1883'"
     ],
-    "is_featured": false
+    "is_featured": true
   }
 }
