@@ -1,6 +1,6 @@
 {
   "v": "4.0",
-  "name": "home assistant",
+  "name": "home-assistant",
   "image": "portalapps.azurecr.io/ptl-apps/homeassistant:main",
   "entrypoints": [
     {
