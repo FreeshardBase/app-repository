@@ -1,0 +1,31 @@
+{
+  "v": "4.0",
+  "name": "home assistant",
+  "image": "portalapps.azurecr.io/ptl-apps/homeassistant:main",
+  "entrypoints": [
+    {
+      "container_port": 8123,
+      "entrypoint_port": "http"
+    }
+  ],
+  "data_dirs": [
+    "/config"
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 120
+  },
+  "store_info": {
+    "description_short": "Open source home automation that puts local control and privacy first.",
+    "description_long": [
+      "Awaken your home",
+      "Open source home automation that puts local control and privacy first. Powered by a worldwide community of tinkerers and DIY enthusiasts."
+    ],
+    "is_featured": true
+  }
+}
