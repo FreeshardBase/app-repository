@@ -1,7 +1,7 @@
 {
   "v": "4.0",
   "name": "home-assistant",
-  "image": "portalapps.azurecr.io/ptl-apps/homeassistant:main",
+  "image": "ghcr.io/home-assistant/home-assistant:stable",
   "entrypoints": [
     {
       "container_port": 8123,
@@ -13,18 +13,21 @@
   ],
   "paths": {
     "": {
-      "access": "private"
+      "access": "public"
     }
   },
   "lifecycle": {
-    "always_on": false,
-    "idle_time_for_shutdown": 120
+    "always_on": true
   },
   "store_info": {
     "description_short": "Open source home automation that puts local control and privacy first.",
     "description_long": [
       "Awaken your home",
       "Open source home automation that puts local control and privacy first. Powered by a worldwide community of tinkerers and DIY enthusiasts."
+    ],
+    "hint": [
+      "Due to missing features of home-assistant, you have to create an account and login.",
+      "But you can also create accounts for others!"
     ],
     "is_featured": true
   }
