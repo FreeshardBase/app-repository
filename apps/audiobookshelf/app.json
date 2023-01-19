@@ -25,14 +25,7 @@
   },
   "store_info": {
     "description_short": "audiobook and podcast server",
-    "description_long": [
-      "A really great app that serves as an example.",
-      "It also has a description that is two paragraphs long."
-    ],
-    "hint": [
-      "This app is not really part of the app store",
-      "In fact, this app does not really exist"
-    ],
-    "is_featured": true
+    "hint": "Due to some missing features, you still have to register and login",
+    "is_featured": false
   }
 }
