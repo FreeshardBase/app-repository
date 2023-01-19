@@ -1,0 +1,38 @@
+{
+  "v": "4.0",
+  "name": "audiobookshelf",
+  "image": "ghcr.io/advplyr/audiobookshelf:latest",
+  "entrypoints": [
+    {
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "data_dirs": [
+    "/config",
+    "/metadata",
+    "/audiobooks",
+    "/podcasts"
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 120
+  },
+  "store_info": {
+    "description_short": "audiobook and podcast server",
+    "description_long": [
+      "A really great app that serves as an example.",
+      "It also has a description that is two paragraphs long."
+    ],
+    "hint": [
+      "This app is not really part of the app store",
+      "In fact, this app does not really exist"
+    ],
+    "is_featured": true
+  }
+}
