@@ -1,7 +1,7 @@
 {
   "v": "2.0",
   "name": "ghost",
-  "image": "ghost:alpine",
+  "image": "ghost:4-alpine",
   "port": 2368,
   "data_dirs": [
     "/var/lib/ghost/content"
