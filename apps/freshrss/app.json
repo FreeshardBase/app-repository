@@ -16,7 +16,7 @@
     "DATABASE_URL": "{{ postgres.connection_string }}",
     "DEBUG": "true",
     "FRESHRSS_INSTALL": "--base_url https://freshrss.{{ portal.domain }}/ --default_user portal --auth_type none",
-    "FRESHRSS_USER": "--user portal --is-admin true"
+    "FRESHRSS_USER": "--user portal"
   },
   "paths": {
     "": {
@@ -28,15 +28,11 @@
     "idle_time_for_shutdown": 120
   },
   "store_info": {
-    "description_short": "A great app",
+    "description_short": "FreshRSS is a self-hosted RSS and Atom feed aggregator.",
     "description_long": [
-      "A really great app that serves as an example.",
-      "It also has a description that is two paragraphs long."
+      "FreshRSS is a self-hosted RSS and Atom feed aggregator.",
+      "It is lightweight, easy to work with, powerful, and customizable."
     ],
-    "hint": [
-      "This app is not really part of the app store",
-      "In fact, this app does not really exist"
-    ],
-    "is_featured": true
+    "is_featured": false
   }
 }
