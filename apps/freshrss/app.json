@@ -13,8 +13,6 @@
     "/var/www/FreshRSS/extensions"
   ],
   "env_vars": {
-    "DATABASE_URL": "{{ postgres.connection_string }}",
-    "DEBUG": "true",
     "FRESHRSS_INSTALL": "--base_url https://freshrss.{{ portal.domain }}/ --default_user portal --auth_type none",
     "FRESHRSS_USER": "--user portal"
   },
