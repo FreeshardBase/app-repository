@@ -1,0 +1,36 @@
+{
+  "v": "4.0",
+  "name": "freshrss",
+  "image": "freshrss/freshrss:1.20.2",
+  "entrypoints": [
+    {
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "data_dirs": [
+    "/var/www/FreshRSS/data",
+    "/var/www/FreshRSS/extensions"
+  ],
+  "env_vars": {
+    "FRESHRSS_INSTALL": "--base_url https://freshrss.{{ portal.domain }}/ --default_user portal --auth_type none",
+    "FRESHRSS_USER": "--user portal"
+  },
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 120
+  },
+  "store_info": {
+    "description_short": "FreshRSS is a self-hosted RSS and Atom feed aggregator.",
+    "description_long": [
+      "FreshRSS is a self-hosted RSS and Atom feed aggregator.",
+      "It is lightweight, easy to work with, powerful, and customizable."
+    ],
+    "is_featured": false
+  }
+}
