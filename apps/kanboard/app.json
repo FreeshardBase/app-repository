@@ -1,7 +1,7 @@
 {
   "v": "4.0",
   "name": "kanboard",
-  "image": "kanboard/kanboard:v1.2.27",
+  "image": "kanboard/kanboard:latest",
   "entrypoints": [
     {
       "container_port": 80,
@@ -13,16 +13,26 @@
     "/var/www/app/plugins"
   ],
   "env_vars": {
-    "REVERSE_PROXY_AUTH": "true",
-    "REVERSE_PROXY_DEFAULT_ADMIN": "admin",
-    "REVERSE_PROXY_USER_HEADER": "HTTP_X_PROXY_USERNAME"
+    "DEBUG": true,
+    "REVERSE_PROXY_AUTH": true,
+    "REVERSE_PROXY_DEFAULT_ADMIN": "portaluser@example.com",
+    "REVERSE_PROXY_USER_HEADER": "HTTP_X_PTL_PROXY_USERNAME"
   },
   "paths": {
     "": {
       "access": "private",
       "headers": {
-        "X-Proxy-Username": "admin"
+        "X-Ptl-Proxy-Username": "portaluser@example.com"
       }
+    },
+    "/public/": {
+      "access": "public"
+    },
+    "/feed/": {
+      "access": "public"
+    },
+    "/ical/": {
+      "access": "public"
     }
   },
   "lifecycle": {
