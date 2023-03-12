@@ -1,0 +1,38 @@
+{
+  "v": "4.0",
+  "name": "kanboard",
+  "image": "kanboard/kanboard:v1.2.27",
+  "entrypoints": [
+    {
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "data_dirs": [
+    "/var/www/app/data",
+    "/var/www/app/plugins"
+  ],
+  "env_vars": {
+    "REVERSE_PROXY_AUTH": "true",
+    "REVERSE_PROXY_DEFAULT_ADMIN": "admin",
+    "REVERSE_PROXY_USER_HEADER": "HTTP_X_PROXY_USERNAME"
+  },
+  "paths": {
+    "": {
+      "access": "private",
+      "headers": {
+        "X-Proxy-Username": "admin"
+      }
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 120
+  },
+  "store_info": {
+    "description_short": "Kanban project management software",
+    "description_long": [
+      "Kanboard is project management software that focuses on the Kanban methodology."
+    ]
+  }
+}
