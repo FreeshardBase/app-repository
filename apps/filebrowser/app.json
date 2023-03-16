@@ -1,8 +1,13 @@
 {
-  "v": "3.2",
+  "v": "4.0",
   "name": "filebrowser",
   "image": "portalapps.azurecr.io/ptl-apps/filebrowser:master",
-  "port": 80,
+  "entrypoints": [
+    {
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
   "data_dirs": [
     "/data",
     {
@@ -16,6 +21,14 @@
     {
       "path": "/data/music",
       "shared_dir": "music"
+    },
+    {
+      "path": "/data/portal_core/app_data",
+      "shared_dir": "app_data"
+    },
+    {
+      "path": "/data/portal_core/service_data",
+      "shared_dir": "service_data"
     }
   ],
   "env_vars": null,
