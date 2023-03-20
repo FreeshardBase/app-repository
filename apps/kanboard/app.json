@@ -42,6 +42,9 @@
       "headers": {
         "X-Ptl-Proxy-Username": "guest"
       }
+    },
+    "/assets/": {
+      "access": "public"
     }
   },
   "lifecycle": {
