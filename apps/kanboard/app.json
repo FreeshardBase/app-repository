@@ -26,12 +26,24 @@
       }
     },
     "/public/": {
-      "access": "public"
+      "access": "public",
+      "headers": {
+        "X-Ptl-Proxy-Username": "guest"
+      }
     },
     "/feed/": {
-      "access": "public"
+      "access": "public",
+      "headers": {
+        "X-Ptl-Proxy-Username": "guest"
+      }
     },
     "/ical/": {
+      "access": "public",
+      "headers": {
+        "X-Ptl-Proxy-Username": "guest"
+      }
+    },
+    "/assets/": {
       "access": "public"
     }
   },
