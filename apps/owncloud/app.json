@@ -1,7 +1,7 @@
 {
   "v": "3.1",
   "name": "owncloud",
-  "image": "portalapps.azurecr.io/ptl-apps/owncloud:init",
+  "image": "portalapps.azurecr.io/ptl-apps/owncloud:main",
   "port": 8080,
   "data_dirs": [
     "/mnt/data"
