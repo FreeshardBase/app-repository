@@ -17,7 +17,8 @@
   "env_vars": {
     "PAPERLESS_ADMIN_USER": "admin",
     "PAPERLESS_ADMIN_PASSWORD": "admin",
-    "PAPERLESS_AUTO_LOGIN_USERNAME": "admin"
+    "PAPERLESS_AUTO_LOGIN_USERNAME": "admin",
+    "PAPERLESS_URL": "https://paperless-ngx.{{ portal.domain }}"
   },
   "paths": {
     "": {
