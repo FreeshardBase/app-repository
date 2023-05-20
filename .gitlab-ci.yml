@@ -1,0 +1,4 @@
+deploy:
+  image: mcr.microsoft.com/azure-cli
+  script:
+    - az storage blob upload-batch --destination "app-store/$CI_COMMIT_REF_NAME" --source apps --sas-token $AZ_STORAGE_SAS_TOKEN --account-name storageaccountportab0da --overwrite
