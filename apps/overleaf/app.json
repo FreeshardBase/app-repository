@@ -1,0 +1,39 @@
+{
+  "v": "5.0",
+  "app_version": "0.1.0",
+  "name": "overleaf",
+  "icon": "icon.svg",
+  "entrypoints": [
+    {
+      "container_name": "overleaf-sharelatex",
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private",
+      "headers": {
+        "X-Ptl-Client-Id": "{{ auth.client_id }}",
+        "X-Ptl-Client-Name": "{{ auth.client_name }}",
+        "X-Ptl-Client-Type": "{{ auth.client_type }}"
+      }
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 120
+  },
+  "store_info": {
+    "description_short": "A great app",
+    "description_long": [
+      "A really great app that serves as an example.",
+      "It also has a description that is two paragraphs long."
+    ],
+    "hint": [
+      "This app is not really part of the app store",
+      "In fact, this app does not really exist"
+    ],
+    "is_featured": true
+  }
+}

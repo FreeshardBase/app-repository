@@ -1,50 +1,40 @@
 {
-  "v": "3.2",
+  "v": "5.0",
+  "app_version": "0.1.0",
   "name": "filebrowser",
-  "image": "portalapps.azurecr.io/ptl-apps/filebrowser:master",
-  "port": 80,
-  "data_dirs": [
-    "/data",
+  "icon": "icon.svg",
+  "entrypoints": [
     {
-      "path": "/data/documents",
-      "shared_dir": "documents"
-    },
-    {
-      "path": "/data/media",
-      "shared_dir": "media"
-    },
-    {
-      "path": "/data/music",
-      "shared_dir": "music"
+      "container_name": "filebrowser",
+      "container_port": 80,
+      "entrypoint_port": "http"
     }
   ],
-  "env_vars": null,
-  "services": null,
   "paths": {
     "": {
       "access": "private",
       "headers": {
-        "X-Ptl-Client-Type": "terminal",
-        "X-Ptl-Client-Id": "{{ client_id }}",
-        "X-Ptl-Client-Name": "{{ client_name }}"
+        "X-Ptl-Client-Id": "{{ auth.client_id }}",
+        "X-Ptl-Client-Name": "{{ auth.client_name }}",
+        "X-Ptl-Client-Type": "{{ auth.client_type }}"
       }
     },
     "/share/": {
       "access": "public",
       "headers": {
-        "X-Ptl-Client-Type": "public"
+        "X-Ptl-Client-Type": "{{ auth.client_type }}"
       }
     },
     "/static/": {
       "access": "public",
       "headers": {
-        "X-Ptl-Client-Type": "public"
+        "X-Ptl-Client-Type": "{{ auth.client_type }}"
       }
     },
     "/api/public/": {
       "access": "public",
       "headers": {
-        "X-Ptl-Client-Type": "public"
+        "X-Ptl-Client-Type": "{{ auth.client_type }}"
       }
     }
   },
