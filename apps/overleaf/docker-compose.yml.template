@@ -7,7 +7,7 @@ networks:
         name: overleaf
 
 services:
-    sharelatex:
+    overleaf-sharelatex:
         restart: always
         image: sharelatex/sharelatex
         container_name: overleaf-sharelatex
@@ -71,7 +71,7 @@ services:
 
             # ENABLE_CRON_RESOURCE_DELETION: true
 
-    mongo:
+    overleaf-mongo:
         restart: always
         image: mongo:4.4
         container_name: overleaf-mongo
@@ -87,7 +87,7 @@ services:
             timeout: 10s
             retries: 5
 
-    redis:
+    overleaf-redis:
         restart: always
         image: redis:6.2
         container_name: overleaf-redis
