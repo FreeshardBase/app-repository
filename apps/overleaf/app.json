@@ -2,7 +2,7 @@
   "v": "5.0",
   "app_version": "0.1.0",
   "name": "overleaf",
-  "icon": "icon.svg",
+  "icon": "overleaf.png",
   "entrypoints": [
     {
       "container_name": "overleaf-sharelatex",
@@ -22,18 +22,15 @@
   },
   "lifecycle": {
     "always_on": false,
-    "idle_time_for_shutdown": 120
+    "idle_time_for_shutdown": 300
   },
   "store_info": {
-    "description_short": "A great app",
+    "description_short": "The easy to use, online, collaborative LaTeX editor",
     "description_long": [
-      "A really great app that serves as an example.",
-      "It also has a description that is two paragraphs long."
+      "There’s nothing complicated or difficult for you to install, and you can start using LaTeX right now, even if you’ve never seen it before. Overleaf comes with a complete, ready to go LaTeX environment which runs on your Portal.",
+      "With Overleaf you get the same LaTeX set-up wherever you go. By working with your colleagues and students on Overleaf, you know that you’re not going to hit any version inconsistencies or package conflicts.",
+      "We support almost all LaTeX features, including inserting images, bibliographies, equations, and much more! Read about all the exciting things you can do with Overleaf in our LaTeX guides."
     ],
-    "hint": [
-      "This app is not really part of the app store",
-      "In fact, this app does not really exist"
-    ],
-    "is_featured": true
+    "hint": "Collaboration features are not yet available."
   }
 }
