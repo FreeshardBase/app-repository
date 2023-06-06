@@ -12,10 +12,8 @@ services:
         image: sharelatex/sharelatex
         container_name: overleaf-sharelatex
         depends_on:
-            overleaf-mongo:
-                condition: service_healthy
-            overleaf-redis:
-                condition: service_started
+            - overleaf-mongo
+            - overleaf-redis
         volumes:
         - "{{ fs.app_data }}/sharelatex_data:/var/lib/sharelatex"
         networks:
