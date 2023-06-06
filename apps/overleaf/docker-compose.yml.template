@@ -16,8 +16,6 @@ services:
                 condition: service_healthy
             overleaf-redis:
                 condition: service_started
-        ports:
-        - 80:80
         volumes:
         - "{{ fs.app_data }}/sharelatex_data:/var/lib/sharelatex"
         networks:
