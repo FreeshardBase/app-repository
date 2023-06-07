@@ -21,7 +21,6 @@ services:
         - overleaf
         environment:
 
-            SHARELATEX_APP_NAME: "Overleaf on {{ portal.short_id }}"
             SHARELATEX_MONGO_URL: mongodb://overleaf-mongo/sharelatex
             SHARELATEX_REDIS_HOST: overleaf-redis
             REDIS_HOST: overleaf-redis
@@ -38,11 +37,12 @@ services:
             # see https://github.com/overleaf/overleaf/issues/695
             TEXMFVAR: /var/lib/sharelatex/tmp/texmf-var
 
-            ## Set for SSL via nginx-proxy
-            #VIRTUAL_HOST: 103.112.212.22
-
-            # SHARELATEX_SITE_URL: http://sharelatex.mydomain.com
-            # SHARELATEX_NAV_TITLE: Our ShareLaTeX Instance
+            SHARELATEX_SITE_URL: "https://overleaf.{{ portal.domain }}/"
+            SHARELATEX_NAV_TITLE: "Overleaf on {{ portal.short_id }}"
+            SHARELATEX_APP_NAME: "Overleaf on {{ portal.short_id }}"
+            SHARELATEX_BEHIND_PROXY: "true"
+            SHARELATEX_ALLOW_PUBLIC_ACCESS: "true"
+            SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: "true"
             # SHARELATEX_HEADER_IMAGE_URL: http://somewhere.com/mylogo.png
             # SHARELATEX_ADMIN_EMAIL: support@it.com
 
@@ -50,22 +50,6 @@ services:
             # SHARELATEX_RIGHT_FOOTER: '[{"text": "Hello I am on the Right"} ]'
 
             # SHARELATEX_EMAIL_FROM_ADDRESS: "team@sharelatex.com"
-
-            # SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID:
-            # SHARELATEX_EMAIL_AWS_SES_SECRET_KEY:
-
-            # SHARELATEX_EMAIL_SMTP_HOST: smtp.mydomain.com
-            # SHARELATEX_EMAIL_SMTP_PORT: 587
-            # SHARELATEX_EMAIL_SMTP_SECURE: false
-            # SHARELATEX_EMAIL_SMTP_USER:
-            # SHARELATEX_EMAIL_SMTP_PASS:
-            # SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH: true
-            # SHARELATEX_EMAIL_SMTP_IGNORE_TLS: false
-            # SHARELATEX_EMAIL_SMTP_NAME: '127.0.0.1'
-            # SHARELATEX_EMAIL_SMTP_LOGGER: true
-            # SHARELATEX_CUSTOM_EMAIL_FOOTER: "This system is run by department x"
-
-            # ENABLE_CRON_RESOURCE_DELETION: true
 
     overleaf-mongo:
         restart: always
