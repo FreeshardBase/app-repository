@@ -13,7 +13,7 @@ def entry(app: dict):
 app_dir = Path(__file__).parent / 'apps'
 
 all_apps_json = {
-	"apps": list(entry(json.loads((a / 'app.json').read_text())) for a in app_dir.glob('*'))
+	"apps": list(entry(json.loads((a / 'app_meta.json').read_text())) for a in app_dir.glob('*'))
 }
 
 store_metadata_file = Path(__file__).parent / 'apps' / 'store_metadata.json'
