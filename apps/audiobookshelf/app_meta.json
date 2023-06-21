@@ -1,0 +1,26 @@
+{
+  "v": "1.0",
+  "app_version": "0.1.0",
+  "name": "audiobookshelf",
+  "icon": "icon.svg",
+  "entrypoints": [
+    {
+      "container_name": "template",
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 120
+  },
+  "store_info": {
+    "description_short": "audiobook and podcast server.",
+    "is_featured": true
+  }
+}

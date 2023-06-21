@@ -1,0 +1,15 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    template:
+        restart: always
+        image: template_app
+        container_name: template
+        volumes:
+        - "{{ fs.app_data }}:/data"
+        networks:
+        - portal
