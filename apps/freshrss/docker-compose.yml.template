@@ -1,0 +1,19 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    freshrss:
+        restart: always
+        image: freshrss/freshrss:1.20.2
+        container_name: freshrss
+        volumes:
+        - "{{ fs.app_data }}/var/www/FreshRSS/data:/var/www/FreshRSS/data"
+        - "{{ fs.app_data }}/var/www/FreshRSS/extensions:/var/www/FreshRSS/extensions"
+        environment:
+        - FRESHRSS_INSTALL: "--base_url https://freshrss.{{ portal.domain }}/ --default_user portal --auth_type none",
+        - FRESHRSS_USER: "--user portal"
+        networks:
+        - portal

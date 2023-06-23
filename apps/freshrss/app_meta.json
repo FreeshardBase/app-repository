@@ -1,0 +1,30 @@
+{
+  "v": "1.0",
+  "app_version": "0.1.0",
+  "name": "freshrss",
+  "icon": "icon.svg",
+  "entrypoints": [
+    {
+      "container_name": "template",
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 600
+  },
+  "store_info": {
+    "description_short": "FreshRSS is a self-hosted RSS and Atom feed aggregator.",
+    "description_long": [
+      "FreshRSS is a self-hosted RSS and Atom feed aggregator.",
+      "It is lightweight, easy to work with, powerful, and customizable."
+    ],
+    "is_featured": false
+  }
+}
