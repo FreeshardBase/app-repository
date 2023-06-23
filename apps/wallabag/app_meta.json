@@ -1,0 +1,28 @@
+{
+  "v": "1.0",
+  "app_version": "0.1.0",
+  "name": "wallabag",
+  "icon": "icon.svg",
+  "entrypoints": [
+    {
+      "container_name": "wallabag",
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 600
+  },
+  "store_info": {
+    "description_short": "Save web articles. Read them later. Read them anywhere.",
+    "description_long": "wallabag is an open source application to save your web articles and allows you to read them later, on your smartphone, your tablet or your ereader.",
+    "hint": "You have to login as the default user with name 'wallabag' and password 'wallabag'",
+    "is_featured": false
+  }
+}

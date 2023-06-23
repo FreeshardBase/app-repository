@@ -10,6 +10,6 @@ services:
         image: template_app
         container_name: template
         volumes:
-        - "{{ fs.app_data }}:/data"
+        - "{{ fs.app_data }}/data:/data"
         networks:
         - portal
