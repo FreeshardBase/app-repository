@@ -1,0 +1,34 @@
+{
+  "v": "1.0",
+  "app_version": "0.1.0",
+  "name": "vaultwarden",
+  "icon": "icon.png",
+  "entrypoints": [
+    {
+      "container_name": "vaultwarden",
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "public"
+    },
+    "/admin/": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 600
+  },
+  "store_info": {
+    "description_short": "Open source password manager (formerly known as BitWarden_RS)",
+    "description_long": "Vaultwarden is a free and open-source password management service that stores sensitive information such as website credentials in an encrypted vault.",
+    "hint": [
+      "At first use, you will have to create an account. This helps encrypt your secrets at rest",
+      "Only one account can be created, all following attempts will cause an error. This is by design."
+    ],
+    "is_featured": false
+  }
+}

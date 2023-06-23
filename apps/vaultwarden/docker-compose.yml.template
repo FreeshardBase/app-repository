@@ -1,0 +1,19 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    vaultwarden:
+        restart: always
+        image: vaultwarden/server
+        container_name: vaultwarden
+        volumes:
+        - "{{ fs.app_data }}/data:/data"
+        environment:
+        - DOMAIN: "https://vaultwarden.{{ portal.domain }}/",
+        - ADMIN_TOKEN: "unused",
+        - DISABLE_ADMIN_TOKEN: "true"
+        networks:
+        - portal

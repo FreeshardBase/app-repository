@@ -5,7 +5,7 @@ networks:
         external: true
 
 services:
-    template:
+    wallabag:
         restart: always
         image: wallabag/wallabag
         container_name: wallabag
