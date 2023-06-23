@@ -1,0 +1,48 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    photoprism:
+        restart: always
+        image: photoprism/photoprism:230615
+        container_name: template
+        volumes:
+        - "{{ fs.app_data }}/photoprism/storage:/photoprism/storage"
+        - "{{ fs.shared }}/pictures:/photoprism/originals"
+        environment:
+        - PHOTOPRISM_SITE_URL: "https://photoprism.{{ portal.domain }}/",
+        - PHOTOPRISM_PUBLIC: "true",
+        - PHOTOPRISM_WORKERS: 1,
+        - PHOTOPRISM_DISABLE_TENSORFLOW: "true"
+        - PHOTOPRISM_DATABASE_DRIVER: "mysql"            # use MariaDB 10.5+ or MySQL 8+ instead of SQLite for improved performance
+        - PHOTOPRISM_DATABASE_SERVER: "mariadb:3306"     # MariaDB or MySQL database server (hostname:port)
+        - PHOTOPRISM_DATABASE_NAME: "photoprism"         # MariaDB or MySQL database schema name
+        - PHOTOPRISM_DATABASE_USER: "photoprism"         # MariaDB or MySQL database user name
+        - PHOTOPRISM_DATABASE_PASSWORD: "insecure"       # MariaDB or MySQL database user password
+        depends_on:
+        - photoprism-mariadb
+        networks:
+        - portal
+
+    photoprism-mariadb:
+        image: mariadb:10.11
+        ## If MariaDB gets stuck in a restart loop, this points to a memory or filesystem issue:
+        ## https://docs.photoprism.app/getting-started/troubleshooting/#fatal-server-errors
+        security_opt: # see https://github.com/MariaDB/mariadb-docker/issues/434#issuecomment-1136151239
+          - seccomp:unconfined
+          - apparmor:unconfined
+        command: mariadbd --innodb-buffer-pool-size=512M --transaction-isolation=READ-COMMITTED --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --max-connections=512 --innodb-rollback-on-timeout=OFF --innodb-lock-wait-timeout=120
+        ## Never store database files on an unreliable device such as a USB flash drive, an SD card, or a shared network folder:
+        volumes:
+          - "{{ fs.app_data }}/database:/var/lib/mysql"
+        environment:
+          MARIADB_AUTO_UPGRADE: "1"
+          MARIADB_INITDB_SKIP_TZINFO: "1"
+          MARIADB_DATABASE: "photoprism"
+          MARIADB_USER: "photoprism"
+          MARIADB_PASSWORD: "insecure"
+          MARIADB_ROOT_PASSWORD: "insecure"
+
