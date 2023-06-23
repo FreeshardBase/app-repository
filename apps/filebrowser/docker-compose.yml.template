@@ -11,8 +11,7 @@ services:
         container_name: filebrowser
         volumes:
         - "{{ fs.app_data }}:/data"
-        - "{{ fs.shared_documents }}:/data/documents"
-        - "{{ fs.shared_media }}:/data/media"
-        - "{{ fs.shared_music }}:/data/music"
+        - "{{ fs.shared }}:/data/shared"
+        - "{{ fs.all_app_data }}:/data/app_data"
         networks:
         - portal
