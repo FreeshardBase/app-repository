@@ -1,0 +1,15 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    element:
+        restart: always
+        image: vectorim/element-web
+        container_name: element
+        volumes:
+        - "{{ fs.app_data }}/data:/data"
+        networks:
+        - portal
