@@ -1,0 +1,15 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    node-red:
+        restart: always
+        image: nodered/node-red
+        container_name: node-red
+        volumes:
+        - "{{ fs.app_data }}/data:/data"
+        networks:
+        - portal
