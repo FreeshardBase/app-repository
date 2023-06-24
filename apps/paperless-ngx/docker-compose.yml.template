@@ -1,0 +1,30 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    paperless-ngx:
+        restart: always
+        image: ghcr.io/paperless-ngx/paperless-ngx:1.16
+        container_name: paperless-ngx
+        volumes:
+        - "{{ fs.app_data }}/usr/src/paperless/data:/usr/src/paperless/data"
+        - "{{ fs.app_data }}/usr/src/paperless/media:/usr/src/paperless/media"
+        - "{{ fs.app_data }}/usr/src/paperless/consume:/usr/src/paperless/consume"
+        - "{{ fs.app_data }}/usr/src/export/data:/usr/src/paperless/export"
+        environment:
+        - PAPERLESS_REDIS: redis://paperless-redis:6379
+        - PAPERLESS_ADMIN_USER: "admin",
+        - PAPERLESS_ADMIN_PASSWORD: "admin",
+        - PAPERLESS_AUTO_LOGIN_USERNAME: "admin",
+        - PAPERLESS_URL: "https://paperless-ngx.{{ portal.domain }}"
+        depends_on:
+        - paperless-redis
+        networks:
+        - portal
+
+    paperless-redis:
+        image: docker.io/library/redis:7
+        restart: always
