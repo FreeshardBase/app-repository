@@ -1,0 +1,17 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    ghost:
+        restart: always
+        image: ghost:4-alpine
+        container_name: ghost
+        volumes:
+        - "{{ fs.app_data }}/var/lib/ghost/content:/var/lib/ghost/content"
+        environment:
+        - url: "https://ghost.{{ portal.domain }}/"
+        networks:
+        - portal
