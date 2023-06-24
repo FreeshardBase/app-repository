@@ -1,0 +1,15 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    mosquitto:
+        restart: always
+        image: portalapps.azurecr.io/ptl-apps/mosquitto:main
+        container_name: mosquitto
+        volumes:
+        - "{{ fs.app_data }}/mosquitto/config:/mosquitto/config"
+        networks:
+        - portal
