@@ -1,0 +1,15 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    wbo:
+        restart: always
+        image: lovasoa/wbo:v1.19.1
+        container_name: wbo
+        volumes:
+        - "{{ fs.app_data }}/opt/app/server-data:/opt/app/server-data"
+        networks:
+        - portal
