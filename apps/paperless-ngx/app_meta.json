@@ -5,7 +5,7 @@
   "icon": "icon.svg",
   "entrypoints": [
     {
-      "container_name": "template",
+      "container_name": "paperless-ngx",
       "container_port": 8000,
       "entrypoint_port": "http"
     }

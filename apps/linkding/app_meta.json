@@ -1,0 +1,33 @@
+{
+  "v": "1.0",
+  "app_version": "0.1.0",
+  "name": "linkding",
+  "icon": "icon.svg",
+  "entrypoints": [
+    {
+      "container_name": "linkding",
+      "container_port": 9090,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private",
+      "headers": {
+        "X-Ptl-User": "admin"
+      }
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 60
+  },
+  "store_info": {
+    "description_short": "linkding is a simple bookmark service",
+    "description_long": [
+      "linkding is a simple bookmark service that you can host yourself. It's designed be to be minimal, fast, and easy to set up."
+    ],
+    "is_featured": true
+  }
+
+}

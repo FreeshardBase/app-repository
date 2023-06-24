@@ -5,7 +5,7 @@
   "icon": "icon.svg",
   "entrypoints": [
     {
-      "container_name": "template",
+      "container_name": "freshrss",
       "container_port": 80,
       "entrypoint_port": "http"
     }

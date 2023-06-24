@@ -5,7 +5,7 @@
   "icon": "icon.svg",
   "entrypoints": [
     {
-      "container_name": "template",
+      "container_name": "audiobookshelf",
       "container_port": 80,
       "entrypoint_port": "http"
     }

@@ -5,7 +5,7 @@
   "icon": "icon.svg",
   "entrypoints": [
     {
-      "container_name": "template",
+      "container_name": "photoprism",
       "container_port": 2342,
       "entrypoint_port": "http"
     }
