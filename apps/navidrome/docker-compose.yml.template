@@ -1,0 +1,20 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    navidrome:
+        restart: always
+        image: deluan/navidrome:pr-2198
+        container_name: navidrome
+        volumes:
+        - "{{ fs.app_data }}/data:/data"
+        - "{{ fs.shared }}/music:/music"
+        environment:
+        - ND_REVERSEPROXYUSERHEADER: "X-Ptl-User",
+        - ND_REVERSEPROXYWHITELIST: "0.0.0.0/0",
+        - ND_DEVAUTOCREATEADMINPASSWORD: "admin"
+        networks:
+        - portal
