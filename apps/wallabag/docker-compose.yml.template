@@ -7,15 +7,15 @@ networks:
 services:
     wallabag:
         restart: always
-        image: wallabag/wallabag
+        image: wallabag/wallabag:2.5.2
         container_name: wallabag
         volumes:
         - "{{ fs.app_data }}/var/www/wallabag/data:/var/www/wallabag/data"
         - "{{ fs.app_data }}/var/www/wallabag/web/assets/images:/var/www/wallabag/web/assets/images"
         environment:
-        - SYMFONY__ENV__DOMAIN_NAME: "https://wallabag.{{ portal.domain }}"
-        - SYMFONY__ENV__MAILER_TRANSPORT: "null"
-        - SYMFONY__ENV__TWOFACTOR_AUTH: "false"
-        - SYMFONY__ENV__FOSUSER_REGISTRATION: "false"
+        - SYMFONY__ENV__DOMAIN_NAME=https://wallabag.{{ portal.domain }}
+        - SYMFONY__ENV__MAILER_TRANSPORT=null
+        - SYMFONY__ENV__TWOFACTOR_AUTH=false
+        - SYMFONY__ENV__FOSUSER_REGISTRATION=false
         networks:
         - portal

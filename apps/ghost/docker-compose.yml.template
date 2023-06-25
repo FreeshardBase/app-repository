@@ -12,6 +12,6 @@ services:
         volumes:
         - "{{ fs.app_data }}/var/lib/ghost/content:/var/lib/ghost/content"
         environment:
-        - url: "https://ghost.{{ portal.domain }}/"
+        - url="https://ghost.{{ portal.domain }}/"
         networks:
         - portal

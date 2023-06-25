@@ -13,8 +13,8 @@ services:
         - "{{ fs.app_data }}/data:/data"
         - "{{ fs.shared }}/music:/music"
         environment:
-        - ND_REVERSEPROXYUSERHEADER: "X-Ptl-User"
-        - ND_REVERSEPROXYWHITELIST: "0.0.0.0/0"
-        - ND_DEVAUTOCREATEADMINPASSWORD: "admin"
+        - ND_REVERSEPROXYUSERHEADER=X-Ptl-User
+        - ND_REVERSEPROXYWHITELIST=0.0.0.0/0
+        - ND_DEVAUTOCREATEADMINPASSWORD=admin
         networks:
         - portal

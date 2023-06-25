@@ -17,7 +17,7 @@
   },
   "lifecycle": {
     "always_on": false,
-    "idle_time_for_shutdown": 120
+    "idle_time_for_shutdown": 1200
   },
   "store_info": {
     "description_short": "audiobook and podcast server.",

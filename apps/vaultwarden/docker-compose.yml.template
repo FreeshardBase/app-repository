@@ -12,8 +12,8 @@ services:
         volumes:
         - "{{ fs.app_data }}/data:/data"
         environment:
-        - DOMAIN: "https://vaultwarden.{{ portal.domain }}/"
-        - ADMIN_TOKEN: "unused"
-        - DISABLE_ADMIN_TOKEN: "true"
+        - DOMAIN=https://vaultwarden.{{ portal.domain }}/
+        - ADMIN_TOKEN=unused
+        - DISABLE_ADMIN_TOKEN=true
         networks:
         - portal

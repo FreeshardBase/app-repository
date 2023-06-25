@@ -10,7 +10,7 @@ services:
         image: portalapps.azurecr.io/ptl-apps/filebrowser:master
         container_name: filebrowser
         volumes:
-        - "{{ fs.app_data }}:/data"
+        - "{{ fs.app_data }}/data:/data"
         - "{{ fs.shared }}:/data/shared"
         - "{{ fs.all_app_data }}:/data/app_data"
         networks:
