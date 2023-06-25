@@ -12,12 +12,12 @@ services:
         volumes:
         - "{{ fs.app_data }}/data:/data"
         environment:
-        -CEDALO_MC_BROKER_ID: "mosquitto",
-        -CEDALO_MC_BROKER_NAME: "Mosquitto",
-        -CEDALO_MC_BROKER_URL: "mqtt://mosquitto:1883",
-        -CEDALO_MC_BROKER_USERNAME: "admin",
-        -CEDALO_MC_BROKER_PASSWORD: "admin",
-        -CEDALO_MC_USERNAME: "admin",
+        -CEDALO_MC_BROKER_ID: "mosquitto"
+        -CEDALO_MC_BROKER_NAME: "Mosquitto"
+        -CEDALO_MC_BROKER_URL: "mqtt://mosquitto:1883"
+        -CEDALO_MC_BROKER_USERNAME: "admin"
+        -CEDALO_MC_BROKER_PASSWORD: "admin"
+        -CEDALO_MC_USERNAME: "admin"
         -CEDALO_MC_PASSWORD: "admin"
         networks:
         - portal

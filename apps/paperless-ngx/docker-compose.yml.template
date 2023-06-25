@@ -16,9 +16,9 @@ services:
         - "{{ fs.app_data }}/usr/src/export/data:/usr/src/paperless/export"
         environment:
         - PAPERLESS_REDIS: redis://paperless-redis:6379
-        - PAPERLESS_ADMIN_USER: "admin",
-        - PAPERLESS_ADMIN_PASSWORD: "admin",
-        - PAPERLESS_AUTO_LOGIN_USERNAME: "admin",
+        - PAPERLESS_ADMIN_USER: "admin"
+        - PAPERLESS_ADMIN_PASSWORD: "admin"
+        - PAPERLESS_AUTO_LOGIN_USERNAME: "admin"
         - PAPERLESS_URL: "https://paperless-ngx.{{ portal.domain }}"
         depends_on:
         - paperless-redis

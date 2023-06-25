@@ -13,9 +13,9 @@ services:
         - "{{ fs.app_data }}/photoprism/storage:/photoprism/storage"
         - "{{ fs.shared }}/pictures:/photoprism/originals"
         environment:
-        - PHOTOPRISM_SITE_URL: "https://photoprism.{{ portal.domain }}/",
-        - PHOTOPRISM_PUBLIC: "true",
-        - PHOTOPRISM_WORKERS: 1,
+        - PHOTOPRISM_SITE_URL: "https://photoprism.{{ portal.domain }}/"
+        - PHOTOPRISM_PUBLIC: "true"
+        - PHOTOPRISM_WORKERS: 1
         - PHOTOPRISM_DISABLE_TENSORFLOW: "true"
         - PHOTOPRISM_DATABASE_DRIVER: "mysql"            # use MariaDB 10.5+ or MySQL 8+ instead of SQLite for improved performance
         - PHOTOPRISM_DATABASE_SERVER: "mariadb:3306"     # MariaDB or MySQL database server (hostname:port)
