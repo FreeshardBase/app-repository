@@ -3,8 +3,6 @@ version: '3.5'
 networks:
     portal:
         external: true
-    overleaf:
-        name: overleaf
 
 services:
     overleaf-sharelatex:
@@ -18,7 +16,6 @@ services:
         - "{{ fs.app_data }}/sharelatex_data:/var/lib/sharelatex"
         networks:
         - portal
-        - overleaf
         environment:
         - SHARELATEX_MONGO_URL=mongodb://overleaf-mongo/sharelatex
         - SHARELATEX_REDIS_HOST=overleaf-redis
@@ -42,7 +39,7 @@ services:
         volumes:
             - "{{ fs.app_data }}/mongo_data:/data/db"
         networks:
-            - overleaf
+            - portal
         healthcheck:
             test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
             interval: 10s
@@ -58,4 +55,4 @@ services:
         volumes:
             - "{{ fs.app_data }}/redis_data:/data"
         networks:
-          - overleaf
+          - portal
