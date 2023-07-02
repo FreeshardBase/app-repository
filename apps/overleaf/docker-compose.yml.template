@@ -30,6 +30,7 @@ services:
         - SHARELATEX_BEHIND_PROXY=true
         - SHARELATEX_ALLOW_PUBLIC_ACCESS=true
         - SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING=true
+
     overleaf-mongo:
         restart: always
         image: mongo:4.4

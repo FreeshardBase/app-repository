@@ -20,6 +20,7 @@
       }
     }
   },
+  "minimum_portal_size": "m",
   "lifecycle": {
     "always_on": false,
     "idle_time_for_shutdown": 300
