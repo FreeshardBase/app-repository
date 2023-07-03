@@ -32,6 +32,9 @@
       "With Overleaf you get the same LaTeX set-up wherever you go. By working with your colleagues and students on Overleaf, you know that you’re not going to hit any version inconsistencies or package conflicts.",
       "We support almost all LaTeX features, including inserting images, bibliographies, equations, and much more! Read about all the exciting things you can do with Overleaf in our LaTeX guides."
     ],
-    "hint": "Collaboration features are not yet available."
+    "hint": [
+      "On first launch, you need to visit the /launchpad URL to create an account.",
+      "Collaboration features are not yet available."
+    ]
   }
 }

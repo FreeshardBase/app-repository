@@ -6,6 +6,7 @@ def entry(app: dict):
 	return {
 		"name": app['name'],
 		"icon": app['icon'],
+		"minimum_portal_size": app.get('minimum_portal_size', 'xs'),
 		"store_info": app['store_info'],
 	}
 
