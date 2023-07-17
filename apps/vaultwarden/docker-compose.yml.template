@@ -7,8 +7,8 @@ networks:
 services:
     vaultwarden:
         restart: always
-        image: vaultwarden/server
-        container_name: vaultwarden:1.28.1
+        image: vaultwarden/server:1.28.1
+        container_name: vaultwarden
         volumes:
         - "{{ fs.app_data }}/data:/data"
         environment:

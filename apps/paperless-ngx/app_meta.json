@@ -15,6 +15,7 @@
       "access": "private"
     }
   },
+  "minimum_portal_size": "s",
   "lifecycle": {
     "always_on": false,
     "idle_time_for_shutdown": 300
