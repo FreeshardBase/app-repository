@@ -13,7 +13,7 @@ services:
         - "2342:2342" # HTTP port (host:container)
         volumes:
         - "{{ fs.app_data }}/photoprism/storage:/photoprism/storage"
-        - "{{ fs.shared }}/pictures:/photoprism/originals"
+        - "{{ fs.shared }}/media:/photoprism/originals"
         environment:
         - PHOTOPRISM_SITE_URL=https://photoprism.{{ portal.domain }}/
         - PHOTOPRISM_PUBLIC=true
