@@ -25,9 +25,6 @@
   "store_info": {
     "description_short": "Combine the flexibility of a spreadsheet with the robustness of a database to organize your data, your way.",
     "description_long": "Grist is a modern relational spreadsheet. It combines the flexibility of a spreadsheet with the robustness of a database to organize your data and make you more productive.",
-    "hint": [
-      "Multi-user features are not functional yet, only you can use the app.",
-      "Integration of this app has not been thoroughly tested, so there might be unforeseen problems."
-    ]
+    "hint": "Multi-user features are not functional yet, only you can use the app."
   }
 }
