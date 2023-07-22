@@ -1,0 +1,18 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    glances:
+        restart: always
+        image: nicolargo/glances:3.4.0.3-full
+        container_name: glances
+        volumes:
+        - "{{ fs.app_data }}/data:/data"
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+        - GLANCES_OPT=-w --disable-plugin network,connections,processlist,diskio
+        networks:
+        - portal

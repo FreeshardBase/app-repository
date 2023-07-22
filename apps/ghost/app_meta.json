@@ -1,0 +1,41 @@
+{
+  "v": "1.0",
+  "app_version": "0.1.0",
+  "name": "ghost",
+  "icon": "icon.png",
+  "entrypoints": [
+    {
+      "container_name": "ghost",
+      "container_port": 2368,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "public",
+      "headers": {
+        "X-Ptl-Client-Type": "public"
+      }
+    },
+    "/ghost/": {
+      "access": "private",
+      "headers": {
+        "X-Ptl-Client-Type": "terminal",
+        "X-Ptl-Client-Id": "{{ client_id }}",
+        "X-Ptl-Client-Name": "{{ client_name }}"
+      }
+    }
+  },
+  "store_info": {
+    "description_short": "A free and open source blogging platform.",
+    "description_long": [
+      "Create your own platform on the web. Ghost is a powerful app for new-media creators to publish, share, and grow a business around their content. It comes with modern tools to build a website, publish content, send newsletters & offer paid subscriptions to members.",
+      "Don't settle for another basic profile that looks just like everyone else. Make it yours."
+    ],
+    "hint": [
+      "At first use, you will have to create an account and setup the site. The easiest way to to this is to navigate to a post and add /edit to the URL.",
+      "Multi-user features are not functional yet, only you can use the app."
+    ]
+  }
+
+}

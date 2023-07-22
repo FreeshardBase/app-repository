@@ -1,0 +1,33 @@
+{
+  "v": "1.0",
+  "app_version": "0.1.0",
+  "name": "navidrome",
+  "icon": "icon.svg",
+  "entrypoints": [
+    {
+      "container_name": "navidrome",
+      "container_port": 4533,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private",
+      "headers": {
+        "X-Ptl-User": "admin"
+      }
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 180
+  },
+  "store_info": {
+    "description_short": "Navidrome is a self-hosted, open source music server and streamer.",
+    "description_long": [
+      "Navidrome is a self-hosted, open source music server and streamer. It gives you freedom to listen to your music collection from any browser or mobile device."
+    ],
+    "is_featured": true
+  }
+
+}

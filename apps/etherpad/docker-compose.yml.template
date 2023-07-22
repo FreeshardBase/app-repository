@@ -1,0 +1,35 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    etherpad:
+        restart: always
+        image: portalapps.azurecr.io/ptl-apps/etherpad-lite:0.2.0
+        container_name: etherpad
+        volumes:
+        - "{{ fs.app_data }}/var:/var"
+        environment:
+        - ADMIN_PASSWORD="admin"
+        - DB_HOST=etherpad-db
+        - DB_USER=etherpad
+        - DB_PASS="pw"
+        - DB_NAME=etherpad
+        depends_on:
+        - etherpad-db
+        networks:
+        - portal
+
+    etherpad-db:
+        image: mariadb:10
+        volumes:
+        - "{{ fs.app_data }}/mariadb:/var/lib/mysql"
+        environment:
+        - MYSQL_ROOT_PASSWORD="root_pw"
+        - MYSQL_DATABASE=etherpad
+        - MYSQL_USER=etherpad
+        - MYSQL_PASSWORD="pw"
+        networks:
+        - portal

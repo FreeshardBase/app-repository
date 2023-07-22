@@ -1,0 +1,24 @@
+{
+  "v": "1.0",
+  "app_version": "0.1.0",
+  "name": "element",
+  "icon": "icon.svg",
+  "entrypoints": [
+    {
+      "container_name": "element",
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "store_info": {
+    "description_short": "Secure and independent communication, connected via Matrix",
+    "description_long": "Element (formerly known as Vector and Riot) is a Matrix web client built using the Matrix React SDK.",
+    "hint": "Since Matrix is a federated service, you will have to register or login at a matrix server on first use."
+  }
+
+}

@@ -1,0 +1,13 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    mirotalk:
+        restart: always
+        image: portalapps.azurecr.io/ptl-apps/mirotalk:master
+        container_name: mirotalk
+        networks:
+        - portal

@@ -1,0 +1,59 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    overleaf-sharelatex:
+        restart: always
+        image: sharelatex/sharelatex:3
+        container_name: overleaf-sharelatex
+        depends_on:
+            - overleaf-mongo
+            - overleaf-redis
+        volumes:
+        - "{{ fs.app_data }}/sharelatex_data:/var/lib/sharelatex"
+        networks:
+        - portal
+        environment:
+        - SHARELATEX_MONGO_URL=mongodb://overleaf-mongo/sharelatex
+        - SHARELATEX_REDIS_HOST=overleaf-redis
+        - REDIS_HOST=overleaf-redis
+        - ENABLED_LINKED_FILE_TYPES='project_file,project_output_file'
+        - ENABLE_CONVERSIONS='true'
+        - EMAIL_CONFIRMATION_DISABLED='true'
+        - TEXMFVAR=/var/lib/sharelatex/tmp/texmf-var
+        - SHARELATEX_SITE_URL=https://overleaf.{{ portal.domain }}/
+        - SHARELATEX_NAV_TITLE=Overleaf on {{ portal.short_id }}
+        - SHARELATEX_APP_NAME=Overleaf on {{ portal.short_id }}
+        - SHARELATEX_BEHIND_PROXY=true
+        - SHARELATEX_ALLOW_PUBLIC_ACCESS=true
+        - SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING=true
+
+    overleaf-mongo:
+        restart: always
+        image: mongo:4.4
+        container_name: overleaf-mongo
+        expose:
+            - 27017
+        volumes:
+            - "{{ fs.app_data }}/mongo_data:/data/db"
+        networks:
+            - portal
+        healthcheck:
+            test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
+            interval: 10s
+            timeout: 10s
+            retries: 5
+
+    overleaf-redis:
+        restart: always
+        image: redis:6.2
+        container_name: overleaf-redis
+        expose:
+            - 6379
+        volumes:
+            - "{{ fs.app_data }}/redis_data:/data"
+        networks:
+          - portal

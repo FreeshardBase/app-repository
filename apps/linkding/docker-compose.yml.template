@@ -1,0 +1,20 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    linkding:
+        restart: always
+        image: sissbruecker/linkding:1.19.0
+        container_name: linkding
+        volumes:
+        - "{{ fs.app_data }}/etc/linkding/data:/etc/linkding/data"
+        environment:
+        - LD_ENABLE_AUTH_PROXY=True
+        - LD_SUPERUSER_NAME=admin
+        - LD_AUTH_PROXY_USERNAME_HEADER=HTTP_X_PTL_USER
+        - DEBUG=true
+        networks:
+        - portal

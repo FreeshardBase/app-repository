@@ -1,0 +1,31 @@
+{
+  "v": "1.0",
+  "app_version": "0.1.0",
+  "name": "cedalo-management-center",
+  "icon": "icon.svg",
+  "entrypoints": [
+    {
+      "container_name": "cedalo-management-center",
+      "container_port": 8088,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 300
+  },
+  "store_info": {
+    "description_short": "The management center for Eclipse Mosquitto",
+    "description_long": [
+      "The management center for Eclipse Mosquitto"
+    ],
+    "hint": "The default login is admin/admin",
+    "is_featured": true
+  }
+
+}

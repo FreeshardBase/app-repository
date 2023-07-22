@@ -1,0 +1,18 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    audiobookshelf:
+        restart: always
+        image: ghcr.io/advplyr/audiobookshelf:2.2.23
+        container_name: audiobookshelf
+        volumes:
+        - "{{ fs.app_data }}/audiobooks:/audiobooks"
+        - "{{ fs.app_data }}/podcasts:/podcasts"
+        - "{{ fs.app_data }}/metadata:/metadata"
+        - "{{ fs.app_data }}/config:/config"
+        networks:
+        - portal

@@ -1,0 +1,13 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    drawio:
+        restart: always
+        image: jgraph/drawio:21.5.0
+        container_name: drawio
+        networks:
+        - portal
