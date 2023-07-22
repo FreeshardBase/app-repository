@@ -1,0 +1,21 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    grist:
+        restart: always
+        image: gristlabs/grist:1.1.2
+        container_name: grist
+        volumes:
+        - "{{ fs.app_data }}/persist:/persist"
+        environment:
+        - APP_HOME_URL=https://grist.{{ portal.domain }}
+        - GRIST_FORWARD_AUTH_HEADER=X-Ptl-Authenticated-User
+        - GRIST_DEFAULT_EMAIL=admin@{{ portal.domain }}
+        - GRIST_SINGLE_ORG=grist
+        - GRIST_PAGE_TITLE_SUFFIX= - Grist@Portal
+        networks:
+        - portal
