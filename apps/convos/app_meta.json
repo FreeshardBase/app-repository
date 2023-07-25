@@ -1,0 +1,33 @@
+{
+  "v": "1.0",
+  "app_version": "0.1.0",
+  "name": "convos",
+  "icon": "icon.png",
+  "entrypoints": [
+    {
+      "container_name": "convos",
+      "container_port": 3000,
+      "entrypoint_port": "http"
+    }
+  ],
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "paths": {
+    "": {
+      "access": "private",
+      "headers": {
+        "X-Ptl-User": "{{ portal.id[:6] }}@example.com"
+      }
+    }
+  },
+  "store_info": {
+    "description_short": "Convos is an IRC client that brings the IRC experience into the 21st century.",
+    "description_long": [
+      "Convos is an IRC client that runs in your browser and brings the IRC experience into the 21st century.",
+      "It features a persistent bouncer on the server side that will keep you online even after you close your browser window."
+    ],
+    "is_featured": true
+  }
+}
