@@ -1,0 +1,44 @@
+{
+  "v": "1.0",
+  "app_version": "0.1.0",
+  "name": "docuseal",
+  "icon": "icon.svg",
+  "entrypoints": [
+    {
+      "container_name": "docuseal",
+      "container_port": 3000,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    },
+    "/d/": {
+      "access": "public"
+    },
+    "/s/": {
+      "access": "public"
+    },
+    "/disk/": {
+      "access": "public"
+    },
+    "/packs/": {
+      "access": "public"
+    },
+    "/api/attachments": {
+      "access": "public"
+    },
+    "/submitters/": {
+      "access": "public"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "DocuSeal allows to create, fill, and sign digital documents.",
+    "is_featured": true
+  }
+}

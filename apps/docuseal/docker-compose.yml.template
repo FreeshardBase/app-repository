@@ -1,0 +1,17 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    docuseal:
+        restart: always
+        image: docuseal/docuseal:1.0.8
+        container_name: docuseal
+        volumes:
+        - "{{ fs.app_data }}/data:/data"
+        environment:
+        - "HOST=docuseal.{{ portal.domain }}"
+        networks:
+        - portal
