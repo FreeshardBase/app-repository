@@ -1,0 +1,15 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    actual:
+        restart: always
+        image: actualbudget/actual-server:23.8.1
+        container_name: actual
+        volumes:
+        - "{{ fs.app_data }}/data:/data"
+        networks:
+        - portal

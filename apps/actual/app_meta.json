@@ -1,0 +1,31 @@
+{
+  "v": "1.0",
+  "app_version": "0.1.0",
+  "name": "actual",
+  "icon": "actual.png",
+  "entrypoints": [
+    {
+      "container_name": "actual",
+      "container_port": 5006,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Enjoy managing your finances",
+    "description_long": [
+      "Enjoy managing your finances",
+      "Actual is a super fast privacy-focused app for managing your finances. You own your data, and we will sync it across all devices with optional end-to-end encryption."
+    ],
+    "hint": "The app prompts you to set a password on first launch. You can choose a simple one, Portal secures the app separately.",
+    "is_featured": true
+  }
+}
