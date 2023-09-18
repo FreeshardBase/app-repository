@@ -11,7 +11,7 @@ services:
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
     command: [ "start.sh", "immich" ]
     volumes:
-      - ./library:/usr/src/app/upload
+      - "{{ fs.app_data }}/upload:/usr/src/app/upload"
     env_file:
       - .env
     depends_on:
@@ -27,7 +27,7 @@ services:
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
     command: [ "start.sh", "microservices" ]
     volumes:
-      - ./library:/usr/src/app/upload
+      - "{{ fs.app_data }}/upload:/usr/src/app/upload"
     env_file:
       - .env
     depends_on:
@@ -42,7 +42,7 @@ services:
     container_name: immich_machine_learning
     image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
     volumes:
-      - ./model-cache:/cache
+      - "{{ fs.app_data }}/model-cache:/cache"
     env_file:
       - .env
     restart: always
@@ -67,7 +67,7 @@ services:
       # remove this to get debug messages
       - GLOG_minloglevel=1
     volumes:
-      - ./tsdata:/data
+      - "{{ fs.app_data }}/tsdata:/data"
     restart: always
     networks:
       - immich
@@ -89,7 +89,7 @@ services:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_DB: ${DB_DATABASE_NAME}
     volumes:
-      - ./pgdata:/var/lib/postgresql/data
+      - "{{ fs.app_data }}/pgdata:/var/lib/postgresql/data"
     restart: always
     networks:
       - immich
