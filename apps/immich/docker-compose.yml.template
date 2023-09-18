@@ -101,8 +101,6 @@ services:
       # Make sure these values get passed through from the env file
       - IMMICH_SERVER_URL
       - IMMICH_WEB_URL
-    ports:
-      - 8080:8080
     depends_on:
       - immich-server
       - immich-web
