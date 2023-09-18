@@ -1,0 +1,25 @@
+{
+  "v": "1.0",
+  "app_version": "0.1.0",
+  "name": "immich",
+  "icon": "icon.png",
+  "entrypoints": [
+    {
+      "container_name": "immich_proxy",
+      "container_port": 8080,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "public"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "High-performance backup photos/videos from your mobile phone"
+  }
+}
