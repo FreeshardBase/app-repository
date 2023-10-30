@@ -1,0 +1,28 @@
+{
+  "v": "1.0",
+  "app_version": "0.7.10",
+  "name": "kavita",
+  "icon": "kavita-logo3.png",
+  "entrypoints": [
+    {
+      "container_name": "kavita",
+      "container_port": 5000,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Lighting fast with a slick design, Kavita is a rocket fueled digital library which supports a vast array of file formats.",
+    "description_long": "Kavita is a fast, feature rich, cross platform reading server. Built with a focus for manga and the goal of being a full solution for all your reading needs.",
+    "hint": "You have to create an admin account to use Kavita.",
+    "is_featured": false
+  }
+}

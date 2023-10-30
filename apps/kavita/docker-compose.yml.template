@@ -1,0 +1,17 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    kavita:
+        restart: always
+        image: jvmilazz0/kavita:0.7.10
+        container_name: kavita
+        volumes:
+        - "{{ fs.app_data }}/kavita/config:/kavita/config"
+        - "{{ fs.shared }}/comics:/comics"
+        - "{{ fs.shared }}/books:/books"
+        networks:
+        - portal
