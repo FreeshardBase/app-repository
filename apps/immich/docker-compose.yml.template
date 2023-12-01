@@ -12,6 +12,7 @@ services:
     command: [ "start.sh", "immich" ]
     volumes:
       - "{{ fs.app_data }}/upload:/usr/src/app/upload"
+      - "{{ fs.shared }}/pictures:/usr/src/app/upload/library"
     env_file:
       - .env
     depends_on:
@@ -20,6 +21,7 @@ services:
       - typesense
     restart: always
     networks:
+      - portal
       - immich
 
   immich-microservices:
@@ -28,6 +30,7 @@ services:
     command: [ "start.sh", "microservices" ]
     volumes:
       - "{{ fs.app_data }}/upload:/usr/src/app/upload"
+      - "{{ fs.shared }}/pictures:/usr/src/app/upload/library"
     env_file:
       - .env
     depends_on:
@@ -43,15 +46,6 @@ services:
     image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
     volumes:
       - "{{ fs.app_data }}/model-cache:/cache"
-    env_file:
-      - .env
-    restart: always
-    networks:
-      - immich
-
-  immich-web:
-    container_name: immich_web
-    image: ghcr.io/immich-app/immich-web:${IMMICH_VERSION:-release}
     env_file:
       - .env
     restart: always
@@ -92,19 +86,4 @@ services:
       - "{{ fs.app_data }}/pgdata:/var/lib/postgresql/data"
     restart: always
     networks:
-      - immich
-
-  immich-proxy:
-    container_name: immich_proxy
-    image: ghcr.io/immich-app/immich-proxy:${IMMICH_VERSION:-release}
-    environment:
-      # Make sure these values get passed through from the env file
-      - IMMICH_SERVER_URL
-      - IMMICH_WEB_URL
-    depends_on:
-      - immich-server
-      - immich-web
-    restart: always
-    networks:
-      - portal
       - immich

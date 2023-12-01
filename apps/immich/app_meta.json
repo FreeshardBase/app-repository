@@ -1,12 +1,12 @@
 {
   "v": "1.0",
-  "app_version": "0.1.0",
+  "app_version": "1.89.0",
   "name": "immich",
   "icon": "icon.png",
   "entrypoints": [
     {
-      "container_name": "immich_proxy",
-      "container_port": 8080,
+      "container_name": "immich_server",
+      "container_port": 3001,
       "entrypoint_port": "http"
     }
   ],
