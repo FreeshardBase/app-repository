@@ -1,0 +1,13 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    stirling-pdf:
+        restart: always
+        image: frooodle/s-pdf:0.15.1
+        container_name: stirling-pdf
+        networks:
+        - portal
