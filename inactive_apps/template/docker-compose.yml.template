@@ -5,10 +5,10 @@ networks:
         external: true
 
 services:
-    template:
+    <<name>>:
         restart: always
-        image: template_app
-        container_name: template
+        image: <<name>>:$$edit$$
+        container_name: <<name>>
         volumes:
         - "{{ fs.app_data }}/data:/data"
         networks:

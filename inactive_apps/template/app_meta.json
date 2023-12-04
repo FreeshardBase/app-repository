@@ -1,11 +1,11 @@
 {
   "v": "1.0",
   "app_version": "0.1.0",
-  "name": "template",
+  "name": "<<name>>",
   "icon": "icon.svg",
   "entrypoints": [
     {
-      "container_name": "template",
+      "container_name": "<<name>>",
       "container_port": 80,
       "entrypoint_port": "http"
     }
@@ -43,8 +43,8 @@
     "idle_time_for_shutdown": 3600
   },
   "store_info": {
-    "description_short": "filebrowser provides a file managing interface.",
-    "description_long": "filebrowser provides a file managing interface within a specified directory and it can be used to upload, delete, preview, rename and edit your files.",
-    "is_featured": true
+    "description_short": "$$edit$$",
+    "description_long": "$$edit$$",
+    "is_featured": false
   }
 }

@@ -2,3 +2,6 @@
 
 apps/store_metadata.json
 apps/*/*.zip
+
+
+__pycache__/
