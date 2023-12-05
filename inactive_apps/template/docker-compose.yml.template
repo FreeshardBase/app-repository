@@ -11,5 +11,7 @@ services:
         container_name: <<name>>
         volumes:
         - "{{ fs.app_data }}/data:/data"
+        environment:
+        - BASE_URL=https://<<name>>.{{ portal.domain }}
         networks:
         - portal

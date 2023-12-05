@@ -1,0 +1,27 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    titra:
+        restart: always
+        image: kromit/titra:0.95.6
+        container_name: titra
+        environment:
+        - ROOT_URL=https://titra.{{ portal.domain }}
+        - MONGO_URL=mongodb://titra-mongodb/titra?directConnection=true
+        - PORT=3000
+        networks:
+        - portal
+
+    titra-mongodb:
+        image: mongo:5.0
+        container_name: titra-mongodb
+        environment:
+        - MONGO_DB:titra
+        volumes:
+        - "{{ fs.app_data }}/data/db:/data/db"
+        networks:
+        - portal

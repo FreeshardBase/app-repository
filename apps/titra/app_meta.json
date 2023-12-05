@@ -1,0 +1,31 @@
+{
+  "v": "1.0",
+  "app_version": "0.95.6",
+  "name": "titra",
+  "icon": "titra-logo-500.png",
+  "entrypoints": [
+    {
+      "container_name": "titra",
+      "container_port": 3000,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "public"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Modern open source project time tracking for freelancers and small teams",
+    "description_long": [
+      "Modern open source project time tracking for freelancers and small teams",
+      "We believe in the philosophy \"Do One Thing And Do It Well.\" and try to follow it in the design and implementation of titra.",
+      "According to the philosophy described above, titra has been built to be the easiest, most convenient and modern way to track your time spent on projects. We want you to get started tracking your time as fast and with the least distractions as possible. After tracking your time, the second most important aspect is the ability to report and export your tracked time efficiently."
+    ],
+    "is_featured": false
+  }
+}
