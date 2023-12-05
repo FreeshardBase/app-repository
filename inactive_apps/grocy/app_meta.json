@@ -1,0 +1,32 @@
+{
+  "v": "1.0",
+  "app_version": "v4.0.3",
+  "name": "grocy",
+  "icon": "icon.png",
+  "entrypoints": [
+    {
+      "container_name": "grocy-frontend",
+      "container_port": 8080,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Grocy is a web-based self-hosted groceries & household management solution for your home.",
+    "description_long": [
+      "Grocy is a web-based self-hosted groceries & household management solution for your home.",
+      "A barcode reader ready interface makes this a easy and quick task and you always know what you currently have at home.",
+      "Define minimum stock amounts of your loved products and never think about \"do I need noodles or are there enough at home?\".",
+      "Maintain your recipes and see at a glance whether everything you need is in stock at home. Of course, everything that is not available can also be automatically added to the shopping list."
+    ],
+    "is_featured": false
+  }
+}
