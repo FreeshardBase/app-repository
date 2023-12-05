@@ -1,0 +1,13 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    mqttx:
+        restart: always
+        image: emqx/mqttx-web:v1.9.6
+        container_name: mqttx
+        networks:
+        - portal

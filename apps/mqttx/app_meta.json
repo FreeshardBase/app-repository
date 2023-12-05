@@ -1,0 +1,29 @@
+{
+  "v": "1.0",
+  "app_version": "v1.9.6",
+  "name": "mqttx",
+  "icon": "img.png",
+  "entrypoints": [
+    {
+      "container_name": "mqttx",
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Browser-based MQTT 5.0 WebSocket client tool.",
+    "description_long": [
+      "MQTT X is designed for an easier way to develop and test IoT applications. Connect MQTT X to a powerful MQTT broker or cloud with one click, and enjoy the combined power to build your business-critical IoT platforms and applications quickly. "
+    ],
+    "is_featured": false
+  }
+}
