@@ -7,7 +7,7 @@ networks:
 services:
     paperless-ngx:
         restart: always
-        image: ghcr.io/paperless-ngx/paperless-ngx:1.16
+        image: ghcr.io/paperless-ngx/paperless-ngx:2.1.1
         container_name: paperless-ngx
         volumes:
         - "{{ fs.app_data }}/usr/src/paperless/data:/usr/src/paperless/data"

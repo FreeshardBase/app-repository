@@ -7,7 +7,7 @@ networks:
 services:
     mqttx:
         restart: always
-        image: emqx/mqttx-web:v1.9.6
+        image: emqx/mqttx-web:v1.9.7
         container_name: mqttx
         networks:
         - portal

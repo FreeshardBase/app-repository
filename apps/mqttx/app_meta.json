@@ -1,6 +1,6 @@
 {
   "v": "1.0",
-  "app_version": "v1.9.6",
+  "app_version": "v1.9.7",
   "name": "mqttx",
   "icon": "img.png",
   "entrypoints": [
