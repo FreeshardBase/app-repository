@@ -1,6 +1,6 @@
 {
   "v": "1.0",
-  "app_version": "0.1.0",
+  "app_version": "v2.26.0",
   "name": "filebrowser",
   "icon": "icon.svg",
   "entrypoints": [

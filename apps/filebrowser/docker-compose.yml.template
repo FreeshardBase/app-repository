@@ -7,7 +7,7 @@ networks:
 services:
     filebrowser:
         restart: always
-        image: portalapps.azurecr.io/ptl-apps/filebrowser:master
+        image: portalapps.azurecr.io/ptl-apps/filebrowser:v2.26.0
         container_name: filebrowser
         volumes:
         - "{{ fs.app_data }}/data:/data"
