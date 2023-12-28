@@ -1,6 +1,6 @@
 {
   "v": "1.0",
-  "app_version": "v1.90.2",
+  "app_version": "v1.91.4",
   "name": "immich",
   "icon": "icon.png",
   "entrypoints": [
