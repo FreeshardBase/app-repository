@@ -7,7 +7,7 @@ networks:
 services:
     convos:
         restart: always
-        image: convos/convos:v7.15
+        image: ghcr.io/convos-chat/convos:v8.05
         container_name: convos
         volumes:
         - "{{ fs.app_data }}/data:/data"
