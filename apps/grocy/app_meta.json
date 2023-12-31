@@ -1,0 +1,26 @@
+{
+  "v": "1.0",
+  "app_version": "v4.0.3",
+  "name": "grocy",
+  "icon": "grocy.png",
+  "entrypoints": [
+    {
+      "container_name": "grocy-frontend",
+      "container_port": 8080,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Grocy is a groceries & household management solution for your home.",
+    "is_featured": false
+  }
+}
