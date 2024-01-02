@@ -1,0 +1,16 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    baikal:
+        restart: always
+        image: ckulka/baikal:0.9.4-nginx
+        container_name: baikal
+        volumes:
+        - "{{ fs.app_data }}/var/www/baikal/config:/var/www/baikal/config"
+        - "{{ fs.app_data }}/var/www/baikal/Specific:/var/www/baikal/Specific"
+        networks:
+        - portal

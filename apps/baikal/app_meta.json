@@ -1,0 +1,30 @@
+{
+  "v": "1.0",
+  "app_version": "0.9.4",
+  "name": "baikal",
+  "icon": "baikal.png",
+  "entrypoints": [
+    {
+      "container_name": "baikal",
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "public"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Baïkal is a lightweight CalDAV+CardDAV server.",
+    "description_long": [
+      "Baïkal is a lightweight CalDAV+CardDAV server. It offers an extensive web interface with easy management of users, address books and calendars.",
+      "Baïkal allows to seamlessly access your contacts and calendars from every device. It is compatible with iOS, Mac OS X, DAVx5 on Android, Mozilla Thunderbird and every other CalDAV and CardDAV capable application."
+    ],
+    "is_featured": false
+  }
+}
