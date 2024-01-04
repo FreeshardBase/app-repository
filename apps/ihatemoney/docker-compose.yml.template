@@ -1,0 +1,25 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    ihatemoney:
+        restart: always
+        image: ihatemoney/ihatemoney:6.1.3
+        container_name: ihatemoney
+        volumes:
+        - "{{ fs.app_data }}/database:/database"
+        environment:
+        - ACTIVATE_DEMO_PROJECT=False
+        - ALLOW_PUBLIC_PROJECT_CREATION=True
+        - BABEL_DEFAULT_TIMEZONE=UTC
+        - SECRET_KEY=tralala
+        - SESSION_COOKIE_SECURE=True
+        - SQLALCHEMY_DATABASE_URI=sqlite:////database/ihatemoney.db
+        - SQLALCHEMY_TRACK_MODIFICATIONS=False
+        - ENABLE_CAPTCHA=True
+        - PORT=8000
+        networks:
+        - portal
