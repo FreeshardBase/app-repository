@@ -12,6 +12,7 @@ def _make_metadata_entry(app_path: Path):
 		app_meta = json.load(f)
 	return {
 		"name": app_meta['name'],
+		"pretty_name": app_meta.get('pretty_name', app_meta['name'].title()),
 		"icon": app_meta['icon'],
 		"minimum_portal_size": app_meta.get('minimum_portal_size', 'xs'),
 		"store_info": app_meta['store_info'],
