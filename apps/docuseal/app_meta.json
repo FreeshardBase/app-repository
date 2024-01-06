@@ -2,6 +2,7 @@
   "v": "1.0",
   "app_version": "0.3.5",
   "name": "docuseal",
+  "pretty_name": "DocuSeal",
   "icon": "icon.svg",
   "entrypoints": [
     {

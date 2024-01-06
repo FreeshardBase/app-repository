@@ -2,6 +2,7 @@
   "v": "1.0",
   "app_version": "0.1.0",
   "name": "cedalo-management-center",
+  "pretty_name": "Cedalo Management Center",
   "icon": "icon.svg",
   "entrypoints": [
     {

@@ -2,6 +2,7 @@
   "v": "1.0",
   "app_version": "0.1.0",
   "name": "mirotalk",
+  "pretty_name": "MiroTalk",
   "icon": "icon.png",
   "entrypoints": [
     {
