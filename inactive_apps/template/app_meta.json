@@ -1,7 +1,8 @@
 {
-  "v": "1.0",
+  "v": "1.1",
   "app_version": "0.1.0",
   "name": "<<name>>",
+  "pretty_name": "<<name>>",
   "icon": "icon.svg",
   "entrypoints": [
     {
