@@ -1,0 +1,20 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    tasks-md:
+        restart: always
+        image: baldissaramatheus/tasks.md:2.0.0
+        container_name: tasks-md
+        volumes:
+        - "{{ fs.app_data }}/tasks:/tasks"
+        - "{{ fs.app_data }}/config:/config"
+        environment:
+        - TITLE=Tasks.md on {{ portal.short_id }}
+        - PUID=1001
+        - PGID=1001
+        networks:
+        - portal

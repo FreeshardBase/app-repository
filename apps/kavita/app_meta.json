@@ -20,7 +20,7 @@
     "idle_time_for_shutdown": 3600
   },
   "store_info": {
-    "description_short": "Lighting fast with a slick design, Kavita is a rocket fueled digital library which supports a vast array of file formats.",
+    "description_short": "Lightning fast with a slick design, Kavita is a rocket fueled digital library which supports a vast array of file formats.",
     "description_long": "Kavita is a fast, feature rich, cross platform reading server. Built with a focus for manga and the goal of being a full solution for all your reading needs.",
     "hint": "You have to create an admin account to use Kavita.",
     "is_featured": false
