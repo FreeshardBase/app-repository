@@ -13,6 +13,7 @@ def _make_metadata_entry(app_path: Path):
 	return {
 		"name": app_meta['name'],
 		"pretty_name": app_meta.get('pretty_name', app_meta['name'].title()),
+		"app_version": app_meta['app_version'],
 		"icon": app_meta['icon'],
 		"minimum_portal_size": app_meta.get('minimum_portal_size', 'xs'),
 		"store_info": app_meta['store_info'],
