@@ -7,7 +7,7 @@ networks:
 services:
     wallabag:
         restart: always
-        image: wallabag/wallabag:2.5.2
+        image: wallabag/wallabag:2.6.8
         container_name: wallabag
         volumes:
         - "{{ fs.app_data }}/var/www/wallabag/data:/var/www/wallabag/data"
