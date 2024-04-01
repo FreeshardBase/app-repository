@@ -1,7 +1,8 @@
 {
   "v": "1.0",
-  "app_version": "0.1.0",
+  "app_version": "2.0.1",
   "name": "etherpad",
+  "pretty_name": "Etherpad",
   "icon": "icon.svg",
   "entrypoints": [
     {
@@ -16,7 +17,13 @@
     },
     "/list": {
       "access": "private"
+    },
+    "/admin": {
+      "access": "private"
     }
+  },
+  "lifecycle": {
+    "idle_time_for_shutdown": 600
   },
   "store_info": {
     "description_short": "Etherpad is an open source online editor providing collaborative editing in really real-time.",
@@ -24,8 +31,10 @@
       "No more sending your stuff back and forth via email, just set up a pad, share the link and start collaborating!",
       "Etherpad allows you to edit documents collaboratively in real-time, much like a live multi-player editor that runs in your browser. Write articles, press releases, to-do lists, etc. together with your friends, fellow students or colleagues, all working on the same document at the same time."
     ],
-    "hint": "All documents are public, so you should chose hard-to-guess names for sensitive docs.",
+    "hint": [
+      "All documents are public, so you should chose hard-to-guess names for sensitive docs.",
+      "You can access the admin panel at /admin. User: admin, Password: admin."
+    ],
     "is_featured": true
   }
-
 }

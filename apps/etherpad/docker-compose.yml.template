@@ -1,35 +1,40 @@
-version: '3.5'
+version: "3.8"
 
 networks:
     portal:
         external: true
 
 services:
-    etherpad:
-        restart: always
-        image: portalapps.azurecr.io/ptl-apps/etherpad-lite:0.2.0
-        container_name: etherpad
-        volumes:
-        - "{{ fs.app_data }}/var:/var"
-        environment:
-        - ADMIN_PASSWORD="admin"
-        - DB_HOST=etherpad-db
-        - DB_USER=etherpad
-        - DB_PASS="pw"
-        - DB_NAME=etherpad
-        depends_on:
-        - etherpad-db
-        networks:
-        - portal
+  app:
+    image: etherpad/etherpad:2.0.1
+    container_name: etherpad
+    environment:
+      ADMIN_PASSWORD: admin
+      DB_CHARSET: utf8mb4
+      DB_HOST: postgres
+      DB_NAME: etherpad
+      DB_PASS: etherpad
+      DB_PORT: 5432
+      DB_TYPE: "postgres"
+      DB_USER: etherpad
+    restart: always
+    command: >
+      bash -c "pnpm install-plugins ep_padlist2 ep_font_color ep_headings2; pnpm run prod;"
+    networks:
+      - portal
 
-    etherpad-db:
-        image: mariadb:10
-        volumes:
-        - "{{ fs.app_data }}/mariadb:/var/lib/mysql"
-        environment:
-        - MYSQL_ROOT_PASSWORD="root_pw"
-        - MYSQL_DATABASE=etherpad
-        - MYSQL_USER=etherpad
-        - MYSQL_PASSWORD="pw"
-        networks:
-        - portal
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: etherpad-postgres
+    environment:
+      POSTGRES_DB: etherpad
+      POSTGRES_PASSWORD: etherpad
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: etherpad
+      PGDATA: /var/lib/postgresql/data/pgdata
+    restart: always
+    volumes:
+      - "{{ fs.app_data }}/postgres_data:/var/lib/postgresql/data/pgdata"
+    networks:
+      - portal
