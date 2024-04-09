@@ -1,8 +1,8 @@
 {
   "v": "1.0",
-  "app_version": "v1.91.4",
+  "app_version": "v1.101.1",
   "name": "immich",
-  "icon": "icon.png",
+  "icon": "immich-logo.svg",
   "entrypoints": [
     {
       "container_name": "immich_server",

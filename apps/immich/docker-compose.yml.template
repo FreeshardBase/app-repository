@@ -52,14 +52,14 @@ services:
 
   redis:
     container_name: immich_redis
-    image: redis:6.2-alpine@sha256:70a7a5b641117670beae0d80658430853896b5ef269ccf00d1827427e3263fa3
+    image: registry.hub.docker.com/library/redis:6.2-alpine
     restart: always
     networks:
       - immich
 
   database:
     container_name: immich_postgres
-    image: tensorchord/pgvecto-rs:pg14-v0.1.11
+    image: registry.hub.docker.com/tensorchord/pgvecto-rs:pg14-v0.2.0
     env_file:
       - .env
     environment:
