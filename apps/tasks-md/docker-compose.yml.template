@@ -7,7 +7,7 @@ networks:
 services:
     tasks-md:
         restart: always
-        image: baldissaramatheus/tasks.md:2.0.0
+        image: baldissaramatheus/tasks.md:2.3.2
         container_name: tasks-md
         volumes:
         - "{{ fs.app_data }}/tasks:/tasks"
