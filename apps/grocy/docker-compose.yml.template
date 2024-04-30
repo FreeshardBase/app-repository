@@ -7,7 +7,7 @@ networks:
 services:
 
   grocy-frontend:
-    image: "grocy/frontend:v4.0.3"
+    image: "grocy/frontend:v4.2.0"
     container_name: grocy-frontend
     links:
       - grocy-backend:backend

@@ -1,6 +1,6 @@
 {
   "v": "1.0",
-  "app_version": "v4.0.3",
+  "app_version": "v4.2.0",
   "name": "grocy",
   "icon": "grocy.png",
   "entrypoints": [
