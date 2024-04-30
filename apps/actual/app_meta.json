@@ -1,6 +1,6 @@
 {
   "v": "1.0",
-  "app_version": "0.1.0",
+  "app_version": "24.4.0",
   "name": "actual",
   "icon": "actual.png",
   "entrypoints": [
