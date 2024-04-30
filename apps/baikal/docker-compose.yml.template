@@ -7,7 +7,7 @@ networks:
 services:
     baikal:
         restart: always
-        image: ckulka/baikal:0.9.4-nginx
+        image: ckulka/baikal:0.9.5-nginx
         container_name: baikal
         volumes:
         - "{{ fs.app_data }}/var/www/baikal/config:/var/www/baikal/config"

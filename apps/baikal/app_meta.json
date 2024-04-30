@@ -1,6 +1,6 @@
 {
   "v": "1.0",
-  "app_version": "0.9.4",
+  "app_version": "0.9.5",
   "name": "baikal",
   "icon": "baikal.png",
   "entrypoints": [
