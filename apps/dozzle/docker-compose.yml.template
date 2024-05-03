@@ -1,0 +1,18 @@
+version: '3.5'
+
+networks:
+    portal:
+        external: true
+
+services:
+    dozzle:
+        restart: always
+        image: amir20/dozzle:v6.5.2
+        container_name: dozzle
+        volumes:
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+        - DOZZLE_HOSTNAME={{ portal.domain }}
+        - DOZZLE_NO_ANALYTICS=true
+        networks:
+        - portal

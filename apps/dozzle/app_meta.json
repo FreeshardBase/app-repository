@@ -1,0 +1,28 @@
+{
+  "v": "1.1",
+  "app_version": "v6.5.2",
+  "name": "dozzle",
+  "pretty_name": "Dozzle",
+  "icon": "dozzle.png",
+  "entrypoints": [
+    {
+      "container_name": "dozzle",
+      "container_port": 8080,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Real-time logging and monitoring for Portal and Portal apps.",
+    "description_long": "Dozzle is a small lightweight application to monitor the logs of Portal and Portal apps. It doesn’t store any log files. It is for live monitoring only.",
+    "is_featured": false
+  }
+}
