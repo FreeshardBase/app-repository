@@ -1,6 +1,6 @@
 {
   "v": "1.0",
-  "app_version": "0.1.0",
+  "app_version": "0.2.0",
   "name": "overleaf",
   "icon": "overleaf.png",
   "entrypoints": [
@@ -12,12 +12,7 @@
   ],
   "paths": {
     "": {
-      "access": "private",
-      "headers": {
-        "X-Ptl-Client-Id": "{{ auth.client_id }}",
-        "X-Ptl-Client-Name": "{{ auth.client_name }}",
-        "X-Ptl-Client-Type": "{{ auth.client_type }}"
-      }
+      "access": "public"
     }
   },
   "minimum_portal_size": "m",

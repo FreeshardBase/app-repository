@@ -20,11 +20,11 @@ services:
         - SHARELATEX_MONGO_URL=mongodb://overleaf-mongo/sharelatex
         - SHARELATEX_REDIS_HOST=overleaf-redis
         - REDIS_HOST=overleaf-redis
-        - ENABLED_LINKED_FILE_TYPES='project_file,project_output_file'
-        - ENABLE_CONVERSIONS='true'
-        - EMAIL_CONFIRMATION_DISABLED='true'
+        - ENABLED_LINKED_FILE_TYPES=project_file,project_output_file
+        - ENABLE_CONVERSIONS=true
+        - EMAIL_CONFIRMATION_DISABLED=true
         - TEXMFVAR=/var/lib/sharelatex/tmp/texmf-var
-        - SHARELATEX_SITE_URL=https://overleaf.{{ portal.domain }}/
+        - SHARELATEX_SITE_URL=https://overleaf.{{ portal.domain }}
         - SHARELATEX_NAV_TITLE=Overleaf on {{ portal.short_id }}
         - SHARELATEX_APP_NAME=Overleaf on {{ portal.short_id }}
         - SHARELATEX_BEHIND_PROXY=true
