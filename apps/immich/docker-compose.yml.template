@@ -9,7 +9,6 @@ services:
   immich-server:
     container_name: immich_server
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
-    command: [ "start.sh", "immich" ]
     volumes:
       - "{{ fs.app_data }}/upload:/usr/src/app/upload"
       - "{{ fs.shared }}/pictures:/usr/src/app/upload/library"
@@ -21,22 +20,6 @@ services:
     restart: always
     networks:
       - portal
-      - immich
-
-  immich-microservices:
-    container_name: immich_microservices
-    image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
-    command: [ "start.sh", "microservices" ]
-    volumes:
-      - "{{ fs.app_data }}/upload:/usr/src/app/upload"
-      - "{{ fs.shared }}/pictures:/usr/src/app/upload/library"
-    env_file:
-      - .env
-    depends_on:
-      - redis
-      - database
-    restart: always
-    networks:
       - immich
 
   immich-machine-learning:
