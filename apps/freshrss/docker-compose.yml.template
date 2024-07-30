@@ -7,7 +7,7 @@ networks:
 services:
     freshrss:
         restart: always
-        image: freshrss/freshrss:1.24.0
+        image: freshrss/freshrss:1.24.1
         container_name: freshrss
         volumes:
         - "{{ fs.app_data }}/var/www/FreshRSS/data:/var/www/FreshRSS/data"
