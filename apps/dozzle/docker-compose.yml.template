@@ -7,7 +7,7 @@ networks:
 services:
     dozzle:
         restart: always
-        image: amir20/dozzle:v7.0.4
+        image: amir20/dozzle:v8.1.2
         container_name: dozzle
         volumes:
         - /var/run/docker.sock:/var/run/docker.sock:ro
