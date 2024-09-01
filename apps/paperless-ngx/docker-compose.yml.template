@@ -20,6 +20,7 @@ services:
         - PAPERLESS_ADMIN_PASSWORD=admin
         - PAPERLESS_AUTO_LOGIN_USERNAME=admin
         - PAPERLESS_URL=https://paperless-ngx.{{ portal.domain }}
+        - PAPERLESS_EMAIL_TASK_CRON="*/1 * * * *"
         depends_on:
         - paperless-redis
         networks:
