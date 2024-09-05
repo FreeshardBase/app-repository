@@ -1,5 +1,5 @@
 deploy:
-  image: mcr.microsoft.com/azure-cli
+  image: registry.gitlab.com/ptl/portal-ci-image:main
   script:
     - python build_store_data.py
     - az storage blob upload-batch --destination "app-store/$CI_COMMIT_REF_SLUG/all_apps" --source apps --sas-token $AZ_STORAGE_SAS_TOKEN --account-name storageaccountportab0da --overwrite
