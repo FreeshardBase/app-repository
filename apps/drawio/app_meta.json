@@ -1,9 +1,10 @@
 {
   "v": "1.0",
-  "app_version": "0.1.0",
+  "app_version": "21.5.0",
   "name": "drawio",
   "pretty_name": "draw.io",
   "icon": "icon.png",
+  "upstream_repo": "https://github.com/jgraph/drawio",
   "entrypoints": [
     {
       "container_name": "drawio",

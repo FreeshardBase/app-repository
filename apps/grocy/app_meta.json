@@ -3,6 +3,7 @@
   "app_version": "v4.2.0",
   "name": "grocy",
   "icon": "grocy.png",
+  "upstream_repo": "https://github.com/grocy/grocy",
   "entrypoints": [
     {
       "container_name": "grocy-frontend",

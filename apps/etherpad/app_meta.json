@@ -4,6 +4,7 @@
   "name": "etherpad",
   "pretty_name": "Etherpad",
   "icon": "icon.svg",
+  "upstream_repo": "https://github.com/ether/etherpad-lite",
   "entrypoints": [
     {
       "container_name": "etherpad",

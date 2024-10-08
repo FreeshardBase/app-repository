@@ -3,6 +3,7 @@
   "app_version": "1.32.0",
   "name": "vaultwarden",
   "icon": "icon.png",
+  "upstream_repo": "https://github.com/dani-garcia/vaultwarden",
   "entrypoints": [
     {
       "container_name": "vaultwarden",

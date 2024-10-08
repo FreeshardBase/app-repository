@@ -4,6 +4,7 @@
   "name": "mqttx",
   "pretty_name": "MQTT X",
   "icon": "img.png",
+  "upstream_repo": "https://github.com/emqx/MQTTX",
   "entrypoints": [
     {
       "container_name": "mqttx",

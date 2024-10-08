@@ -4,6 +4,7 @@
   "name": "docuseal",
   "pretty_name": "DocuSeal",
   "icon": "icon.svg",
+  "upstream_repo": "https://github.com/docusealco/docuseal",
   "entrypoints": [
     {
       "container_name": "docuseal",

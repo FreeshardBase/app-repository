@@ -4,6 +4,7 @@
   "name": "paperless-ngx",
   "pretty_name": "Paperless NGX",
   "icon": "icon.svg",
+  "upstream_repo": "https://github.com/paperless-ngx/paperless-ngx",
   "entrypoints": [
     {
       "container_name": "paperless-ngx",

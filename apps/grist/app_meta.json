@@ -3,6 +3,7 @@
   "app_version": "1.1.16",
   "name": "grist",
   "icon": "icon.svg",
+  "upstream_repo": "https://github.com/gristlabs/grist-core",
   "entrypoints": [
     {
       "container_name": "grist",

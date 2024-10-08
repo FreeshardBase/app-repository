@@ -3,6 +3,7 @@
   "app_version": "24.9.0",
   "name": "actual",
   "icon": "actual.png",
+  "upstream_repo": "https://github.com/actualbudget/actual",
   "entrypoints": [
     {
       "container_name": "actual",

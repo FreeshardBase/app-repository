@@ -4,6 +4,8 @@
   "name": "stirling-pdf",
   "pretty_name": "Stirling PDF",
   "icon": "stirling.png",
+  "homepage": "https://www.stirlingpdf.com/",
+  "upstream_repo": "https://github.com/Stirling-Tools/Stirling-PDF",
   "entrypoints": [
     {
       "container_name": "stirling-pdf",

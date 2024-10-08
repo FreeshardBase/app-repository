@@ -4,6 +4,7 @@
   "name": "wbo",
   "pretty_name": "WBO",
   "icon": "icon.png",
+  "homepage": "https://wbo.ophir.dev/",
   "entrypoints": [
     {
       "container_name": "wbo",

@@ -4,6 +4,7 @@
   "name": "tasks-md",
   "pretty_name": "Tasks.md",
   "icon": "icon.png",
+  "upstream_repo": "https://github.com/BaldissaraMatheus/Tasks.md",
   "entrypoints": [
     {
       "container_name": "tasks-md",

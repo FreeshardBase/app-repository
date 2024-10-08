@@ -4,6 +4,7 @@
   "name": "freshrss",
   "pretty_name": "FreshRSS",
   "icon": "icon.svg",
+  "upstream_repo": "https://github.com/FreshRSS/FreshRSS",
   "entrypoints": [
     {
       "container_name": "freshrss",
