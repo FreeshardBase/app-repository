@@ -4,14 +4,18 @@ import http.client
 import itertools
 import json
 import re
+import shutil
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
 from typing import Literal, TypedDict
 
+from build_store_data import make_app_zips
+
 UPDATE_INFO_JSON = Path(__file__).parent / 'update_info' / 'update_info.json'
 GITHUB_TOKEN_FILE = Path(__file__).parent / 'update_info' / 'github_token'
+UPDATED_APPS_DIR = Path(__file__).parent / 'update_info' / 'updated_apps'
 FILE_EXTENSIONS = ['yml.template', 'json', 'env']
 
 
@@ -89,8 +93,17 @@ def command_update():
 			app_info['status'] = 'updated'
 			print(f'Updated {app_name:<20} {app_info["current_version"]:<10}  ->  {app_info["latest_version"]}')
 
+	make_app_zips()
+	UPDATED_APPS_DIR.mkdir(exist_ok=True)
+	for app_name, app_info in update_info['apps'].items():
+		if app_info['status'] == 'updated':
+			app_dir = Path(__file__).parent / 'apps' / app_name
+			shutil.copy(app_dir / f'{app_name}.zip', UPDATED_APPS_DIR / f'{app_name}.zip')
+
 	with open(UPDATE_INFO_JSON, 'w') as f:
 		json.dump(update_info, f, indent=2)
+
+	print(f'=== Done updating app files. Smoke test the apps in "update_info/updated_apps", then run the commit command. ===')
 
 
 def command_commit():
@@ -178,7 +191,7 @@ def update_file(file_path: Path, current_version: str, latest_version: str):
 def adapt_version_string(app_name: str, version: str) -> str:
 	new_version = version
 	if app_name in ['actual', 'audiobookshelf', 'drawio', 'etherpad', 'kavita', 'linkding', 'navidrome',
-					'paperless-ngx', 'stirling-pdf']:
+					'paperless-ngx', 'stirling-pdf', 'grist']:
 		new_version = version[1:]  # remove the 'v' prefix
 	if app_name in ['element']:
 		new_version = version.split('-')[0]  # remove the suffix
