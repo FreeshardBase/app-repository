@@ -4,44 +4,112 @@ import http.client
 import itertools
 import json
 import re
+import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Literal
 
+from typing import Literal, TypedDict
+
+UPDATE_INFO_JSON = Path(__file__).parent / 'update_info' / 'update_info.json'
+GITHUB_TOKEN_FILE = Path(__file__).parent / 'update_info' / 'github_token'
 FILE_EXTENSIONS = ['yml.template', 'json', 'env']
 
 
 # todo: handle version suffixes like with baikal. e.g. 0.1.2-nginx
 # todo: also use the docker hub api to get the latest version of the image
 
-def main(command: Literal['check', 'update', 'commit']):
-	if command == 'check':
-		print('=== Checking for updates, no files will be modified. ===')
-	elif command == 'update':
-		print('=== Updating files. ===')
 
+class AppInfo(TypedDict):
+	status: Literal['no_upstream', 'up_to_date', 'outdated', 'updated']
+	current_version: str
+	latest_version: str | None
+
+
+class UpdateInfo(TypedDict):
+	timestamp: str
+	apps: dict[str, AppInfo]
+
+
+def main(command: Literal['check', 'update', 'commit']):
+	UPDATE_INFO_JSON.parent.mkdir(exist_ok=True)
+	if command == 'check':
+		command_check()
+	if command == 'update':
+		command_update()
+	if command == 'commit':
+		command_commit()
+
+
+def command_check():
+	# check for update_info.json file and prompt if it should be overwritten
+	if UPDATE_INFO_JSON.exists():
+		overwrite = input(f'update_info.json already exists. Overwrite? (y/n): ')
+		if overwrite.lower() != 'y':
+			print('Aborting.')
+			exit(1)
+
+	print('=== Checking for updates, no app files will be modified. ===')
 	apps_dir = Path(__file__).parent / 'apps'
-	apps_without_upstream = []
-	apps_up_to_date = []
+	update_info = UpdateInfo(timestamp=datetime.now(timezone.utc).isoformat(), apps={})
 	for app_dir in sorted(apps_dir.iterdir()):
 		if not app_dir.is_dir():
 			continue
 
 		current_version, latest_version = get_versions(app_dir)
 		if latest_version is None:
-			apps_without_upstream.append(app_dir.name)
-			continue
+			app_info = {'status': 'no_upstream', 'current_version': current_version, 'latest_version': None}
+		elif current_version == latest_version:
+			app_info = {'status': 'up_to_date', 'current_version': current_version, 'latest_version': latest_version}
+		else:
+			app_info = {'status': 'outdated', 'current_version': current_version, 'latest_version': latest_version}
+		update_info['apps'][app_dir.name] = app_info
+		print('.', end='', flush=True)
+	print('\r', end='', flush=True)
 
-		if current_version == latest_version:
-			apps_up_to_date.append(app_dir.name)
-			continue
+	with open(UPDATE_INFO_JSON, 'w') as f:
+		json.dump(update_info, f, indent=2)
+	print_update_info(update_info)
+	print(f'=== Done checking for updates. Run the update command to update the outdated apps. ===')
 
-		if command == 'update':
+
+def command_update():
+	if not UPDATE_INFO_JSON.exists():
+		print('Run the check command first to create the update_info.json file.')
+		exit(1)
+
+	print('=== Updating app files. ===')
+	with open(UPDATE_INFO_JSON) as f:
+		update_info: UpdateInfo = json.load(f)
+
+	for app_name, app_info in update_info['apps'].items():
+		if app_info['status'] == 'outdated':
+			app_dir = Path(__file__).parent / 'apps' / app_name
 			for file_path in itertools.chain(*(app_dir.glob(f'**/*.{ext}') for ext in FILE_EXTENSIONS)):
-				update_file(file_path, current_version, latest_version)
-		print(f'{app_dir.name:<20} {current_version:<10}  ->  {latest_version}')
+				update_file(file_path, app_info['current_version'], app_info['latest_version'])
+			app_info['status'] = 'updated'
+			print(f'Updated {app_name:<20} {app_info["current_version"]:<10}  ->  {app_info["latest_version"]}')
 
-	print(f'{len(apps_without_upstream)} apps without upstream: {', '.join(apps_without_upstream)}')
-	print(f'{len(apps_up_to_date)} apps up to date: {', '.join(apps_up_to_date)}')
+	with open(UPDATE_INFO_JSON, 'w') as f:
+		json.dump(update_info, f, indent=2)
+
+
+def command_commit():
+	print('=== Committing changes. ===')
+	if not UPDATE_INFO_JSON.exists():
+		print('Run the check command first to create the update_info.json file.')
+		exit(1)
+
+	with open(UPDATE_INFO_JSON) as f:
+		update_info: UpdateInfo = json.load(f)
+
+	for app_name, app_info in update_info['apps'].items():
+		if app_info['status'] == 'updated':
+			commit_message = f'Update {app_name} from {app_info['current_version']} to {app_info['latest_version']}'
+			subprocess.run(['git', 'add', f'apps/{app_name}'])
+			subprocess.run(['git', 'commit', '-m', commit_message])
+			print(f'Committed changes for {app_name}')
+
+	UPDATE_INFO_JSON.unlink()
 
 
 def parse_args():
@@ -76,10 +144,20 @@ def get_latest_version(upstream_repo: str):
 		'User-Agent': 'Portal-App-Store'
 	}
 
+	if GITHUB_TOKEN_FILE.exists():
+		with open(GITHUB_TOKEN_FILE) as f:
+			token = f.read().strip()
+		headers['Authorization'] = f'token {token}'
+
 	url = f'/repos/{owner}/{repo}/releases'
 	conn.request("GET", url, headers=headers)
 	response = conn.getresponse()
 	if response.status != 200:
+		if response.status == 403 and response.reason == 'rate limit exceeded':
+			print('Rate limit exceeded. Try again later or consider using a personal access token.')
+			print('You can generate it here: https://github.com/settings/tokens.')
+			print('Place it in the file update_info/github_token.')
+			exit(1)
 		raise Exception(f'Failed to get releases from {url}: {response.status} {response.reason}')
 	data = response.read()
 
@@ -107,6 +185,19 @@ def adapt_version_string(app_name: str, version: str) -> str:
 	if app_name in ['glances']:
 		new_version = version + '-full'  # add the '-full' suffix
 	return new_version
+
+
+def print_update_info(update_info: UpdateInfo):
+	print(f'=== Checked {len(update_info['apps'])} apps on {update_info["timestamp"]} ===')
+	for app_name, app_info in update_info['apps'].items():
+		if app_info['status'] == 'outdated':
+			print(f'{app_name:<20} {app_info["current_version"]:<10}  ->  {app_info["latest_version"]}')
+	apps_without_upstream = [app_name for app_name, app_info in update_info['apps'].items() if
+							 app_info['status'] == 'no_upstream']
+	print(f'{len(apps_without_upstream)} apps without upstream: {', '.join(apps_without_upstream)}')
+	apps_up_to_date = [app_name for app_name, app_info in update_info['apps'].items() if
+					   app_info['status'] == 'up_to_date']
+	print(f'{len(apps_up_to_date)} apps up to date: {', '.join(apps_up_to_date)}')
 
 
 if __name__ == '__main__':
