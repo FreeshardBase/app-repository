@@ -34,7 +34,7 @@ class UpdateInfo(TypedDict):
 	apps: dict[str, AppInfo]
 
 
-def main(command: Literal['check', 'update', 'test', 'commit']):
+def main(command: Literal['check', 'update', 'test', 'build', 'commit']):
 	UPDATE_INFO_JSON.parent.mkdir(exist_ok=True)
 	if command == 'check':
 		command_check()
@@ -42,6 +42,8 @@ def main(command: Literal['check', 'update', 'test', 'commit']):
 		command_update()
 	if command == 'test':
 		command_test()
+	if command == 'build':
+		command_build()
 	if command == 'commit':
 		command_commit()
 
@@ -89,18 +91,13 @@ def command_update():
 			app_info['status'] = 'updated'
 			print(f'Updated {app_name:<20} {app_info["current_version"]:<10}  ->  {app_info["latest_version"]}')
 
-	make_app_zips()
-	UPDATED_APPS_DIR.mkdir(exist_ok=True)
-	for app_name, app_info in update_info['apps'].items():
-		if app_info['status'] == 'updated':
-			app_dir = Path(__file__).parent / 'apps' / app_name
-			shutil.copy(app_dir / f'{app_name}.zip', UPDATED_APPS_DIR / f'{app_name}.zip')
-
 	with open(UPDATE_INFO_JSON, 'w') as f:
 		json.dump(update_info, f, indent=2)
 
 	print(
-		f'=== Done updating app files. Run the "test" command to test if the docker tags exist. Then, smoke test the apps in "update_info/updated_apps", then run the commit command. ===')
+		f'=== Done updating app files. Run the "test" command to test if the docker tags exist. '
+		f'Then, run the "build" command and smoke test the apps in "update_info/updated_apps".'
+		f'Then run the commit command. ===')
 
 
 def command_test():
@@ -128,6 +125,23 @@ def command_test():
 			(app_dir / 'docker-compose.yml').unlink()
 
 
+def command_build():
+	with open(UPDATE_INFO_JSON) as f:
+		update_info: UpdateInfo = json.load(f)
+
+	make_app_zips()
+
+	shutil.rmtree(UPDATED_APPS_DIR, ignore_errors=True)
+	UPDATED_APPS_DIR.mkdir(exist_ok=True)
+	for app_name, app_info in update_info['apps'].items():
+		if app_info['status'] == 'updated':
+			app_dir = Path(__file__).parent / 'apps' / app_name
+			shutil.copy(app_dir / f'{app_name}.zip', UPDATED_APPS_DIR / f'{app_name}.zip')
+
+	print(f'=== Done building updated apps. Smoke test the apps in {UPDATED_APPS_DIR}. ===')
+
+
+
 def command_commit():
 	print('=== Committing changes. ===')
 	if not UPDATE_INFO_JSON.exists():
@@ -149,7 +163,7 @@ def command_commit():
 
 def parse_args():
 	parser = argparse.ArgumentParser(description='Update application versions.')
-	parser.add_argument('command', type=str, choices=['check', 'update', 'test', 'commit'])
+	parser.add_argument('command', type=str, choices=['check', 'update', 'test', 'build', 'commit'])
 	return parser.parse_args()
 
 
