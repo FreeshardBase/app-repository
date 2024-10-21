@@ -8,7 +8,6 @@ import shutil
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
-
 from typing import Literal, TypedDict
 
 from build_store_data import make_app_zips
@@ -34,12 +33,14 @@ class UpdateInfo(TypedDict):
 	apps: dict[str, AppInfo]
 
 
-def main(command: Literal['check', 'update', 'commit']):
+def main(command: Literal['check', 'update', 'test', 'commit']):
 	UPDATE_INFO_JSON.parent.mkdir(exist_ok=True)
 	if command == 'check':
 		command_check()
 	if command == 'update':
 		command_update()
+	if command == 'test':
+		command_test()
 	if command == 'commit':
 		command_commit()
 
@@ -103,7 +104,32 @@ def command_update():
 	with open(UPDATE_INFO_JSON, 'w') as f:
 		json.dump(update_info, f, indent=2)
 
-	print(f'=== Done updating app files. Smoke test the apps in "update_info/updated_apps", then run the commit command. ===')
+	print(
+		f'=== Done updating app files. Smoke test the apps in "update_info/updated_apps", then run the commit command. ===')
+
+
+def command_test():
+	if not UPDATE_INFO_JSON.exists():
+		print('Run the check command first to create the update_info.json file.')
+		exit(1)
+
+	print('=== Testing if updated apps can be pulled. ===')
+	with open(UPDATE_INFO_JSON) as f:
+		update_info: UpdateInfo = json.load(f)
+
+	for app_name, app_info in update_info['apps'].items():
+		if app_info['status'] == 'updated':
+			app_dir = Path(__file__).parent / 'apps' / app_name
+			shutil.copy(app_dir / 'docker-compose.yml.template', app_dir / 'docker-compose.yml')
+			update_file(app_dir / 'docker-compose.yml', '{{ fs.app_data }}', './app_data', '{{ fs.shared }}', './shared')
+
+			pull_process = subprocess.Popen(['docker-compose', 'pull', '--dry-run', '-q'], cwd=app_dir)
+			if pull_process.wait() == 0:
+				print(f'Pulling {app_name} seems to work.')
+			else:
+				print(f'!!! Failed to pull {app_name} !!!')
+
+			(app_dir / 'docker-compose.yml').unlink()
 
 
 def command_commit():
@@ -127,7 +153,7 @@ def command_commit():
 
 def parse_args():
 	parser = argparse.ArgumentParser(description='Update application versions.')
-	parser.add_argument('command', type=str, choices=['check', 'update', 'commit'])
+	parser.add_argument('command', type=str, choices=['check', 'update', 'test', 'commit'])
 	return parser.parse_args()
 
 
@@ -178,11 +204,13 @@ def get_latest_version(upstream_repo: str):
 	return releases[0]['tag_name']
 
 
-def update_file(file_path: Path, current_version: str, latest_version: str):
+def update_file(file_path: Path, *replacements: str):
+	replacements_iter = iter(replacements)
 	with open(str(file_path)) as f:
 		content = f.read()
 
-	content = content.replace(current_version, latest_version)
+	for a, b in itertools.batched(replacements_iter, 2):
+		content = content.replace(a, b)
 
 	with open(file_path, 'w') as f:
 		f.write(content)
