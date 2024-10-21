@@ -8,7 +8,7 @@ import shutil
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Literal, TypedDict
+from typing import Literal, TypedDict, Tuple
 
 from build_store_data import make_app_zips
 
@@ -26,6 +26,7 @@ class AppInfo(TypedDict):
 	status: Literal['no_upstream', 'up_to_date', 'outdated', 'updated']
 	current_version: str
 	latest_version: str | None
+	breaking_changes: list[Tuple[str, str]]
 
 
 class UpdateInfo(TypedDict):
@@ -47,34 +48,28 @@ def main(command: Literal['check', 'update', 'test', 'commit']):
 
 def command_check():
 	# check for update_info.json file and prompt if it should be overwritten
+	do_update = True
 	if UPDATE_INFO_JSON.exists():
 		overwrite = input(f'update_info.json already exists. Overwrite? (y/n): ')
 		if overwrite.lower() != 'y':
-			print('Aborting.')
-			exit(1)
+			do_update = False
 
-	print('=== Checking for updates, no app files will be modified. ===')
-	apps_dir = Path(__file__).parent / 'apps'
-	update_info = UpdateInfo(timestamp=datetime.now(timezone.utc).isoformat(), apps={})
-	for app_dir in sorted(apps_dir.iterdir()):
-		if not app_dir.is_dir():
-			continue
+	if do_update:
+		print('=== Checking for updates, no app files will be modified. ===')
+		apps_dir = Path(__file__).parent / 'apps'
+		update_info = UpdateInfo(timestamp=datetime.now(timezone.utc).isoformat(), apps={})
+		for app_dir in sorted(apps_dir.iterdir()):
+			if not app_dir.is_dir():
+				continue
+			update_info['apps'][app_dir.name] = make_app_info(app_dir)
+			print('.', end='', flush=True)
+		print('\r', end='', flush=True)
 
-		current_version, latest_version = get_versions(app_dir)
-		if latest_version is None:
-			app_info = {'status': 'no_upstream', 'current_version': current_version, 'latest_version': None}
-		elif current_version == latest_version:
-			app_info = {'status': 'up_to_date', 'current_version': current_version, 'latest_version': latest_version}
-		else:
-			app_info = {'status': 'outdated', 'current_version': current_version, 'latest_version': latest_version}
-		update_info['apps'][app_dir.name] = app_info
-		print('.', end='', flush=True)
-	print('\r', end='', flush=True)
+		with open(UPDATE_INFO_JSON, 'w') as f:
+			json.dump(update_info, f, indent=2)
 
-	with open(UPDATE_INFO_JSON, 'w') as f:
-		json.dump(update_info, f, indent=2)
-	print_update_info(update_info)
-	print(f'=== Done checking for updates. Run the update command to update the outdated apps. ===')
+	print_update_info()
+	print(f'=== Run the update command to update the outdated apps. ===')
 
 
 def command_update():
@@ -121,7 +116,8 @@ def command_test():
 		if app_info['status'] == 'updated':
 			app_dir = Path(__file__).parent / 'apps' / app_name
 			shutil.copy(app_dir / 'docker-compose.yml.template', app_dir / 'docker-compose.yml')
-			update_file(app_dir / 'docker-compose.yml', '{{ fs.app_data }}', './app_data', '{{ fs.shared }}', './shared')
+			update_file(app_dir / 'docker-compose.yml', '{{ fs.app_data }}', './app_data', '{{ fs.shared }}',
+						'./shared')
 
 			pull_process = subprocess.Popen(['docker-compose', 'pull', '--dry-run', '-q'], cwd=app_dir)
 			if pull_process.wait() == 0:
@@ -157,21 +153,31 @@ def parse_args():
 	return parser.parse_args()
 
 
-def get_versions(app_dir: Path) -> tuple[str, str | None]:
+def make_app_info(app_dir: Path) -> AppInfo:
 	with open(app_dir / 'app_meta.json') as f:
 		app_meta = json.load(f)
 
+	app_name = app_dir.name
+	current_version = app_meta['app_version']
+	result = AppInfo(status='no_upstream', current_version=current_version, latest_version=None, breaking_changes=[])
+
 	if 'upstream_repo' not in app_meta:
-		return app_meta['app_version'], None
+		return result
 
-	latest_version = adapt_version_string(app_dir.name, get_latest_version(app_meta['upstream_repo']))
+	latest_releases = get_latest_releases(app_meta['upstream_repo'], current_version)
+	if latest_releases:
+		result.update(status='outdated', latest_version=adapt_version_string(app_name, latest_releases[0]['tag_name']))
+		result.update(breaking_changes=[(release['tag_name'], release['html_url']) for release in latest_releases if
+										'break' in release['body'].lower()])
+	else:
+		result.update(status='up_to_date', latest_version=current_version)
 
-	return app_meta['app_version'], latest_version
+	return result
 
 
-def get_latest_version(upstream_repo: str):
-	gitlab_link_regex = r'https://github\.com/([^/]+)/([^/]+)'
-	match = re.match(gitlab_link_regex, upstream_repo)
+def get_latest_releases(upstream_repo: str, current_version: str):
+	github_link_regex = r'https://github\.com/([^/]+)/([^/]+)'
+	match = re.match(github_link_regex, upstream_repo)
 	owner = match.group(1)
 	repo = match.group(2)
 
@@ -201,7 +207,14 @@ def get_latest_version(upstream_repo: str):
 	data = response.read()
 
 	releases = json.loads(data)
-	return releases[0]['tag_name']
+	result = []
+	for release in releases:
+		if release['tag_name'] != current_version:
+			result.append(release)
+		else:
+			break
+
+	return result
 
 
 def update_file(file_path: Path, *replacements: str):
@@ -228,11 +241,14 @@ def adapt_version_string(app_name: str, version: str) -> str:
 	return new_version
 
 
-def print_update_info(update_info: UpdateInfo):
+def print_update_info():
+	with open(UPDATE_INFO_JSON) as f:
+		update_info: UpdateInfo = json.load(f)
 	print(f'=== Checked {len(update_info['apps'])} apps on {update_info["timestamp"]} ===')
 	for app_name, app_info in update_info['apps'].items():
 		if app_info['status'] == 'outdated':
-			print(f'{app_name:<20} {app_info["current_version"]:<10}  ->  {app_info["latest_version"]}')
+			breaking = f'({len(app_info['breaking_changes'])} possible breaking changes: {', '.join([c[0] for c in app_info['breaking_changes']])})' if app_info['breaking_changes'] else ''
+			print(f'{app_name:<20} {app_info["current_version"]:<10}  ->  {app_info["latest_version"]:<10} {breaking}')
 	apps_without_upstream = [app_name for app_name, app_info in update_info['apps'].items() if
 							 app_info['status'] == 'no_upstream']
 	print(f'{len(apps_without_upstream)} apps without upstream: {', '.join(apps_without_upstream)}')
