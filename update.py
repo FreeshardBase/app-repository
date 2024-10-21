@@ -168,7 +168,7 @@ def make_app_info(app_dir: Path) -> AppInfo:
 	if latest_releases:
 		result.update(status='outdated', latest_version=adapt_version_string(app_name, latest_releases[0]['tag_name']))
 		result.update(breaking_changes=[(release['tag_name'], release['html_url']) for release in latest_releases if
-										'break' in release['body'].lower()])
+										'breaking' in release['body'].lower()])
 	else:
 		result.update(status='up_to_date', latest_version=current_version)
 
@@ -247,7 +247,8 @@ def print_update_info():
 	print(f'=== Checked {len(update_info['apps'])} apps on {update_info["timestamp"]} ===')
 	for app_name, app_info in update_info['apps'].items():
 		if app_info['status'] == 'outdated':
-			breaking = f'({len(app_info['breaking_changes'])} possible breaking changes: {', '.join([c[0] for c in app_info['breaking_changes']])})' if app_info['breaking_changes'] else ''
+			breaking = f'({len(app_info['breaking_changes'])} possible breaking changes: {', '.join([c[0] for c in app_info['breaking_changes']])})' if \
+			app_info['breaking_changes'] else ''
 			print(f'{app_name:<20} {app_info["current_version"]:<10}  ->  {app_info["latest_version"]:<10} {breaking}')
 	apps_without_upstream = [app_name for app_name, app_info in update_info['apps'].items() if
 							 app_info['status'] == 'no_upstream']
@@ -255,6 +256,13 @@ def print_update_info():
 	apps_up_to_date = [app_name for app_name, app_info in update_info['apps'].items() if
 					   app_info['status'] == 'up_to_date']
 	print(f'{len(apps_up_to_date)} apps up to date: {', '.join(apps_up_to_date)}')
+
+	print('')
+	for app_name, app_info in update_info['apps'].items():
+		if app_info['status'] == 'outdated' and app_info['breaking_changes']:
+			print(f'--- Breaking changes for {app_name} ---')
+			for version, url in app_info['breaking_changes']:
+				print(f'{version}: {url}#:~:text=breaking')
 
 
 if __name__ == '__main__':
