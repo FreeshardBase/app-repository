@@ -1,6 +1,6 @@
 {
   "v": "1.0",
-  "app_version": "1.32.0",
+  "app_version": "1.32.2",
   "name": "vaultwarden",
   "icon": "icon.png",
   "upstream_repo": "https://github.com/dani-garcia/vaultwarden",
