@@ -1,5 +1,3 @@
-version: '3.5'
-
 networks:
     portal:
         external: true
@@ -7,7 +5,7 @@ networks:
 services:
     kavita:
         restart: always
-        image: jvmilazz0/kavita:0.7.10
+        image: jvmilazz0/kavita:0.8.3
         container_name: kavita
         volumes:
         - "{{ fs.app_data }}/kavita/config:/kavita/config"

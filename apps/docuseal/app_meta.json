@@ -1,9 +1,10 @@
 {
   "v": "1.0",
-  "app_version": "1.7.1",
+  "app_version": "1.7.6",
   "name": "docuseal",
   "pretty_name": "DocuSeal",
   "icon": "icon.svg",
+  "upstream_repo": "https://github.com/docusealco/docuseal",
   "entrypoints": [
     {
       "container_name": "docuseal",

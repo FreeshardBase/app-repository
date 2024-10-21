@@ -1,9 +1,10 @@
 {
   "v": "1.0",
-  "app_version": "0.1.0",
+  "app_version": "2.2",
   "name": "node-red",
   "pretty_name": "Node-RED",
   "icon": "icon.png",
+  "upstream_repo": "https://github.com/node-red/node-red",
   "entrypoints": [
     {
       "container_name": "node-red",

@@ -1,9 +1,10 @@
 {
   "v": "1.1",
-  "app_version": "v8.4.3",
+  "app_version": "v8.6.1",
   "name": "dozzle",
   "pretty_name": "Dozzle",
   "icon": "dozzle.png",
+  "upstream_repo": "https://github.com/amir20/dozzle",
   "entrypoints": [
     {
       "container_name": "dozzle",

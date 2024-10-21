@@ -1,8 +1,10 @@
 {
   "v": "1.0",
-  "app_version": "0.99.4",
+  "app_version": "0.99.17",
   "name": "titra",
   "icon": "titra-logo-500.png",
+  "homepage": "https://titra.io/",
+  "upstream_repo": "https://github.com/kromitgmbh/titra",
   "entrypoints": [
     {
       "container_name": "titra",

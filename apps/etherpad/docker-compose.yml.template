@@ -1,12 +1,10 @@
-version: "3.8"
-
 networks:
     portal:
         external: true
 
 services:
   app:
-    image: etherpad/etherpad:2.0.1
+    image: etherpad/etherpad:2.2.5
     container_name: etherpad
     environment:
       ADMIN_PASSWORD: admin

@@ -1,8 +1,9 @@
 {
   "v": "1.0",
-  "app_version": "0.1.0",
+  "app_version": "0.53.3",
   "name": "navidrome",
   "icon": "icon.svg",
+  "upstream_repo": "https://github.com/navidrome/navidrome",
   "entrypoints": [
     {
       "container_name": "navidrome",

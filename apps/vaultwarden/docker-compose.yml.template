@@ -1,5 +1,3 @@
-version: '3.5'
-
 networks:
     portal:
         external: true
@@ -7,7 +5,7 @@ networks:
 services:
     vaultwarden:
         restart: always
-        image: vaultwarden/server:1.32.0
+        image: vaultwarden/server:1.32.2
         container_name: vaultwarden
         volumes:
         - "{{ fs.app_data }}/data:/data"

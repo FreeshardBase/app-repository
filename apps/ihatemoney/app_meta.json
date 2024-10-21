@@ -4,6 +4,7 @@
   "name": "ihatemoney",
   "pretty_name": "I Hate Money",
   "icon": "ihatemoney.png",
+  "upstream_repo": "https://github.com/spiral-project/ihatemoney",
   "entrypoints": [
     {
       "container_name": "ihatemoney",

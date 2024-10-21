@@ -1,8 +1,9 @@
 {
   "v": "1.0",
-  "app_version": "0.7.10",
+  "app_version": "0.8.3",
   "name": "kavita",
   "icon": "kavita-logo3.png",
+  "upstream_repo": "https://github.com/Kareadita/Kavita",
   "entrypoints": [
     {
       "container_name": "kavita",

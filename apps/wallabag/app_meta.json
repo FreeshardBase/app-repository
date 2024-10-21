@@ -1,8 +1,10 @@
 {
   "v": "1.0",
-  "app_version": "2.6.8",
+  "app_version": "2.6.9",
   "name": "wallabag",
   "icon": "icon.svg",
+  "homepage": "https://wallabag.org/",
+  "upstream_repo": "https://github.com/wallabag/wallabag",
   "entrypoints": [
     {
       "container_name": "wallabag",
