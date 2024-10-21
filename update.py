@@ -100,7 +100,7 @@ def command_update():
 		json.dump(update_info, f, indent=2)
 
 	print(
-		f'=== Done updating app files. Smoke test the apps in "update_info/updated_apps", then run the commit command. ===')
+		f'=== Done updating app files. Run the "test" command to test if the docker tags exist. Then, smoke test the apps in "update_info/updated_apps", then run the commit command. ===')
 
 
 def command_test():
@@ -210,6 +210,8 @@ def get_latest_releases(upstream_repo: str, current_version: str):
 	result = []
 	for release in releases:
 		if release['tag_name'] != current_version:
+			if release['prerelease']:
+				continue
 			result.append(release)
 		else:
 			break
@@ -248,7 +250,7 @@ def print_update_info():
 	for app_name, app_info in update_info['apps'].items():
 		if app_info['status'] == 'outdated':
 			breaking = f'({len(app_info['breaking_changes'])} possible breaking changes: {', '.join([c[0] for c in app_info['breaking_changes']])})' if \
-			app_info['breaking_changes'] else ''
+				app_info['breaking_changes'] else ''
 			print(f'{app_name:<20} {app_info["current_version"]:<10}  ->  {app_info["latest_version"]:<10} {breaking}')
 	apps_without_upstream = [app_name for app_name, app_info in update_info['apps'].items() if
 							 app_info['status'] == 'no_upstream']
