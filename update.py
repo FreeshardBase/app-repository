@@ -178,7 +178,7 @@ def make_app_info(app_dir: Path) -> AppInfo:
 	if 'upstream_repo' not in app_meta:
 		return result
 
-	latest_releases = get_latest_releases(app_meta['upstream_repo'], current_version)
+	latest_releases = get_latest_releases(app_name, app_meta['upstream_repo'], current_version)
 	if latest_releases:
 		result.update(status='outdated', latest_version=adapt_version_string(app_name, latest_releases[0]['tag_name']))
 		result.update(breaking_changes=[(release['tag_name'], release['html_url']) for release in latest_releases if
@@ -189,7 +189,7 @@ def make_app_info(app_dir: Path) -> AppInfo:
 	return result
 
 
-def get_latest_releases(upstream_repo: str, current_version: str):
+def get_latest_releases(app_name: str, upstream_repo: str, current_version: str):
 	github_link_regex = r'https://github\.com/([^/]+)/([^/]+)'
 	match = re.match(github_link_regex, upstream_repo)
 	owner = match.group(1)
@@ -223,7 +223,7 @@ def get_latest_releases(upstream_repo: str, current_version: str):
 	releases = json.loads(data)
 	result = []
 	for release in releases:
-		if release['tag_name'] != current_version:
+		if adapt_version_string(app_name, release['tag_name']) != current_version:
 			if release['prerelease']:
 				continue
 			result.append(release)
