@@ -23,7 +23,7 @@ FILE_EXTENSIONS = ['yml.template', 'json', 'env']
 
 
 class AppInfo(TypedDict):
-	status: Literal['no_upstream', 'up_to_date', 'outdated', 'updated']
+	status: Literal['no_upstream', 'up_to_date', 'skipped', 'outdated', 'updated']
 	current_version: str
 	latest_version: str | None
 	breaking_changes: list[Tuple[str, str]]
@@ -34,10 +34,12 @@ class UpdateInfo(TypedDict):
 	apps: dict[str, AppInfo]
 
 
-def main(command: Literal['check', 'update', 'test', 'build', 'commit']):
+def main(command: Literal['check', 'skip', 'update', 'test', 'build', 'commit'], apps: list[str]):
 	UPDATE_INFO_JSON.parent.mkdir(exist_ok=True)
 	if command == 'check':
 		command_check()
+	if command == 'skip':
+		command_skip(apps)
 	if command == 'update':
 		command_update()
 	if command == 'test':
@@ -72,6 +74,26 @@ def command_check():
 
 	print_update_info()
 	print(f'=== Run the update command to update the outdated apps. ===')
+
+
+def command_skip(apps: list[str]):
+	if not UPDATE_INFO_JSON.exists():
+		print('Run the check command first to create the update_info.json file.')
+		exit(1)
+
+	with open(UPDATE_INFO_JSON) as f:
+		update_info: UpdateInfo = json.load(f)
+
+	for app_name in apps:
+		if app_name in update_info['apps']:
+			update_info['apps'][app_name]['status'] = 'skipped'
+		else:
+			print(f'App {app_name} not found in update_info.json')
+
+	with open(UPDATE_INFO_JSON, 'w') as f:
+		json.dump(update_info, f, indent=2)
+
+	print_update_info()
 
 
 def command_update():
@@ -141,7 +163,6 @@ def command_build():
 	print(f'=== Done building updated apps. Smoke test the apps in {UPDATED_APPS_DIR}. ===')
 
 
-
 def command_commit():
 	print('=== Committing changes. ===')
 	if not UPDATE_INFO_JSON.exists():
@@ -163,7 +184,8 @@ def command_commit():
 
 def parse_args():
 	parser = argparse.ArgumentParser(description='Update application versions.')
-	parser.add_argument('command', type=str, choices=['check', 'update', 'test', 'build', 'commit'])
+	parser.add_argument('command', type=str, choices=['check', 'skip', 'update', 'test', 'build', 'commit'])
+	parser.add_argument('apps', type=str, nargs='*')
 	return parser.parse_args()
 
 
@@ -272,6 +294,8 @@ def print_update_info():
 	apps_up_to_date = [app_name for app_name, app_info in update_info['apps'].items() if
 					   app_info['status'] == 'up_to_date']
 	print(f'{len(apps_up_to_date)} apps up to date: {', '.join(apps_up_to_date)}')
+	apps_skipped = [app_name for app_name, app_info in update_info['apps'].items() if app_info['status'] == 'skipped']
+	print(f'{len(apps_skipped)} apps skipped: {', '.join(apps_skipped)}')
 
 	print('')
 	for app_name, app_info in update_info['apps'].items():
@@ -283,4 +307,4 @@ def print_update_info():
 
 if __name__ == '__main__':
 	args = parse_args()
-	main(args.command)
+	main(args.command, args.apps)
