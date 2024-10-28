@@ -5,7 +5,7 @@ networks:
 services:
     paperless-ngx:
         restart: always
-        image: ghcr.io/paperless-ngx/paperless-ngx:2.12.1
+        image: ghcr.io/paperless-ngx/paperless-ngx:2.13.0
         container_name: paperless-ngx
         volumes:
         - "{{ fs.app_data }}/usr/src/paperless/data:/usr/src/paperless/data"
@@ -19,6 +19,7 @@ services:
         - PAPERLESS_AUTO_LOGIN_USERNAME=admin
         - PAPERLESS_URL=https://paperless-ngx.{{ portal.domain }}
         - PAPERLESS_EMAIL_TASK_CRON=* * * * *
+        - "PAPERLESS_OCR_USER_ARGS={\"invalidate_digital_signatures\": true}"
         depends_on:
         - paperless-redis
         networks:
