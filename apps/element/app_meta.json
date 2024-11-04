@@ -1,6 +1,6 @@
 {
   "v": "1.0",
-  "app_version": "v1.11.82",
+  "app_version": "v1.11.83",
   "name": "element",
   "icon": "icon.svg",
   "upstream_repo": "https://github.com/element-hq/element-web",
