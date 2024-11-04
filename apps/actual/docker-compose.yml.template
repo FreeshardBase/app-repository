@@ -5,7 +5,7 @@ networks:
 services:
     actual:
         restart: always
-        image: actualbudget/actual-server:24.10.1
+        image: actualbudget/actual-server:24.11.0
         container_name: actual
         volumes:
         - "{{ fs.app_data }}/data:/data"
