@@ -6,7 +6,7 @@ import json
 import re
 import shutil
 import subprocess
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from pathlib import Path
 from typing import Literal, TypedDict, Tuple
 
@@ -172,12 +172,21 @@ def command_commit():
 	with open(UPDATE_INFO_JSON) as f:
 		update_info: UpdateInfo = json.load(f)
 
+	branch_name = f'updates/{date.today().isoformat()}'
+	subprocess.run(['git', 'checkout', '-b', branch_name])
+	print(f'Created branch {branch_name}')
+
 	for app_name, app_info in update_info['apps'].items():
 		if app_info['status'] == 'updated':
 			commit_message = f'Update {app_name} from {app_info['current_version']} to {app_info['latest_version']}'
 			subprocess.run(['git', 'add', f'apps/{app_name}'])
 			subprocess.run(['git', 'commit', '-m', commit_message])
 			print(f'Committed changes for {app_name}')
+
+	subprocess.run(['git', 'checkout', 'master'])
+	subprocess.run(['git', 'merge', '--no-ff', '--no-edit', branch_name])
+	subprocess.run(['git', 'branch', '-d', branch_name])
+	print(f'Merged branch {branch_name} into master')
 
 	UPDATE_INFO_JSON.unlink()
 
