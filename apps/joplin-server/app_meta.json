@@ -1,0 +1,41 @@
+{
+  "v": "1.1",
+  "app_version": "0.1.0",
+  "name": "joplin-server",
+  "pretty_name": "Joplin Server",
+  "icon": "server_logo.png",
+  "entrypoints": [
+    {
+      "container_name": "joplin-server",
+      "container_port": 22300,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "public"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "A free, cross-platform note-taking and to-do application with end-to-end encryption for seamless organization and productivity.",
+    "description_long": [
+      "Joplin is a powerful, open-source note-taking and to-do application that puts your privacy and productivity first. With its intuitive interface and robust features, Joplin makes it easy to capture, organize, and access your thoughts, ideas, and tasks across all your devices.",
+      "Key benefits of Joplin include:",
+      "End-to-end encryption: Keep your notes secure with military-grade encryption, ensuring your data remains private and protected.",
+      "Cross-platform synchronization: Seamlessly access your notes on Windows, macOS, Linux, Android, and iOS, with real-time syncing across devices.",
+      "Markdown support: Create beautifully formatted notes using Markdown, with a live preview to see your changes instantly.",
+      "Rich media integration: Easily embed images, audio, and other file types directly into your notes for comprehensive documentation.",
+      "Customizable organization: Use notebooks, sub-notebooks, and tags to create a structure that fits your unique workflow.",
+      "Web clipper: Save web pages and screenshots directly to Joplin with the browser extension for effortless research and reference.",
+      "Search and filter: Quickly find the information you need with powerful search capabilities and customizable filters.",
+      "Import and export: Seamlessly transition from other note-taking apps by importing your existing notes, and export your data in various formats.",
+      "Plugin system: Extend Joplin's functionality with a growing ecosystem of community-developed plugins."
+    ],
+    "hint": "The default username is 'admin@localhost' and the password is 'admin'. Change them right away!",
+    "is_featured": false
+  }
+}
