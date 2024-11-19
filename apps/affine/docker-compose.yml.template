@@ -1,0 +1,62 @@
+networks:
+  portal:
+    external: true
+
+services:
+  affine:
+    restart: always
+    image: ghcr.io/toeverything/affine-graphql:stable
+    container_name: affine
+    command:
+      ['sh', '-c', 'node ./scripts/self-host-predeploy && node ./dist/index.js']
+    volumes:
+      - "{{ fs.app_data }}/config:/root/.affine/config"
+      - "{{ fs.app_data }}/storage:/root/.affine/storage"
+    environment:
+      - BASE_URL=https://affine.{{ portal.domain }}
+      - NODE_OPTIONS="--import=./scripts/register.js"
+      - AFFINE_CONFIG_PATH=/root/.affine/config
+      - REDIS_SERVER_HOST=affine-redis
+      - DATABASE_URL=postgres://affine:affine@affine-postgres:5432/affine
+      - NODE_ENV=production
+      - TELEMETRY_ENABLE=false
+    depends_on:
+      affine-redis:
+        condition: service_healthy
+      affine-postgres:
+        condition: service_healthy
+    networks:
+      - portal
+
+  affine-redis:
+    image: redis
+    container_name: affine-redis
+    restart: unless-stopped
+    volumes:
+      - "{{ fs.app_data }}/redis-data:/data"
+    healthcheck:
+      test: [ 'CMD', 'redis-cli', '--raw', 'incr', 'ping' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - portal
+
+  affine-postgres:
+    image: postgres:16
+    container_name: affine-postgres
+    restart: unless-stopped
+    volumes:
+      - "{{ fs.app_data }}/postgres-data:/var/lib/postgresql/data"
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U affine' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_USER: affine
+      POSTGRES_PASSWORD: affine
+      POSTGRES_DB: affine
+      PGDATA: /var/lib/postgresql/data/pgdata
+    networks:
+      - portal
