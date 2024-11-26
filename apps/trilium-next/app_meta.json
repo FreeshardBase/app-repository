@@ -1,0 +1,38 @@
+{
+  "v": "1.1",
+  "app_version": "v0.90.12",
+  "name": "trilium-next",
+  "pretty_name": "Trilium Next",
+  "icon": "icon.png",
+  "upstream_repo": "https://github.com/TriliumNext/Notes",
+  "entrypoints": [
+    {
+      "container_name": "trilium-next",
+      "container_port": 8080,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    },
+    "/share/": {
+      "access": "public"
+    },
+    "/assets/": {
+      "access": "public"
+    },
+    "/favicon.ico": {
+      "access": "public"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Build your personal knowledge base with TriliumNext Notes",
+    "description_long": "TriliumNext Notes is an open-source, cross-platform hierarchical note taking application with focus on building large personal knowledge bases.",
+    "is_featured": false
+  }
+}
