@@ -1,0 +1,33 @@
+{
+  "v": "1.1",
+  "app_version": "0.22.5",
+  "name": "memos",
+  "pretty_name": "memos",
+  "icon": "icon.png",
+  "upstream_repo": "https://github.com/usememos/memos",
+  "entrypoints": [
+    {
+      "container_name": "memos",
+      "container_port": 5230,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "public"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "An open-source, lightweight note-taking solution.",
+    "description_long": "An open-source, self-hosted note-taking solution designed for seamless deployment and multi-platform access. Experience effortless plain text writing with pain-free, complemented by robust Markdown syntax support for enhanced formatting.",
+    "hint": [
+      "You need to create a user on first start.",
+      "We recommend to disallow user registration the settings under 'System'."
+    ],
+    "is_featured": false
+  }
+}

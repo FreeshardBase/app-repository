@@ -1,0 +1,13 @@
+networks:
+    portal:
+        external: true
+
+services:
+    memos:
+        restart: always
+        image: neosmemo/memos:0.22.5
+        container_name: memos
+        volumes:
+        - "{{ fs.app_data }}/data:/var/opt/memos"
+        networks:
+        - portal
