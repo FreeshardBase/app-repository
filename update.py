@@ -38,14 +38,19 @@ def main(command: Literal['check', 'skip', 'update', 'test', 'build', 'commit'],
 	UPDATE_INFO_JSON.parent.mkdir(exist_ok=True)
 	if command == 'check':
 		command_check()
+		print('=== Next, run "skip" to skip apps that should not be updated. If you are done, run "update" ===')
 	if command == 'skip':
 		command_skip(apps)
+		print('=== If you are done skipping, run "update" to update the app files. ===')
 	if command == 'update':
 		command_update()
+		print('=== Next, run "test" to test if the docker tags exist. ===')
 	if command == 'test':
 		command_test()
+		print('=== Next, run "build" to build the updated app zips. ===')
 	if command == 'build':
 		command_build()
+		print('=== Next, smoke test the apps in "update_info/updated_apps". Then run "commit". ===')
 	if command == 'commit':
 		command_commit()
 
@@ -73,7 +78,6 @@ def command_check():
 			json.dump(update_info, f, indent=2)
 
 	print_update_info()
-	print(f'=== Run the update command to update the outdated apps. ===')
 
 
 def command_skip(apps: list[str]):
@@ -116,11 +120,6 @@ def command_update():
 	with open(UPDATE_INFO_JSON, 'w') as f:
 		json.dump(update_info, f, indent=2)
 
-	print(
-		f'=== Done updating app files. Run the "test" command to test if the docker tags exist. '
-		f'Then, run the "build" command and smoke test the apps in "update_info/updated_apps".'
-		f'Then run the commit command. ===')
-
 
 def command_test():
 	if not UPDATE_INFO_JSON.exists():
@@ -131,6 +130,7 @@ def command_test():
 	with open(UPDATE_INFO_JSON) as f:
 		update_info: UpdateInfo = json.load(f)
 
+	failed_apps = []
 	for app_name, app_info in update_info['apps'].items():
 		if app_info['status'] == 'updated':
 			app_dir = Path(__file__).parent / 'apps' / app_name
@@ -138,13 +138,19 @@ def command_test():
 			update_file(app_dir / 'docker-compose.yml', '{{ fs.app_data }}', './app_data', '{{ fs.shared }}',
 						'./shared')
 
-			pull_process = subprocess.Popen(['docker-compose', 'pull', '--dry-run', '-q'], cwd=app_dir)
-			if pull_process.wait() == 0:
-				print(f'Pulling {app_name} seems to work.')
-			else:
-				print(f'!!! Failed to pull {app_name} !!!')
+			pull_process = subprocess.Popen(['docker-compose', 'pull', '--dry-run', '-q'], cwd=app_dir, stdout=None, stderr=None)
+			print('.', end='', flush=True)
+			if pull_process.wait() != 0:
+				failed_apps.append(app_name)
 
 			(app_dir / 'docker-compose.yml').unlink()
+
+	print('\r', end='', flush=True)
+	if failed_apps:
+		print('Failed to pull the following apps:')
+		print('\n'.join(failed_apps))
+	else:
+		print('All apps can be pulled successfully.')
 
 
 def command_build():
@@ -160,7 +166,7 @@ def command_build():
 			app_dir = Path(__file__).parent / 'apps' / app_name
 			shutil.copy(app_dir / f'{app_name}.zip', UPDATED_APPS_DIR / f'{app_name}.zip')
 
-	print(f'=== Done building updated apps. Smoke test the apps in {UPDATED_APPS_DIR}. ===')
+	subprocess.Popen(['xdg-open', str(UPDATED_APPS_DIR)], start_new_session=True)
 
 
 def command_commit():
@@ -279,7 +285,7 @@ def update_file(file_path: Path, *replacements: str):
 def adapt_version_string(app_name: str, version: str) -> str:
 	new_version = version
 	if app_name in ['actual', 'audiobookshelf', 'drawio', 'etherpad', 'kavita', 'linkding', 'navidrome',
-					'paperless-ngx', 'stirling-pdf', 'grist']:
+					'paperless-ngx', 'stirling-pdf', 'grist', 'memos']:
 		new_version = version[1:]  # remove the 'v' prefix
 	if app_name in ['element']:
 		new_version = version.split('-')[0]  # remove the suffix
@@ -292,17 +298,27 @@ def print_update_info():
 	with open(UPDATE_INFO_JSON) as f:
 		update_info: UpdateInfo = json.load(f)
 	print(f'=== Checked {len(update_info['apps'])} apps on {update_info["timestamp"]} ===')
+
 	for app_name, app_info in update_info['apps'].items():
 		if app_info['status'] == 'outdated':
 			breaking = f'({len(app_info['breaking_changes'])} possible breaking changes: {', '.join([c[0] for c in app_info['breaking_changes']])})' if \
 				app_info['breaking_changes'] else ''
 			print(f'{app_name:<20} {app_info["current_version"]:<10}  ->  {app_info["latest_version"]:<10} {breaking}')
+
+	if any(app_info['status'] == 'updated' for app_info in update_info['apps'].values()):
+		print('\nUpdated apps:')
+		for app_name, app_info in update_info['apps'].items():
+			if app_info['status'] == 'updated':
+				print(f'{app_name:<20} {app_info["current_version"]:<10}  ->  {app_info["latest_version"]:<10}')
+
 	apps_without_upstream = [app_name for app_name, app_info in update_info['apps'].items() if
 							 app_info['status'] == 'no_upstream']
 	print(f'{len(apps_without_upstream)} apps without upstream: {', '.join(apps_without_upstream)}')
+
 	apps_up_to_date = [app_name for app_name, app_info in update_info['apps'].items() if
 					   app_info['status'] == 'up_to_date']
 	print(f'{len(apps_up_to_date)} apps up to date: {', '.join(apps_up_to_date)}')
+
 	apps_skipped = [app_name for app_name, app_info in update_info['apps'].items() if app_info['status'] == 'skipped']
 	print(f'{len(apps_skipped)} apps skipped: {', '.join(apps_skipped)}')
 
