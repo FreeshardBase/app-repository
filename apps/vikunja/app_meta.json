@@ -1,0 +1,27 @@
+{
+  "v": "1.1",
+  "app_version": "0.24.5",
+  "name": "vikunja",
+  "pretty_name": "Vikunja",
+  "icon": "icon.svg",
+  "entrypoints": [
+    {
+      "container_name": "vikunja",
+      "container_port": 3456,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "public"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Plan your projects with the elegance of a sloth on a sunny day.",
+    "is_featured": false
+  }
+}
