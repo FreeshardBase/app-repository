@@ -4,7 +4,7 @@ networks:
 
 services:
   app:
-    image: etherpad/etherpad:2.2.6
+    image: etherpad/etherpad:2.2.7
     container_name: etherpad
     environment:
       ADMIN_PASSWORD: admin
