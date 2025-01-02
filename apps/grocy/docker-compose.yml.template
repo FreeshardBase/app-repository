@@ -13,7 +13,7 @@ services:
     - portal
 
   grocy-backend:
-    image: "grocy/backend:v4.0.3"
+    image: "grocy/backend:v4.2.0"
     container_name: grocy-backend
     volumes:
       - "{{ fs.app_data }}/var/www/data/db:/var/www/data/db"
