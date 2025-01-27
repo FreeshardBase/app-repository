@@ -5,7 +5,7 @@ networks:
 services:
     stirling-pdf:
         restart: always
-        image: frooodle/s-pdf:0.38.0
+        image: frooodle/s-pdf:0.39.0
         container_name: stirling-pdf
         networks:
         - portal
