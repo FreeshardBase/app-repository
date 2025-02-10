@@ -1,6 +1,6 @@
 {
   "v": "1.0",
-  "app_version": "2.18.1",
+  "app_version": "2.19.0",
   "name": "audiobookshelf",
   "icon": "icon.svg",
   "upstream_repo": "https://github.com/advplyr/audiobookshelf",

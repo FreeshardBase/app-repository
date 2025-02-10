@@ -5,7 +5,7 @@ networks:
 services:
     memos:
         restart: always
-        image: neosmemo/memos:0.23.0
+        image: neosmemo/memos:0.24.0
         container_name: memos
         volumes:
         - "{{ fs.app_data }}/data:/var/opt/memos"
