@@ -91,6 +91,7 @@ def command_skip(apps: list[str]):
 	for app_name in apps:
 		if app_name in update_info['apps']:
 			update_info['apps'][app_name]['status'] = 'skipped'
+			subprocess.Popen(['git', 'checkout', f'apps/{app_name}']).wait()
 		else:
 			print(f'App {app_name} not found in update_info.json')
 
