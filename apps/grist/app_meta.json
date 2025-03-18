@@ -1,6 +1,6 @@
 {
   "v": "1.0",
-  "app_version": "1.4.0",
+  "app_version": "1.4.2",
   "name": "grist",
   "icon": "icon.svg",
   "upstream_repo": "https://github.com/gristlabs/grist-core",
