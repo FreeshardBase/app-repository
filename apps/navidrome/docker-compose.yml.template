@@ -5,7 +5,7 @@ networks:
 services:
     navidrome:
         restart: always
-        image: deluan/navidrome:0.55.1
+        image: deluan/navidrome:0.55.2
         container_name: navidrome
         volumes:
         - "{{ fs.app_data }}/data:/data"
