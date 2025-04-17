@@ -5,7 +5,7 @@ networks:
 services:
     kavita:
         restart: always
-        image: jvmilazz0/kavita:0.8.5
+        image: jvmilazz0/kavita:0.8.6
         container_name: kavita
         volumes:
         - "{{ fs.app_data }}/kavita/config:/kavita/config"
