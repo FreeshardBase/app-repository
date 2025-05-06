@@ -26,3 +26,9 @@ jobs:
             --sas-token $AZ_STORAGE_SAS_TOKEN \
             --account-name storageaccountportab0da \
             --overwrite
+          az storage blob upload-batch \
+            --destination "app-store/${{ github.ref_name }}/all_apps" \
+            --source apps \
+            --sas-token $AZ_STORAGE_SAS_TOKEN \
+            --account-name storageaccountportab0da \
+            --overwrite
