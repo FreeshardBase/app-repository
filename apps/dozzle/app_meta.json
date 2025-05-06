@@ -22,8 +22,8 @@
     "idle_time_for_shutdown": 3600
   },
   "store_info": {
-    "description_short": "Real-time logging and monitoring for Portal and Portal apps.",
-    "description_long": "Dozzle is a small lightweight application to monitor the logs of Portal and Portal apps. It doesn’t store any log files. It is for live monitoring only.",
+    "description_short": "Real-time logging and monitoring for your shard and apps.",
+    "description_long": "Dozzle is a small lightweight application to monitor the logs of your shard and its apps. It doesn’t store any log files. It is for live monitoring only.",
     "is_featured": false
   }
 }
