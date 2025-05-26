@@ -5,7 +5,7 @@ networks:
 services:
     grist:
         restart: always
-        image: gristlabs/grist:1.5.1
+        image: gristlabs/grist:1.5.2
         container_name: grist
         volumes:
         - "{{ fs.app_data }}/persist:/persist"
