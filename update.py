@@ -190,10 +190,10 @@ def command_commit():
 			subprocess.run(['git', 'commit', '-m', commit_message])
 			print(f'Committed changes for {app_name}')
 
-	subprocess.run(['git', 'checkout', 'master'])
+	subprocess.run(['git', 'checkout', 'main'])
 	subprocess.run(['git', 'merge', '--no-ff', '--no-edit', branch_name])
 	subprocess.run(['git', 'branch', '-d', branch_name])
-	print(f'Merged branch {branch_name} into master')
+	print(f'Merged branch {branch_name} into main')
 
 	UPDATE_INFO_JSON.unlink()
 
