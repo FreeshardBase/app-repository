@@ -40,7 +40,7 @@ services:
 
   database:
     container_name: immich_postgres
-    image: registry.hub.docker.com/tensorchord/pgvecto-rs:pg14-v0.2.0
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
     env_file:
       - .env
     environment:
