@@ -5,7 +5,7 @@ networks:
 services:
     vaultwarden:
         restart: always
-        image: vaultwarden/server:1.33.2
+        image: vaultwarden/server:1.34.1
         container_name: vaultwarden
         volumes:
         - "{{ fs.app_data }}/data:/data"
