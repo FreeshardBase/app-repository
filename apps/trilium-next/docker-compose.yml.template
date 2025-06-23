@@ -5,7 +5,7 @@ networks:
 services:
     trilium-next:
         restart: always
-        image: triliumnext/notes:v0.94.1
+        image: triliumnext/notes:v0.95.0
         container_name: trilium-next
         volumes:
         - "{{ fs.app_data }}/data:/home/node/trilium-data"
