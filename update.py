@@ -139,7 +139,7 @@ def command_test():
 			update_file(app_dir / 'docker-compose.yml', '{{ fs.app_data }}', './app_data', '{{ fs.shared }}',
 						'./shared')
 
-			pull_process = subprocess.Popen(['docker-compose', 'pull', '--dry-run', '-q'], cwd=app_dir, stdout=None, stderr=None)
+			pull_process = subprocess.Popen(['docker-compose', 'pull', '--dry-run', '-q'], cwd=app_dir, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 			print('.', end='', flush=True)
 			if pull_process.wait() != 0:
 				failed_apps.append(app_name)
