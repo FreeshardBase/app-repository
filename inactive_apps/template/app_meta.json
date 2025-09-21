@@ -4,6 +4,7 @@
   "name": "<<name>>",
   "pretty_name": "<<name>>",
   "icon": "icon.svg",
+  "upstream_repo": "$$edit$$",
   "entrypoints": [
     {
       "container_name": "<<name>>",

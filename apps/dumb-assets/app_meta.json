@@ -1,0 +1,29 @@
+{
+  "v": "1.1",
+  "app_version": "1.0.11",
+  "name": "dumb-assets",
+  "pretty_name": "DumbAssets",
+  "icon": "dumbassets.svg",
+  "upstream_repo": "https://github.com/DumbWareio/DumbAssets",
+  "entrypoints": [
+    {
+      "container_name": "dumb-assets",
+      "container_port": 3000,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "A stupid simple asset tracker.",
+    "description_long": "A stupid simple asset tracker for keeping track of your physical assets, their components, and applicable warranties and routine maintenance.",
+    "is_featured": false
+  }
+}

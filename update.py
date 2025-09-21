@@ -286,7 +286,7 @@ def update_file(file_path: Path, *replacements: str):
 def adapt_version_string(app_name: str, version: str) -> str:
 	new_version = version
 	if app_name in ['actual', 'audiobookshelf', 'drawio', 'etherpad', 'kavita', 'linkding', 'navidrome',
-					'paperless-ngx', 'stirling-pdf', 'grist', 'memos']:
+					'paperless-ngx', 'stirling-pdf', 'grist', 'memos', 'DumbAssets']:
 		new_version = version[1:]  # remove the 'v' prefix
 	if app_name in ['element']:
 		new_version = version.split('-')[0]  # remove the suffix

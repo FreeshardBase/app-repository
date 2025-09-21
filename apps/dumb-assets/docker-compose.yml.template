@@ -1,0 +1,16 @@
+networks:
+    portal:
+        external: true
+
+services:
+    dumb-assets:
+        restart: always
+        image: dumbwareio/dumbassets:1.0.11
+        container_name: dumb-assets
+        volumes:
+        - "{{ fs.app_data }}/app/data:/app/data"
+        environment:
+        - BASE_URL=https://dumb-assets.{{ portal.domain }}
+        - SITE_TITLE=DumbAssets at {{ portal.short_id }}
+        networks:
+        - portal
