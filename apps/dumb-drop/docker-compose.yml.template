@@ -1,0 +1,17 @@
+networks:
+    portal:
+        external: true
+
+services:
+    dumb-drop:
+        restart: always
+        image: dumbwareio/dumbdrop:latest
+        container_name: dumb-drop
+        volumes:
+        - "{{ fs.app_data }}/app/uploads:/app/uploads"
+        environment:
+        - BASE_URL=https://dumb-drop.{{ portal.domain }}
+        - DUMBDROP_TITLE=DumbDrop at {{ portal.short_id }}
+        - UPLOAD_DIR=/app/uploads
+        networks:
+        - portal

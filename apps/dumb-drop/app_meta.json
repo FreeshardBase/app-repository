@@ -1,0 +1,31 @@
+{
+  "v": "1.1",
+  "app_version": "0.1.0",
+  "name": "dumb-drop",
+  "pretty_name": "DumbDrop",
+  "icon": "dumbdrop.svg",
+  "entrypoints": [
+    {
+      "container_name": "dumb-drop",
+      "container_port": 3000,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "public"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "A stupid simple file upload application.",
+    "description_long": [
+      "A stupid simple file upload application that provides a clean, modern interface for dragging and dropping files. Built with Node.js and vanilla JavaScript.",
+      "Allows anyone to upload any file to your Portal!"
+    ],
+    "is_featured": false
+  }
+}
