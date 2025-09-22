@@ -1,6 +1,6 @@
 {
-  "v": "1.0",
-  "app_version": "0.1.0",
+  "v": "1.1",
+  "app_version": "0.1.1",
   "name": "mirotalk",
   "pretty_name": "MiroTalk",
   "icon": "icon.png",
@@ -16,6 +16,10 @@
       "access": "public"
     }
   },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 4000
+  },
   "store_info": {
     "description_short": "Free browser based real-time video calls.",
     "description_long": [
@@ -23,7 +27,7 @@
       "Start your next video call with a single click. No download, plug-in, or login is required. Just get straight to talking, messaging, and sharing your screen."
     ],
     "hint": "All rooms are public, so you should chose hard-to-guess names for sensitive topics.",
-    "is_featured": true
+    "is_featured": false
   }
 
 }
