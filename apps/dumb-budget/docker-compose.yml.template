@@ -1,0 +1,17 @@
+networks:
+    portal:
+        external: true
+
+services:
+    dumb-budget:
+        restart: always
+        image: dumbwareio/dumbbudget:latest
+        container_name: dumb-budget
+        volumes:
+        - "{{ fs.app_data }}/app/data:/app/data"
+        environment:
+        - BASE_URL=https://dumb-budget.{{ portal.domain }}
+        - INSTANCE_NAME={{ portal.short_id }}
+        - CURRENCY=EUR
+        networks:
+        - portal

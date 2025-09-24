@@ -1,0 +1,29 @@
+{
+  "v": "1.1",
+  "app_version": "0.1.0",
+  "name": "dumb-budget",
+  "pretty_name": "DumbBudget",
+  "icon": "dumbbudget.svg",
+  "upstream_repo": "https://github.com/DumbWareio/DumbBudget",
+  "entrypoints": [
+    {
+      "container_name": "dumb-budget",
+      "container_port": 3000,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "A simple personal budgeting app.",
+    "description_long": "A simple personal budgeting app. Track your income and expenses with a clean, modern interface.",
+    "is_featured": false
+  }
+}
