@@ -5,7 +5,7 @@ networks:
 services:
     drawio:
         restart: always
-        image: jgraph/drawio:28.2.5
+        image: jgraph/drawio:28.2.9
         container_name: drawio
         networks:
         - portal
