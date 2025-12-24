@@ -5,7 +5,10 @@ networks:
 services:
     stirling-pdf:
         restart: always
-        image: frooodle/s-pdf:1.5.0
+        image: stirlingtools/stirling-pdf:2.1.5
         container_name: stirling-pdf
+        environment:
+        - MODE=BOTH
+        - SECURITY_ENABLELOGIN=false
         networks:
         - portal
