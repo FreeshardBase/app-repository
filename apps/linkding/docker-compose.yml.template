@@ -5,7 +5,7 @@ networks:
 services:
     linkding:
         restart: always
-        image: sissbruecker/linkding:1.44.1
+        image: sissbruecker/linkding:1.44.2
         container_name: linkding
         volumes:
         - "{{ fs.app_data }}/etc/linkding/data:/etc/linkding/data"
