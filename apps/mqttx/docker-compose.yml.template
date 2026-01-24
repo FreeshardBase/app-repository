@@ -5,7 +5,7 @@ networks:
 services:
     mqttx:
         restart: always
-        image: emqx/mqttx-web:v1.12.1
+        image: emqx/mqttx-web:v1.13.0
         container_name: mqttx
         environment:
         - BASE_URL=https://mqttx.{{ portal.domain }}
