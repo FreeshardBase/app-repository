@@ -1,0 +1,25 @@
+networks:
+    portal:
+        external: true
+
+services:
+    kitchenowl:
+        restart: always
+        image: tombursch/kitchenowl-web:v0.7.6
+        container_name: kitchenowl
+        volumes:
+        - "{{ fs.app_data }}/data:/data"
+        environment:
+        - BACK_URL=kitchenowl-backend:5000
+        networks:
+        - portal
+    kitchenowl-backend:
+        restart: always
+        image: tombursch/kitchenowl-backend:v0.7.6
+        container_name: kitchenowl-backend
+        environment:
+          - JWT_SECRET_KEY=jkawfhei8rzfg84rztg7r
+        volumes:
+        - "{{ fs.app_data }}/data:/data"
+        networks:
+        - portal

@@ -1,0 +1,29 @@
+{
+  "v": "1.1",
+  "app_version": "v0.7.6",
+  "name": "kitchenowl",
+  "pretty_name": "KitchenOwl",
+  "icon": "icon.png",
+  "upstream_repo": "https://github.com/tombursch/kitchenowl",
+  "entrypoints": [
+    {
+      "container_name": "kitchenowl",
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "public"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "The last grocery app you'll ever need!",
+    "description_long": "KitchenOwl is a smart grocery list and recipe manager. Easily add items to your shopping list before you go shopping or create recipes and get cooking suggestions. Track your expenses, so you know how much you've spent. Download now!",
+    "is_featured": false
+  }
+}
