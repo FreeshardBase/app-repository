@@ -5,7 +5,7 @@ networks:
 services:
     ihatemoney:
         restart: always
-        image: ihatemoney/ihatemoney:7.0.0
+        image: ihatemoney/ihatemoney:7.0.1
         container_name: ihatemoney
         volumes:
         - "{{ fs.app_data }}/database:/database"
