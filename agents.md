@@ -179,6 +179,7 @@ services:
 networks:
     portal:
         external: true
+    my-app:
 
 services:
     my-app:
@@ -196,6 +197,7 @@ services:
         - my-app-redis
         networks:
         - portal
+        - my-app
 
     my-app-postgres:
         restart: always
@@ -208,14 +210,14 @@ services:
         - POSTGRES_PASSWORD=myapp
         - POSTGRES_DB=myapp
         networks:
-        - portal
+        - my-app
 
     my-app-redis:
         restart: always
         image: redis:7-alpine
         container_name: my-app-redis
         networks:
-        - portal
+        - my-app
 ```
 
 ### Key Rules
@@ -228,7 +230,7 @@ services:
 6. **Image tags**: Pin to a specific version matching `app_version` in app_meta.json. Do not use `latest`.
 7. **Internal networking**: Supporting services (databases, caches) can reference each other by container_name since they're on the same network.
 8. **Docker socket**: Can be mounted read-only if needed: `/var/run/docker.sock:/var/run/docker.sock:ro` (used by dozzle).
-9. **Private networks**: For complex apps, create an additional private network for internal communication (see immich example). Only containers that need to be reachable from outside should join the `portal` network.
+9. **Private networks**: For multi-service apps, only the entrypoint container should join the `portal` network. Create an additional private network (named after the app) for internal communication between all services. The entrypoint container joins both networks; supporting services join only the private network. See immich for examples.
 
 ### Common Shared Directory Paths
 
