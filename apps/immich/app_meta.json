@@ -1,6 +1,6 @@
 {
   "v": "1.0",
-  "app_version": "v2.5.5",
+  "app_version": "v2.6.1",
   "name": "immich",
   "icon": "immich-logo.svg",
   "upstream_repo": "https://github.com/immich-app/immich",
