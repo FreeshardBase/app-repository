@@ -5,6 +5,7 @@
 **License:** {{ license }} ({{ license_class }})
 **Image:** `{{ image }}:{{ tag_latest }}`
 **Last release:** {{ last_release_date }}
+**Preview zip (after CI):** https://storageaccountportab0da.blob.core.windows.net/app-store/preview/pr-<PR_NUMBER_PLACEHOLDER>/all_apps/{{ name }}.zip
 
 ## What is it
 
