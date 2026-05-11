@@ -12,7 +12,7 @@ services:
         - "{{ fs.app_data }}/config:/var/syncthing/config"
         - "{{ fs.shared }}:/var/syncthing/Sync"
         environment:
-        - STGUIADDRESS=0.0.0.0:8384
+        - STGUIADDRESS=http://0.0.0.0:8384
         - PUID=1000
         - PGID=1000
         networks:
