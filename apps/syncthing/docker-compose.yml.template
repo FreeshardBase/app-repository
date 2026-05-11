@@ -1,0 +1,19 @@
+networks:
+    portal:
+        external: true
+
+services:
+    syncthing:
+        restart: always
+        image: syncthing/syncthing:2.0.16
+        container_name: syncthing
+        hostname: syncthing
+        volumes:
+        - "{{ fs.app_data }}/config:/var/syncthing/config"
+        - "{{ fs.shared }}:/var/syncthing/Sync"
+        environment:
+        - STGUIADDRESS=http://0.0.0.0:8384
+        - PUID=0
+        - PGID=0
+        networks:
+        - portal
