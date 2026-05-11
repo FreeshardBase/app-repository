@@ -24,4 +24,6 @@ Outputs:
 
 4. **update.py entry.** If `research.json.tag_strip_v_needed == true`, open `update.py`, find the `adapt_version_string` function, and add `<name>` to the list of apps that strip the `v` prefix. Match surrounding style. If a different tag transformation is needed (suffix strip, prefix add), insert a custom branch and document the rule in `decisions.md`.
 
-5. **Hand off.** Continue to `phases/05-pr.md`.
+5. **Build store data / zip.** Run `just build-store-data` (fallback: `python3 -m build_store_data` if `just` is unavailable). This regenerates `apps/<name>/<name>.zip` and refreshes `apps/store_metadata.json`. Both are gitignored but the zip is uploaded as a PR artifact in phase 5. If the build fails, stop and surface the error — do not push a half-built zip.
+
+6. **Hand off.** Continue to `phases/05-pr.md`.
