@@ -249,7 +249,7 @@ Vendored at `reference/freeshard-digest.md` with companion `digest-meta.json` (`
 
 Drift handling: preflight checks `generated_at`. If older than 30 days, dispatch a subagent to crawl `docs.freeshard.net`, regenerate the digest, and overwrite both files before continuing.
 
-Follow-up: file an issue in the docs repo to add CI-driven digest regeneration so the vendored copy is always fresh and the 30-day refresh becomes a fallback.
+Follow-up: file an issue in the docs repo to add CI-driven digest regeneration so the vendored copy is always fresh and the 30-day refresh becomes a fallback. Filed: https://github.com/FreeshardBase/documentation/issues/2
 
 ## Slash command
 
