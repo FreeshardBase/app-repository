@@ -1,1 +1,8 @@
-{}
+{
+  "generated_at": "2026-05-11",
+  "source_urls": [
+    "https://docs.freeshard.net",
+    "https://docs.freeshard.net/overview/"
+  ],
+  "note": "docs.freeshard.net dev sub-pages return 404; digest derived primarily from agents.md and live app examples."
+}
