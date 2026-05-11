@@ -71,10 +71,11 @@ The skill is named `add-app`. Reevaluation is the same skill switched into a dif
   ↓
 3. Proposal
    - draft app_meta.json + docker-compose.yml.template in memory
-   - decide access model (private / public / auth-proxy)
-   - decide shared volumes (fs.shared/...) based on category hint
+   - decide access model (private / public / auth-proxy) — reads notes for auth-proxy env vars and quirks
+   - decide shared volumes (fs.shared/...) — reads notes for data-category hints
    - decide minimum_portal_size from resource_class_estimate
    - decide always_on / idle_time_for_shutdown
+   - decide telemetry opt-out env vars — reads notes
    - if subagent reported any ambiguity[] entries → checkpoint with user
    - else continue silently
   ↓
@@ -97,8 +98,13 @@ Each run uses an isolated worktree at `.worktrees/add-<name>` on branch `feat/ad
 
 ## Research subagent contract
 
-Subagent type: `general-purpose`. Prompt (in `phases/02-research.md`) instructs it to investigate the app via Docker Hub, GitHub, and the upstream homepage, anchored on the field schema below. The subagent returns a single fenced JSON block; the main thread parses it. Raw pages do not enter main context.
+Subagent type: `general-purpose`. Prompt (in `phases/02-research.md`) instructs it to investigate the app via Docker Hub, GitHub, and the upstream homepage, anchored on the contract below.
 
+The contract is **hybrid**: a structured JSON block carries fields the main thread needs for programmatic gating, followed by a free-form markdown `notes` section for everything else. The main thread parses the JSON for hard-exit checks, version comparison, and file drafting. The `notes` section is never parsed for gating — it is rendered verbatim into the PR body so reviewers see the subagent's nuanced findings.
+
+Return format:
+
+````
 ```json
 {
   "name": "linkding",
@@ -109,37 +115,43 @@ Subagent type: `general-purpose`. Prompt (in `phases/02-research.md`) instructs 
   "paid": false,
   "image": "sissbruecker/linkding",
   "tag_latest": "1.36.0",
-  "tag_format": "semver",
   "github_release_tag_example": "v1.36.0",
   "tag_strip_v_needed": true,
   "last_release_date": "2025-09-12",
   "abandoned": false,
   "container_port": 9090,
-  "auth_proxy_support": {
-    "supported": true,
-    "env_vars": ["LD_ENABLE_AUTH_PROXY", "LD_AUTH_PROXY_USERNAME_HEADER"],
-    "header_name_var": "LD_AUTH_PROXY_USERNAME_HEADER"
-  },
-  "telemetry_optout_env": null,
   "needs_database": false,
   "supporting_services": [],
-  "shared_volume_hint": null,
   "resource_class_estimate": "xs",
   "multi_tenant": false,
   "needs_privileged": false,
   "needs_gpu": false,
   "icon_candidates": ["..."],
-  "screenshots": ["..."],
   "description_short": "Self-hosted bookmark manager.",
-  "description_long": ["...", "..."],
   "ambiguity": [],
   "warnings": []
 }
 ```
 
-Required fields (main thread validates): `name`, `image`, `tag_latest`, `license_class`, `container_port`, `description_short`. Missing → re-ask once, else hard exit.
+## Notes
 
-`ambiguity[]` entries describe genuine uncertainty that should trigger a user checkpoint; each entry has `{topic, options, recommendation}`. `warnings[]` captures soft warnings (c/d/e/g, abandoned, etc.) for the PR body.
+<free-form markdown — subagent dumps anything important that doesn't fit the schema: auth-proxy details, deployment quirks, security caveats, federation requirements, registry caveats, screenshots, long description, env vars to disable telemetry, alternative image candidates considered and rejected, etc.>
+````
+
+Rationale for hybrid:
+- **Structured fields** = deterministic gating. Hard exits (a/b/f), version-only-drift check, and file drafting need parsed values, not LLM re-extraction.
+- **Free-form `notes`** = room for surprise findings the schema can't anticipate.
+
+Structured field rules:
+- Enums kept minimal: `license_class ∈ {foss, source-available, proprietary}`, `resource_class_estimate ∈ {xs, s, l}`. Anything weirder lives in `notes`.
+- No `tag_format` enum — the main thread decides `tag_strip_v_needed` from `tag_latest` vs `github_release_tag_example` directly; unusual schemes (date stamps, monotonic build numbers) get described in `notes`.
+- No structured `auth_proxy_support`, `shared_volume_hint`, `telemetry_optout_env` — these live in `notes` because they're nuanced (often partial support, plugin-only, multiple alternative envs). Proposal phase reads `notes` to decide.
+- `ambiguity[]` and `warnings[]` stay structured because they drive checkpoint logic and PR-body sections.
+
+Required JSON fields (main thread validates): `name`, `image`, `tag_latest`, `license_class`, `container_port`, `description_short`. Missing → re-ask once, else hard exit.
+
+`ambiguity[]` entries: `{topic, options[], recommendation}`. Non-empty triggers checkpoint.
+`warnings[]` entries: plain strings; rendered in PR body.
 
 ## Multiple-image disambiguation
 
