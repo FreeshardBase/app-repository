@@ -1,8 +1,24 @@
 {
   "generated_at": "2026-05-11",
   "source_urls": [
-    "https://docs.freeshard.net",
-    "https://docs.freeshard.net/overview/"
-  ],
-  "note": "docs.freeshard.net dev sub-pages return 404; digest derived primarily from agents.md and live app examples."
+    "https://docs.freeshard.net/",
+    "https://docs.freeshard.net/overview/",
+    "https://docs.freeshard.net/developer_docs/overview/",
+    "https://docs.freeshard.net/developer_docs/app_meta_json/",
+    "https://docs.freeshard.net/developer_docs/docker_compose_template/",
+    "https://docs.freeshard.net/developer_docs/routing_and_ac/",
+    "https://docs.freeshard.net/developer_docs/lifecycle/",
+    "https://docs.freeshard.net/developer_docs/persisting/",
+    "https://docs.freeshard.net/developer_docs/internal_services/",
+    "https://docs.freeshard.net/developer_docs/peering/",
+    "https://docs.freeshard.net/developer_docs/events/",
+    "https://docs.freeshard.net/developer_docs/submitting/",
+    "https://docs.freeshard.net/developer_docs/existing_apps/",
+    "https://docs.freeshard.net/developer_docs/custom_apps/",
+    "https://docs.freeshard.net/developer_docs/revenue_share/",
+    "https://docs.freeshard.net/overview/concepts/apps/",
+    "https://docs.freeshard.net/overview/concepts/single_user_isolation/",
+    "https://docs.freeshard.net/overview/concepts/devices/",
+    "https://storageaccountportab0da.blob.core.windows.net/json-schema/0-30-2/schema_app_meta_1.2.json"
+  ]
 }
