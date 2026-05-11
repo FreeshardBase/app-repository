@@ -1,0 +1,39 @@
+{
+    "v": "1.2",
+    "app_version": "2.0.16",
+    "name": "syncthing",
+    "pretty_name": "Syncthing",
+    "icon": "icon.svg",
+    "homepage": "https://syncthing.net/",
+    "upstream_repo": "https://github.com/syncthing/syncthing",
+    "entrypoints": [
+        {
+            "container_name": "syncthing",
+            "container_port": 8384,
+            "entrypoint_port": "http"
+        }
+    ],
+    "paths": {
+        "": {
+            "access": "private"
+        }
+    },
+    "lifecycle": {
+        "always_on": true
+    },
+    "minimum_portal_size": "s",
+    "store_info": {
+        "description_short": "Continuous peer-to-peer file synchronization between your devices.",
+        "description_long": [
+            "Syncthing is an open-source, peer-to-peer file synchronization tool. It keeps folders synchronized across multiple devices in real time, without requiring a central cloud provider. All traffic is end-to-end encrypted and authenticated with per-device TLS certificates.",
+            "On your shard, Syncthing acts as an always-on sync node that mirrors files from your laptops, phones, and other devices. Pair the shard with each device once and the folders stay in sync automatically.",
+            "Syncthing's sync folder is mapped to the shard's shared storage, so synced files appear under the same paths used by other Freeshard apps (documents, music, pictures, media). Other apps on your shard can read and write the same files."
+        ],
+        "hint": [
+            "On first launch, open the Syncthing web UI and set a GUI username and password under Actions → Settings → GUI.",
+            "The shard cannot accept direct incoming connections on Syncthing's sync port. Connections to and from other devices use the public Syncthing relay pool, which is slower than direct but works behind any NAT.",
+            "Sync folders live under the shard's shared storage, so files synced here are visible to other Freeshard apps that use the same shared directories."
+        ],
+        "is_featured": false
+    }
+}
