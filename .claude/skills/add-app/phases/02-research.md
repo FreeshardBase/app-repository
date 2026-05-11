@@ -8,11 +8,19 @@ Outputs (in `./.add-app-scratch/`):
 
 ## Steps
 
-1. **Dispatch research subagent.** Type: `general-purpose`. Prompt:
+1. **Dispatch research subagent.** Type: `general-purpose`. Subagents on open-ended web research can hang silently for tens of minutes. Set a hard time budget: if the subagent has not returned within ~5 minutes, abort it and finish the research inline with WebFetch + `gh` + `docker manifest inspect`. The prompt itself also tells the subagent to time-box.
+
+   Prompt:
 
    ```
    Research the self-hostable app named "<name>" for inclusion in the
-   Freeshard app store.
+   Freeshard app store. Hard budget: 5 minutes total. If a single
+   source is slow or unreachable, skip it and move on — do not retry
+   indefinitely. Prefer the GitHub API (`gh api repos/<org>/<repo>`)
+   over scraping the rendered repo page; prefer `docker manifest
+   inspect` over Docker Hub HTML. Return whatever you have at the
+   budget boundary; mark unknown fields as null with an ambiguity
+   entry rather than continuing to dig.
 
    READ FIRST (as background, do not re-output):
    - /home/ubuntu/projects/freeshard/app-repository/.claude/skills/add-app/reference/freeshard-digest.md

@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   deploy:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     container: ghcr.io/freeshardbase/cicd-image:1.0.3
     steps:
@@ -28,6 +32,28 @@ jobs:
             --overwrite
           az storage blob upload-batch \
             --destination "app-store/${{ github.ref_name }}/all_apps" \
+            --source apps \
+            --sas-token $AZ_STORAGE_SAS_TOKEN \
+            --account-name storageaccountportab0da \
+            --overwrite
+
+  preview:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    container: ghcr.io/freeshardbase/cicd-image:1.0.3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build store data
+        run: python3 build_store_data.py
+
+      - name: Upload preview to Azure Blob Storage
+        env:
+          AZ_STORAGE_SAS_TOKEN: ${{ secrets.AZ_STORAGE_SAS_TOKEN }}
+        run: |
+          az storage blob upload-batch \
+            --destination "app-store/preview/pr-${{ github.event.pull_request.number }}/all_apps" \
             --source apps \
             --sas-token $AZ_STORAGE_SAS_TOKEN \
             --account-name storageaccountportab0da \
