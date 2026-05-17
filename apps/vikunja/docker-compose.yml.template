@@ -1,0 +1,21 @@
+networks:
+    portal:
+        external: true
+
+services:
+    vikunja:
+        restart: always
+        image: vikunja/vikunja:2.3.0
+        container_name: vikunja
+        volumes:
+        - "{{ fs.app_data }}/files:/app/vikunja/files"
+        - "{{ fs.app_data }}/db:/db"
+        environment:
+        - VIKUNJA_SERVICE_JWTSECRET=1d9a31cd5a148fee55efe42fe09f84db15d3a4c913e25d6248eedfa9960e2894
+        - VIKUNJA_SERVICE_PUBLICURL=https://vikunja.{{ portal.domain }}
+        - VIKUNJA_SERVICE_ENABLEREGISTRATION=false
+        - VIKUNJA_DATABASE_TYPE=sqlite
+        - VIKUNJA_DATABASE_PATH=/db/vikunja.db
+        networks:
+        - portal
+        user: 0:0
