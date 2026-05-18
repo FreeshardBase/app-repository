@@ -1,0 +1,28 @@
+{
+  "v": "1.2",
+  "app_version": "2.3.0",
+  "name": "vikunja",
+  "pretty_name": "Vikunja",
+  "icon": "icon.svg",
+  "homepage": "https://vikunja.io",
+  "upstream_repo": "https://github.com/go-vikunja/vikunja",
+  "entrypoints": [
+    {
+      "container_name": "vikunja",
+      "container_port": 3456,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "store_info": {
+    "description_short": "Plan your projects with the elegance of a sloth on a sunny day.",
+    "description_long": [
+      "Vikunja is an open-source, self-hosted to-do and project-management app. Tasks support priorities, due dates, reminders, labels, attachments, sub-tasks and saved filters, viewable as list, kanban, gantt, table or calendar.",
+      "Projects nest into hierarchies and can be shared with teams. Authentication is built-in (username/password) with optional OpenID Connect. A single Go binary bundles the Vue frontend and runs on SQLite by default — no separate database required."
+    ]
+  }
+}
