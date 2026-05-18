@@ -50,6 +50,6 @@ Outputs (in `./.add-app-scratch/`):
     - Show drafted files.
     - List each ambiguity topic with options and the subagent's recommendation.
     - User chooses per topic, edits drafts, or rejects.
-    - Reject → hard exit, leave worktree in place.
+    - Reject → hard exit code `reject`. Follow the "Blocked-app documentation" procedure in `reference/exit-criteria.md`: write `blocked_apps/<name>.md`, commit, push, open a non-draft documentation-only PR. Leave the worktree in place.
 
 11. **Hand off.** Continue to `phases/04-scaffold.md`.
