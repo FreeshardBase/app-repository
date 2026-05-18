@@ -53,7 +53,7 @@ jobs:
           AZ_STORAGE_SAS_TOKEN: ${{ secrets.AZ_STORAGE_SAS_TOKEN }}
         run: |
           az storage blob upload-batch \
-            --destination "app-store/preview/pr-${{ github.event.pull_request.number }}/all_apps" \
+            --destination "app-store/preview/${{ github.head_ref }}/all_apps" \
             --source apps \
             --sas-token $AZ_STORAGE_SAS_TOKEN \
             --account-name storageaccountportab0da \
