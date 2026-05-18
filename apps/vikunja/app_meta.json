@@ -15,7 +15,7 @@
   ],
   "paths": {
     "": {
-      "access": "public"
+      "access": "private"
     }
   },
   "store_info": {
