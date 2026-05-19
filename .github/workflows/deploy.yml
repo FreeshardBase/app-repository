@@ -58,3 +58,46 @@ jobs:
             --sas-token $AZ_STORAGE_SAS_TOKEN \
             --account-name storageaccountportab0da \
             --overwrite
+
+      - name: Build updated_apps.zip bundle (changed apps only)
+        if: startsWith(github.head_ref, 'updates/')
+        run: |
+          mkdir -p /tmp/bundle
+          # find apps changed in this PR
+          git fetch origin main
+          changed=$(git diff --name-only origin/main...HEAD -- 'apps/*/' \
+                    | awk -F/ '{print $2}' | sort -u)
+          echo "Changed apps:"; echo "$changed"
+          for app in $changed; do
+            if [ -f "apps/$app/$app.zip" ]; then
+              cp "apps/$app/$app.zip" /tmp/bundle/
+            fi
+          done
+          (cd /tmp/bundle && zip -r /tmp/updated_apps.zip .)
+          ls -la /tmp/updated_apps.zip
+
+      - name: Upload updated_apps.zip bundle
+        if: startsWith(github.head_ref, 'updates/')
+        env:
+          AZ_STORAGE_SAS_TOKEN: ${{ secrets.AZ_STORAGE_SAS_TOKEN }}
+        run: |
+          # head_ref is `updates/<iso-ts>`; strip the prefix
+          TS="${GITHUB_HEAD_REF#updates/}"
+          echo "Uploading to app-store/updates/$TS/updated_apps.zip"
+          az storage blob upload \
+            --file /tmp/updated_apps.zip \
+            --container-name app-store \
+            --name "updates/$TS/updated_apps.zip" \
+            --sas-token "$AZ_STORAGE_SAS_TOKEN" \
+            --account-name storageaccountportab0da \
+            --overwrite
+
+      - name: Comment bundle URL on PR
+        if: startsWith(github.head_ref, 'updates/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TS="${GITHUB_HEAD_REF#updates/}"
+          URL="https://storageaccountportab0da.blob.core.windows.net/app-store/updates/$TS/updated_apps.zip"
+          gh pr comment "${{ github.event.pull_request.number }}" \
+            --body "Smoke-test bundle uploaded: $URL"
