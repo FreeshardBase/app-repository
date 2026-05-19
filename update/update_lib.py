@@ -100,3 +100,46 @@ def latest_lscr_tag(image: str, filter_regex: str = r".*",
                      suffix: Optional[str] = None) -> str:
     """linuxserver.io ships via ghcr; same protocol."""
     return latest_ghcr_tag(image, filter_regex, strip_prefix, suffix)
+
+
+def _github_headers() -> dict:
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    if GITHUB_TOKEN_FILE.exists():
+        token = GITHUB_TOKEN_FILE.read_text().strip()
+        headers["Authorization"] = f"token {token}"
+    return headers
+
+
+def github_releases(repo: str) -> list[dict]:
+    """`repo` is `owner/name`. Returns list of release dicts, newest first."""
+    url = f"https://api.github.com/repos/{repo}/releases?per_page=100"
+    return _http_get_json(url, headers=_github_headers())
+
+
+def latest_github_release(repo: str, filter_regex: Optional[str] = None) -> dict:
+    """Returns the first non-prerelease release whose tag matches filter_regex.
+
+    Return shape: {tag_name, body, html_url}.
+    """
+    pat = re.compile(filter_regex) if filter_regex else None
+    for r in github_releases(repo):
+        if r.get("prerelease"):
+            continue
+        if pat and not pat.match(r["tag_name"]):
+            continue
+        return {"tag_name": r["tag_name"], "body": r.get("body") or "", "html_url": r["html_url"]}
+    raise ValueError(f"no matching release in {repo}")
+
+
+def github_release_body(repo: str, tag: str) -> Optional[str]:
+    url = f"https://api.github.com/repos/{repo}/releases/tags/{tag}"
+    try:
+        data = _http_get_json(url, headers=_github_headers())
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return None
+        raise
+    return data.get("body") or ""
