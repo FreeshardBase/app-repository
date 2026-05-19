@@ -156,3 +156,49 @@ def semver_jump(old: str, new: str) -> str:
     if n[1] != o[1]:
         return "minor"
     return "patch"
+
+
+COMPOSE_CACHE_DIR = UPDATE_DIR / "update_info" / "upstream_compose_cache"
+
+
+def fetch_upstream_compose(app_name: str, version: str, url: str) -> str:
+    """Cache-on-disk fetch of an upstream docker-compose file at a given version.
+
+    Cache key is (app, version) — tag content is immutable.
+    """
+    cache_path = COMPOSE_CACHE_DIR / app_name / f"{version}.yml"
+    if cache_path.exists():
+        return cache_path.read_text()
+    text = _http_get_text(url)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path.write_text(text)
+    return text
+
+
+_IMAGE_LINE_RE = re.compile(r"^\s*image:\s*\S+\s*$")
+
+
+def compose_diff(old_yaml: str, new_yaml: str) -> tuple[str, bool]:
+    """Unified diff. Strip pairs of changed `image:` lines.
+
+    Returns (diff_text, nontrivial). `nontrivial` is True iff diff has any
+    +/- lines that are NOT `image:` value changes.
+    """
+    import difflib
+    diff_lines = list(difflib.unified_diff(
+        old_yaml.splitlines(keepends=False),
+        new_yaml.splitlines(keepends=False),
+        fromfile="old", tofile="new", lineterm="",
+    ))
+    nontrivial = False
+    for line in diff_lines:
+        if not (line.startswith("+") or line.startswith("-")):
+            continue
+        if line.startswith("+++") or line.startswith("---"):
+            continue
+        payload = line[1:]
+        if _IMAGE_LINE_RE.match(payload):
+            continue
+        nontrivial = True
+        break
+    return "\n".join(diff_lines), nontrivial
