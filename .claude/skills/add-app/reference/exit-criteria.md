@@ -92,3 +92,13 @@ does not redo the research from scratch.
 If `blocked_apps/<name>.md` already exists (re-run of a previously
 blocked app), update it in place rather than creating a duplicate, and
 adjust the `Blocked:` date if the exit reason changed.
+
+## Scaffold checklist
+
+Before opening a PR, verify all of the following:
+
+- [ ] `apps/<name>/app_meta.json` exists and is valid JSON.
+- [ ] `apps/<name>/docker-compose.yml.template` exists.
+- [ ] `apps/<name>/update_check.py` exists and either returns a parseable dict when `check('')` is called, or raises `NotImplementedError` as a documented stub.
+- [ ] `docker manifest inspect` passed for the chosen image and tag.
+- [ ] `just build-store-data` completed without error.
