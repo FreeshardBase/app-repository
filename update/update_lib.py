@@ -16,14 +16,6 @@ UPDATE_DIR = Path(__file__).parent
 GITHUB_TOKEN_FILE = UPDATE_DIR / "github_token"
 
 
-def semver_parse(s):
-    """Stub. Overridden in Task 4 with full implementation."""
-    m = re.match(r"^(\d+)\.(\d+)\.(\d+)$", s) if isinstance(s, str) else None
-    if not m:
-        return None
-    return (int(m.group(1)), int(m.group(2)), int(m.group(3)))
-
-
 def _http_get_json(url: str, headers: Optional[dict] = None) -> dict | list:
     req_headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
     if headers:
@@ -143,3 +135,24 @@ def github_release_body(repo: str, tag: str) -> Optional[str]:
             return None
         raise
     return data.get("body") or ""
+
+
+def semver_parse(s: str) -> Optional[tuple[int, int, int]]:
+    """Parse strict X.Y.Z. Returns None if not semver."""
+    m = re.match(r"^(\d+)\.(\d+)\.(\d+)$", s)
+    if not m:
+        return None
+    return (int(m.group(1)), int(m.group(2)), int(m.group(3)))
+
+
+def semver_jump(old: str, new: str) -> str:
+    """Returns 'patch' | 'minor' | 'major' | 'non_semver'."""
+    o = semver_parse(old)
+    n = semver_parse(new)
+    if not o or not n:
+        return "non_semver"
+    if n[0] != o[0]:
+        return "major"
+    if n[1] != o[1]:
+        return "minor"
+    return "patch"
