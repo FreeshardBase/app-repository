@@ -36,6 +36,7 @@
 - [x] `docker-compose.yml.template` set
 - [x] `app_meta.json` set (`app_version`, `name`, `pretty_name`, `icon`, `entrypoints`, `paths`, `lifecycle`, `store_info`)
 - [x] `upstream_repo` set
+- [x] `update_check.py` present ({{ update_check_stub_or_implemented }})
 - [{{ icon_done }}] Icon present
 - [{{ auth_proxy_done }}] Auth-proxy configured (if applicable)
 - [{{ shared_data_done }}] Shared data path mounted (if applicable)

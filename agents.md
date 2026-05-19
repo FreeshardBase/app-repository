@@ -258,29 +258,28 @@ services:
 
 ## Version Updates
 
-The `update.py` script automates version updates for apps with `upstream_repo` set:
+Updates run via the `/update-apps` skill (`.claude/skills/update-apps/`). The skill orchestrates `update/update.py` and reasons over breaking-change candidates.
 
-1. `python update.py check` - Checks GitHub releases for all apps.
-2. `python update.py skip <app1> <app2>` - Skip specific apps from updating.
-3. `python update.py update` - Updates version strings in all config files.
-4. `python update.py test` - Verifies Docker images can be pulled.
-5. `python update.py build` - Builds updated zip files.
-6. `python update.py commit` - Creates a branch, commits per-app, and merges.
+Flow on a single run:
 
-When updating an app version manually:
-- Update `app_version` in `app_meta.json`.
-- Update the image tag in `docker-compose.yml.template`.
-- Update any `.env` file if it contains versions.
-- Run `python -m build_store_data` to rebuild the zip.
+1. `python3 update/update.py check --json` polls every app's `apps/<name>/update_check.py` in parallel, writes `update/update_info/latest_check.json`.
+2. Skill classifies each outdated app: clean patch/minor without "breaking" notes and without non-trivial upstream-compose changes → AUTO. Anything else → candidate; the skill judges per app and picks AUTO or REVIEW.
+3. `python3 update/update.py apply <app> <ver> --auto|--review --branch-ts <ts>` rewrites version strings, runs `docker compose pull --dry-run`, commits onto `updates/<iso-ts>` with message `update <app> from <old> to <new> [AUTO|REVIEW]`.
+4. Skill opens a PR; GH `preview` job builds `updated_apps.zip`, uploads to `app-store/updates/<iso-ts>/updated_apps.zip`, comments the URL.
+5. User downloads bundle, smoke-installs on a fresh shard, merges PR.
 
-### Version String Conventions
+### Per-app `update_check.py`
 
-Some apps strip or add prefixes to GitHub release tags (handled in `update.py:adapt_version_string`):
-- Apps that strip the `v` prefix: actual, audiobookshelf, drawio, etherpad, kavita, linkding, navidrome, paperless-ngx, stirling-pdf, grist, memos
-- element: strips suffix after `-`
-- glances: appends `-full`
+Every app folder has `update_check.py` defining `def check(current_version: str) -> dict` returning:
 
-When adding a new app, check whether the Docker image tag matches the GitHub release tag format and add an entry to `adapt_version_string` if needed.
+- `latest_version` (required, matches docker tag format)
+- `release_notes_url` (optional)
+- `release_body` (optional; release notes text used for "breaking" scan)
+- `upstream_compose_url` (optional; raw URL of upstream docker-compose, may contain `{version}` placeholder)
+
+Use helpers from `update/update_lib.py`: `latest_github_release`, `latest_dockerhub_tag`, `latest_ghcr_tag`, `latest_lscr_tag`. For weird tag schemes, write whatever logic the app needs — the script is the escape hatch.
+
+If an image has no resolvable tag pattern, the script may raise `NotImplementedError`; the orchestrator reports it as `error` and the run continues.
 
 ## Checklist for Adding a New App
 
