@@ -6,5 +6,6 @@ apps/*/*.zip
 
 __pycache__/
 
-update_info
+update/update_info
+update/github_token
 .claude/worktrees/
