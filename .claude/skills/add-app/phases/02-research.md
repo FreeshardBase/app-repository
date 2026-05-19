@@ -91,7 +91,7 @@ Outputs (in `./.add-app-scratch/`):
 
 4. **Manifest inspect.** Run `docker manifest inspect <image>:<tag>` where `<tag>` is `tag_latest`. If exit code non-zero, hard-exit code a. Print the command output to the user.
 
-5. **Apply hard exits.** Read `reference/exit-criteria.md`. Apply hard exits in order: a (already handled), b (`license_class != "foss"`), f (`paid == true` AND no free self-host tier per notes). On hard exit, print findings, do not commit anything, leave worktree for inspection, stop.
+5. **Apply hard exits.** Read `reference/exit-criteria.md`. Apply hard exits in order: a (already handled), b (`license_class != "foss"`), f (`paid == true` AND no free self-host tier per notes). On hard exit, follow the "Blocked-app documentation" procedure in `reference/exit-criteria.md`: write `blocked_apps/<name>.md`, commit, push, open a non-draft documentation-only PR titled `Document blocked app: <pretty_name>`. Print findings, leave the worktree for inspection, stop. Do NOT create `apps/<name>/` files.
 
 6. **Collect soft warnings.** Append to `research.json`'s `warnings[]` any of: c (privileged/gpu), d (multi-tenant), e (abandoned — compute from `last_release_date`), g (resource_class_estimate == "l").
 

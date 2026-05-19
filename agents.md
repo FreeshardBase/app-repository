@@ -14,10 +14,18 @@ apps/
     .env                           # Optional, for complex multi-service apps
 inactive_apps/
   template/                        # Skeleton for new apps
+blocked_apps/
+  README.md                        # Schema + procedure
+  <app-name>.md                    # One file per analysed-and-blocked app
 justfile                           # `just new-app <name>` scaffolds a new app
 build_store_data.py                # Builds store_metadata.json and zip files
 update.py                          # Checks GitHub releases for version updates
 ```
+
+`blocked_apps/` documents candidates that were researched but did not
+pass the inclusion criteria (non-FOSS license, no Docker image, paid
+tier, etc.). See `blocked_apps/README.md` for the file schema. Written
+automatically by the `/add-app` skill on every hard exit.
 
 ## Creating a New App
 
