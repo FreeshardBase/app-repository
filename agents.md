@@ -281,7 +281,7 @@ Use helpers from `update/update_lib.py`: `latest_github_release`, `latest_docker
 
 If an image has no resolvable tag pattern, the script may raise `NotImplementedError`; the orchestrator reports it as `error` and the run continues.
 
-Use the same `NotImplementedError` pattern as an explicit **opt-out** for apps whose updates must be done manually — self-built images (e.g. `mosquitto`), or upstreams whose Docker tags are unreliable for auto-detection (e.g. `joplin-server`, where Docker Hub publishes prerelease tags without flagging them). Include a short reason string; it surfaces in the check report so the choice stays discoverable.
+For apps whose updates must be done manually — self-built images (e.g. `mosquitto`), or upstreams whose Docker tags are unreliable for auto-detection (e.g. `joplin-server`, where Docker Hub publishes prerelease tags without flagging them) — raise `update.update_lib.OptOut("<reason>")` instead. The orchestrator reports them as `opt_out` (distinct from `error`) with the reason string preserved, so the choice stays discoverable in every check run.
 
 ## Checklist for Adding a New App
 
