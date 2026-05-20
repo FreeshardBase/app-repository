@@ -5,7 +5,7 @@ networks:
 services:
     node-red:
         restart: always
-        image: nodered/node-red:2.2
+        image: nodered/node-red:4.1.10
         container_name: node-red
         volumes:
         - "{{ fs.app_data }}/data:/data"

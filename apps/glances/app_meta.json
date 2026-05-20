@@ -1,6 +1,6 @@
 {
   "v": "1.0",
-  "app_version": "3.4.0.3",
+  "app_version": "4.5.4",
   "name": "glances",
   "icon": "glances.png",
   "entrypoints": [
