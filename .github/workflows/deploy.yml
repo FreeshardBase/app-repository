@@ -62,6 +62,7 @@ jobs:
       - name: Build updated_apps.zip bundle (changed apps only)
         if: startsWith(github.head_ref, 'updates/')
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           mkdir -p /tmp/bundle
           # find apps changed in this PR
           git fetch origin main
