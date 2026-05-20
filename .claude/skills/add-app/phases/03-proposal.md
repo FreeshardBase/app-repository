@@ -15,7 +15,18 @@ Outputs (in `./.add-app-scratch/`):
 2. **Decide access mode.**
    - Default: `private` with the standard X-Ptl-Client-* headers from the template.
    - If `research_notes.md` documents auth-proxy support: use `private` with auth-proxy headers. Pick the username header env var from notes and add it to the compose template's environment block. Add `X-Ptl-User: admin` to the `paths[""].headers`.
-   - If notes say the app handles its own auth and is intended for public sharing (e.g., ghost, immich): use `public`.
+   - If the app has built-in auth (login screen) but NO header-trust support, the default is still `private`. Pairing gates access to the login/registration page itself, so signup can remain enabled without exposing it to the internet. Do NOT pick `public` just because the app manages its own auth — that path forces first-run bootstrap problems (see step 2a).
+   - Only use `public` if the app is genuinely intended for unauthenticated visitors (e.g., ghost, immich public shares) and a paired-only experience would defeat the purpose.
+
+2a. **First-run bootstrap check.** If the app has built-in auth and any of:
+   - Requires an admin user to be created before login works, AND
+   - That creation can ONLY be done via shell/CLI inside the container (`docker exec`), AND
+   - The user does NOT have SSH/shell access to the shard,
+
+   then the app violates Freeshard's "no manual post-install configuration" rule. Resolution priority:
+   1. Pick `access: private` and leave self-registration ENABLED upstream-default. Pairing acts as the authorization boundary; first paired visitor registers. Document in `decisions.md`.
+   2. If registration cannot be enabled at all (admin-only signup), add an init container that seeds an admin user with a generated password written into a file under `fs.app_data` and document the file path as a `hint` in `store_info`. Ugly but workable.
+   3. If neither is possible, **hard-exit code j** (see `exit-criteria.md`) — the app is not Freeshard-suitable.
 
 3. **Decide shared volumes.** Inspect notes for category hints. Map:
    - Music app → `{{ fs.shared }}/music`
