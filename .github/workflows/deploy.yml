@@ -44,6 +44,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Build store data
         run: python3 build_store_data.py
@@ -74,7 +76,7 @@ jobs:
               cp "apps/$app/$app.zip" /tmp/bundle/
             fi
           done
-          (cd /tmp/bundle && zip -r /tmp/updated_apps.zip .)
+          python3 -c "import os,zipfile; src='/tmp/bundle'; z=zipfile.ZipFile('/tmp/updated_apps.zip','w',zipfile.ZIP_DEFLATED); [z.write(os.path.join(src,n),arcname=n) for n in sorted(os.listdir(src))]; z.close()"
           ls -la /tmp/updated_apps.zip
 
       - name: Upload updated_apps.zip bundle
