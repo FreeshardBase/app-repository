@@ -12,7 +12,7 @@ jobs:
   deploy:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    container: ghcr.io/freeshardbase/cicd-image:1.0.3
+    container: ghcr.io/freeshardbase/cicd-image:1.1.4
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -40,10 +40,12 @@ jobs:
   preview:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    container: ghcr.io/freeshardbase/cicd-image:1.0.3
+    container: ghcr.io/freeshardbase/cicd-image:1.1.4
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Build store data
         run: python3 build_store_data.py
