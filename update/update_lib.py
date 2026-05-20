@@ -138,8 +138,8 @@ def github_release_body(repo: str, tag: str) -> Optional[str]:
 
 
 def semver_parse(s: str) -> Optional[tuple[int, int, int]]:
-    """Parse strict X.Y.Z. Returns None if not semver."""
-    m = re.match(r"^(\d+)\.(\d+)\.(\d+)$", s)
+    """Parse X.Y.Z, tolerating an optional leading `v`. Returns None if not semver."""
+    m = re.match(r"^v?(\d+)\.(\d+)\.(\d+)$", s)
     if not m:
         return None
     return (int(m.group(1)), int(m.group(2)), int(m.group(3)))
