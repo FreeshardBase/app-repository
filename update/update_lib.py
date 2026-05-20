@@ -12,6 +12,15 @@ from typing import Optional
 USER_AGENT = "freeshard-app-update-checker"
 TIMEOUT = 30
 
+
+class OptOut(Exception):
+    """Raised by an app's update_check.py to opt out of auto-update detection.
+
+    Used for apps whose updates must be done manually — self-built images,
+    upstreams with unreliable tag schemes, etc. The orchestrator records the
+    reason and marks the app as `opt_out` (distinct from `error`).
+    """
+
 UPDATE_DIR = Path(__file__).parent
 GITHUB_TOKEN_FILE = UPDATE_DIR / "github_token"
 
