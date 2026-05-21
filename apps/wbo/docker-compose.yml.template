@@ -11,3 +11,4 @@ services:
         - "{{ fs.app_data }}/opt/app/server-data:/opt/app/server-data"
         networks:
         - portal
+        user: "0:0"
