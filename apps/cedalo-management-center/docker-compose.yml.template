@@ -5,7 +5,7 @@ networks:
 services:
     cedalo-management-center:
         restart: always
-        image: cedalo/management-center:2
+        image: cedalo/management-center:2.6.4
         container_name: cedalo-management-center
         volumes:
         - "{{ fs.app_data }}/data:/data"
