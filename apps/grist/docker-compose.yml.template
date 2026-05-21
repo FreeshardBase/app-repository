@@ -15,5 +15,6 @@ services:
         - GRIST_DEFAULT_EMAIL=admin@{{ portal.domain }}
         - GRIST_SINGLE_ORG=grist
         - GRIST_PAGE_TITLE_SUFFIX= - Grist@Portal
+        - GRIST_IN_SERVICE=true
         networks:
         - portal
