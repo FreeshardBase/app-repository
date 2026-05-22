@@ -5,7 +5,7 @@ networks:
 services:
     joplin-server:
         restart: unless-stopped
-        image: joplin/server:latest
+        image: joplin/server:3.7.1
         container_name: joplin-server
         volumes:
         - "{{ fs.app_data }}/data:/data"

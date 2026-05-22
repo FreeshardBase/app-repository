@@ -5,9 +5,10 @@ networks:
 services:
     wbo:
         restart: always
-        image: lovasoa/wbo:v1.19.1
+        image: lovasoa/wbo:v2.8.5
         container_name: wbo
         volumes:
         - "{{ fs.app_data }}/opt/app/server-data:/opt/app/server-data"
         networks:
         - portal
+        user: "0:0"

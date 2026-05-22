@@ -5,7 +5,7 @@ networks:
 services:
     photoprism:
         restart: always
-        image: photoprism/photoprism:230615
+        image: photoprism/photoprism:260305
         container_name: photoprism
         ports:
         - "2342:2342" # HTTP port (host:container)
