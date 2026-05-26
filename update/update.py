@@ -90,12 +90,16 @@ def _classify(app_name: str, current: str, payload: dict) -> dict:
 
 
 def _check_one(app_dir: Path) -> dict:
+    from update.update_lib import OptOut
+
     current = _current_version(app_dir)
     mod = _load_app_check(app_dir)
     if mod is None:
         return {"app": app_dir.name, "current": current, "status": "no_script"}
     try:
         payload = mod.check(current)
+    except OptOut as e:
+        return {"app": app_dir.name, "current": current, "status": "opt_out", "reason": str(e)}
     except NotImplementedError as e:
         return {"app": app_dir.name, "current": current, "status": "error", "error": str(e)}
     except Exception as e:
@@ -131,6 +135,8 @@ def _print_summary(report: dict):
             print(f"  OUTDATED  {name:<25} {e['current']:<12} -> {e['latest']:<12}  ({r})")
         elif s == "error":
             print(f"  ERROR     {name:<25} {e.get('error','')}")
+        elif s == "opt_out":
+            print(f"  OPT_OUT   {name:<25} {e.get('reason','')}")
         elif s == "no_script":
             print(f"  NO_SCRIPT {name:<25}")
 

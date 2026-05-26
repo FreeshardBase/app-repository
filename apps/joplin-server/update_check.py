@@ -1,12 +1,9 @@
-from update.update_lib import latest_dockerhub_tag
+from update.update_lib import OptOut
 
 
 def check(current_version: str) -> dict:
-    # joplin/server publishes X.Y.Z semver tags on Docker Hub.
-    latest = latest_dockerhub_tag("joplin/server", filter_regex=r"^\d+\.\d+\.\d+$")
-    return {
-        "latest_version": latest,
-        "release_notes_url": "https://github.com/laurent22/joplin/releases",
-        "release_body": None,
-        "upstream_compose_url": None,
-    }
+    # Docker Hub `joplin/server` publishes tags for both stable and prerelease GitHub
+    # releases (e.g. 3.7.1 is a prerelease) without exposing the prerelease flag.
+    # Tag set is also sparse — many GitHub stable releases never get a Docker tag.
+    # Auto-detection is unreliable; bump manually after checking upstream.
+    raise OptOut("upstream publishes prereleases as plain Docker tags; manual updates only")
