@@ -19,7 +19,7 @@
   "minimum_portal_size": "s",
   "lifecycle": {
     "always_on": false,
-    "idle_time_for_shutdown": 3600
+    "idle_time_for_shutdown": 21600
   },
   "store_info": {
     "description_short": "High-performance backup photos/videos from your mobile phone"

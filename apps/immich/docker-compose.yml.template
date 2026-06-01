@@ -49,6 +49,7 @@ services:
       POSTGRES_DB: ${DB_DATABASE_NAME}
     volumes:
       - "{{ fs.app_data }}/pgdata:/var/lib/postgresql/data"
+    shm_size: 128mb
     restart: always
     networks:
       - immich
