@@ -277,6 +277,23 @@ Every app folder has `update_check.py` defining `def check(current_version: str)
 - `release_body` (optional; release notes text used for "breaking" scan)
 - `upstream_compose_url` (optional; raw URL of upstream docker-compose, may contain `{version}` placeholder)
 
+**Wire `upstream_compose_url` for stateful / multi-image apps** (those with a bundled
+postgres/redis/etc.). The version bumper only string-replaces the app's own version, so a
+supporting image that upstream bumps independently (e.g. immich's postgres/vector-extension
+image) silently drifts in our frozen template. When the URL is set, the check fetches the
+upstream compose at the old and new versions and `compose_diff` flags any change beyond the
+app-version bump (supporting-image tag or structural change) → forces REVIEW. A stale DB
+image is what caused the immich pgvecto.rs outage; this is the guard against a repeat. Only
+wire it for upstreams that publish a version-pinned compose.
+
+Wired: immich, etherpad, paperless-ngx, titra. Deliberately NOT wired (and why):
+- `affine` — uses the mutable `:stable` tag, `check()` raises `NotImplementedError`; no version
+  detection, so the diff never runs.
+- `joplin-server` — `OptOut` (manual updates); the diff never runs.
+- `overleaf` — no version-pinned compose in the main repo (prod compose lives in
+  `overleaf/toolkit`, not tagged to the sharelatex image version).
+- `photoprism` — date-stamp image tags (`YYMMDD`) with no matching per-version git compose.
+
 Use helpers from `update/update_lib.py`: `latest_github_release`, `latest_dockerhub_tag`, `latest_ghcr_tag`, `latest_lscr_tag`. For weird tag schemes, write whatever logic the app needs — the script is the escape hatch.
 
 If an image has no resolvable tag pattern, the script may raise `NotImplementedError`; the orchestrator reports it as `error` and the run continues.
