@@ -73,9 +73,9 @@ def _classify(app_name: str, current: str, payload: dict) -> dict:
             new_url = url.replace("{version}", latest)
             old_yaml = fetch_upstream_compose(app_name, current, old_url)
             new_yaml = fetch_upstream_compose(app_name, latest, new_url)
-            diff_text, nontrivial = compose_diff(old_yaml, new_yaml)
+            diff_text, nontrivial = compose_diff(old_yaml, new_yaml, current, latest)
             if nontrivial:
-                reasons.append("upstream docker-compose has non-image changes")
+                reasons.append("upstream compose changed beyond the app version (supporting image or structure)")
         except Exception as e:
             reasons.append(f"compose fetch failed: {e}")
 

@@ -184,30 +184,48 @@ def fetch_upstream_compose(app_name: str, version: str, url: str) -> str:
     return text
 
 
-_IMAGE_LINE_RE = re.compile(r"^\s*image:\s*\S+\s*$")
+_DIGEST_RE = re.compile(r"@sha256:[0-9a-f]+")
 
 
-def compose_diff(old_yaml: str, new_yaml: str) -> tuple[str, bool]:
-    """Unified diff. Strip pairs of changed `image:` lines.
+def compose_diff(
+    old_yaml: str,
+    new_yaml: str,
+    old_version: str | None = None,
+    new_version: str | None = None,
+) -> tuple[str, bool]:
+    """Unified diff of an upstream docker-compose across two versions.
 
-    Returns (diff_text, nontrivial). `nontrivial` is True iff diff has any
-    +/- lines that are NOT `image:` value changes.
+    `nontrivial` is True iff the diff contains changes beyond the app's own
+    version bump — i.e. a *supporting* image tag change (postgres, redis, ...)
+    or a structural change. These are the changes the version bumper does NOT
+    carry into our template (it only string-replaces the app version), so they
+    must force human REVIEW.
+
+    The flag is computed on a normalized comparison: image digests are stripped
+    and the app's own version is neutralized (old -> new), so the routine
+    main-image bump cancels out and only independent changes remain. The full,
+    un-normalized diff text is returned for human review.
     """
     import difflib
+
     diff_lines = list(difflib.unified_diff(
         old_yaml.splitlines(keepends=False),
         new_yaml.splitlines(keepends=False),
         fromfile="old", tofile="new", lineterm="",
     ))
-    nontrivial = False
-    for line in diff_lines:
-        if not (line.startswith("+") or line.startswith("-")):
-            continue
-        if line.startswith("+++") or line.startswith("---"):
-            continue
-        payload = line[1:]
-        if _IMAGE_LINE_RE.match(payload):
-            continue
-        nontrivial = True
-        break
+
+    def _norm(text: str) -> str:
+        text = _DIGEST_RE.sub("", text)
+        if old_version and new_version:
+            text = text.replace(old_version, new_version)
+        return text
+
+    nontrivial = any(
+        (line.startswith(("+", "-")) and not line.startswith(("+++", "---")))
+        for line in difflib.unified_diff(
+            _norm(old_yaml).splitlines(keepends=False),
+            _norm(new_yaml).splitlines(keepends=False),
+            lineterm="",
+        )
+    )
     return "\n".join(diff_lines), nontrivial
