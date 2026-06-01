@@ -7,5 +7,6 @@ def check(current_version: str) -> dict:
         "latest_version": rel["tag_name"].lstrip("v"),
         "release_notes_url": rel["html_url"],
         "release_body": rel["body"],
-        "upstream_compose_url": None,
+        # Pins postgres + redis independently of the paperless version — track them.
+        "upstream_compose_url": "https://raw.githubusercontent.com/paperless-ngx/paperless-ngx/v{version}/docker/compose/docker-compose.postgres.yml",
     }

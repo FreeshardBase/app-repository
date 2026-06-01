@@ -284,8 +284,15 @@ image) silently drifts in our frozen template. When the URL is set, the check fe
 upstream compose at the old and new versions and `compose_diff` flags any change beyond the
 app-version bump (supporting-image tag or structural change) → forces REVIEW. A stale DB
 image is what caused the immich pgvecto.rs outage; this is the guard against a repeat. Only
-wire it for upstreams that publish a version-pinned compose. Candidates still unwired:
-affine, etherpad, joplin-server, overleaf, paperless-ngx, photoprism, titra.
+wire it for upstreams that publish a version-pinned compose.
+
+Wired: immich, etherpad, paperless-ngx, titra. Deliberately NOT wired (and why):
+- `affine` — uses the mutable `:stable` tag, `check()` raises `NotImplementedError`; no version
+  detection, so the diff never runs.
+- `joplin-server` — `OptOut` (manual updates); the diff never runs.
+- `overleaf` — no version-pinned compose in the main repo (prod compose lives in
+  `overleaf/toolkit`, not tagged to the sharelatex image version).
+- `photoprism` — date-stamp image tags (`YYMMDD`) with no matching per-version git compose.
 
 Use helpers from `update/update_lib.py`: `latest_github_release`, `latest_dockerhub_tag`, `latest_ghcr_tag`, `latest_lscr_tag`. For weird tag schemes, write whatever logic the app needs — the script is the escape hatch.
 

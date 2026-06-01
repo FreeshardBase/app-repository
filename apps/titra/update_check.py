@@ -7,5 +7,6 @@ def check(current_version: str) -> dict:
         "latest_version": rel["tag_name"],
         "release_notes_url": rel["html_url"],
         "release_body": rel["body"],
-        "upstream_compose_url": None,
+        # Pins mongo independently of the titra version — track it. Tags have no `v` prefix.
+        "upstream_compose_url": "https://raw.githubusercontent.com/kromitgmbh/titra/{version}/docker-compose.yml",
     }

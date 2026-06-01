@@ -7,5 +7,6 @@ def check(current_version: str) -> dict:
         "latest_version": rel["tag_name"].lstrip("v"),
         "release_notes_url": rel["html_url"],
         "release_body": rel["body"],
-        "upstream_compose_url": None,
+        # Pins postgres independently of the etherpad version — track it.
+        "upstream_compose_url": "https://raw.githubusercontent.com/ether/etherpad-lite/v{version}/docker-compose.yml",
     }
