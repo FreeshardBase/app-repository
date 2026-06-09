@@ -11,6 +11,9 @@ services:
         - "{{ fs.app_data }}/data:/data"
         environment:
         - BACK_URL=kitchenowl-backend:5000
+        depends_on:
+            kitchenowl-backend:
+                condition: service_healthy
         networks:
         - portal
     kitchenowl-backend:
@@ -19,6 +22,14 @@ services:
         container_name: kitchenowl-backend
         environment:
           - JWT_SECRET_KEY=jkawfhei8rzfg84rztg7r
+        # Backend image ships its own HEALTHCHECK (uwsgi_curl against /api/health/<token>).
+        # Override only the timing so cold starts gate quickly instead of waiting out the
+        # image-default 60s interval; the health command + token stay upstream's.
+        healthcheck:
+            interval: 5s
+            timeout: 3s
+            retries: 12
+            start_period: 10s
         volumes:
         - "{{ fs.app_data }}/data:/data"
         networks:
