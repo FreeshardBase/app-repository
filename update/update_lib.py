@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
+import threading
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -103,13 +105,42 @@ def latest_lscr_tag(image: str, filter_regex: str = r".*",
     return latest_ghcr_tag(image, filter_regex, strip_prefix, suffix)
 
 
+_token_lock = threading.Lock()
+
+
+def _ensure_github_token() -> Optional[str]:
+    """Return the GitHub token, persisting it to GITHUB_TOKEN_FILE if absent.
+
+    The file is the single source of truth: when it does not exist we fill it
+    once from `gh auth token` and reuse it from then on. There is deliberately
+    no transient env-var fallback — an unauthenticated run hits GitHub's 60
+    req/hr limit and fails most apps, so we always materialise the file.
+    Returns None only when the file is missing and `gh` cannot supply a token.
+    """
+    with _token_lock:
+        if not GITHUB_TOKEN_FILE.exists():
+            try:
+                token = subprocess.run(
+                    ["gh", "auth", "token"],
+                    capture_output=True, text=True, check=True,
+                ).stdout.strip()
+            except (OSError, subprocess.CalledProcessError):
+                return None
+            if token:
+                GITHUB_TOKEN_FILE.write_text(token + "\n")
+                GITHUB_TOKEN_FILE.chmod(0o600)
+    if GITHUB_TOKEN_FILE.exists():
+        return GITHUB_TOKEN_FILE.read_text().strip() or None
+    return None
+
+
 def _github_headers() -> dict:
     headers = {
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
     }
-    if GITHUB_TOKEN_FILE.exists():
-        token = GITHUB_TOKEN_FILE.read_text().strip()
+    token = _ensure_github_token()
+    if token:
         headers["Authorization"] = f"token {token}"
     return headers
 
