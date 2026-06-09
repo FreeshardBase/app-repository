@@ -92,7 +92,17 @@ def _classify(app_name: str, current: str, payload: dict) -> dict:
 def _check_one(app_dir: Path) -> dict:
     from update.update_lib import OptOut
 
-    current = _current_version(app_dir)
+    try:
+        current = _current_version(app_dir)
+    except (FileNotFoundError, KeyError, ValueError) as e:
+        # apps/ should only contain valid app directories. A dir without a
+        # readable app_meta.json is a stray (e.g. an orphaned __pycache__ left
+        # by a removed app). Surface it as an error for the agent to clean up
+        # rather than crashing the whole check run.
+        return {
+            "app": app_dir.name, "current": None, "status": "error",
+            "error": f"not a valid app directory: cannot read app_meta.json ({type(e).__name__}: {e})",
+        }
     mod = _load_app_check(app_dir)
     if mod is None:
         return {"app": app_dir.name, "current": current, "status": "no_script"}
