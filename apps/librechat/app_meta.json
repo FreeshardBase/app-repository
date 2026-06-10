@@ -1,0 +1,39 @@
+{
+  "v": "1.2",
+  "app_version": "v0.7.9",
+  "name": "librechat",
+  "pretty_name": "LibreChat",
+  "icon": "icon.svg",
+  "homepage": "https://librechat.ai/",
+  "upstream_repo": "https://github.com/danny-avila/LibreChat",
+  "entrypoints": [
+    {
+      "container_name": "librechat",
+      "container_port": 3080,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "minimum_portal_size": "l",
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Self-hosted, open-source ChatGPT-style chat UI for many AI providers (OpenAI, Anthropic, Gemini, local models) with agents, search and file uploads.",
+    "description_long": [
+      "LibreChat is an open-source, self-hostable AI chat platform with a familiar ChatGPT-style interface. Instead of locking you to a single provider, it lets you connect and switch between many AI models — OpenAI (GPT), Anthropic (Claude), Google Gemini, Mistral, Groq, OpenRouter, and local/self-hosted models — all from one UI, using your own API keys.",
+      "Beyond plain chat it bundles AI agents, file uploads, image generation, message search, conversation presets and forking, and OpenAPI \"Actions\" for tool use.",
+      "It is MIT-licensed and free to self-host; the only costs are whatever the underlying AI providers charge for their APIs (or zero, if you point it at local models)."
+    ],
+    "hint": [
+      "On first visit, create your account on the registration screen — the first registered user is your LibreChat login.",
+      "LibreChat needs an API key from at least one AI provider (e.g. OpenAI or Anthropic) to chat, or a reachable local model endpoint. Add keys under Settings after signing in.",
+      "File-retrieval (RAG) features are not enabled in this build; chat, model switching and search work out of the box."
+    ]
+  }
+}

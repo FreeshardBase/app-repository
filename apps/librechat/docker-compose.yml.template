@@ -1,0 +1,56 @@
+networks:
+  portal:
+    external: true
+  librechat:
+
+services:
+  librechat:
+    restart: always
+    image: ghcr.io/danny-avila/librechat:v0.7.9
+    container_name: librechat
+    depends_on:
+      - librechat-mongodb
+      - librechat-meilisearch
+    volumes:
+      - "{{ fs.app_data }}/images:/app/client/public/images"
+      - "{{ fs.app_data }}/uploads:/app/uploads"
+      - "{{ fs.app_data }}/logs:/app/api/logs"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3080
+      - MONGO_URI=mongodb://librechat-mongodb:27017/LibreChat
+      - MEILI_HOST=http://librechat-meilisearch:7700
+      - MEILI_MASTER_KEY=freeshard_librechat_meili_master_key
+      - SEARCH=true
+      - DOMAIN_CLIENT=https://librechat.{{ portal.domain }}
+      - DOMAIN_SERVER=https://librechat.{{ portal.domain }}
+      - ALLOW_REGISTRATION=true
+      - CREDS_KEY=9a7b3c1d5e8f0a2b4c6d8e0f1a3b5c7d9e1f2a4b6c8d0e2f4a6b8c0d2e4f6a8b
+      - CREDS_IV=1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d
+      - JWT_SECRET=5e7c9a1b3d5f7090a2c4e6f80b1d3f5a7c9e1b3d5f7a9c0e2b4d6f8a0c2e4f6b
+      - JWT_REFRESH_SECRET=b6d8f0a2c4e6082a4c6e80b2d4f6a8c0e2f4b6d8a0c2e4f60b1d3f5a7c9e1b3d
+    networks:
+      - portal
+      - librechat
+
+  librechat-mongodb:
+    restart: always
+    image: mongo:7.0
+    container_name: librechat-mongodb
+    command: mongod --noauth
+    volumes:
+      - "{{ fs.app_data }}/mongodb:/data/db"
+    networks:
+      - librechat
+
+  librechat-meilisearch:
+    restart: always
+    image: getmeili/meilisearch:v1.12.3
+    container_name: librechat-meilisearch
+    environment:
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_MASTER_KEY=freeshard_librechat_meili_master_key
+    volumes:
+      - "{{ fs.app_data }}/meili_data:/meili_data"
+    networks:
+      - librechat
