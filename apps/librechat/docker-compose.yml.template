@@ -8,6 +8,10 @@ services:
     restart: always
     image: ghcr.io/danny-avila/librechat:v0.7.9
     container_name: librechat
+    # Image runs as non-root `node` (uid 1000); the fs.app_data bind mounts are
+    # created root-owned by the Docker daemon, so node can't write logs/uploads/
+    # images (EACCES crash loop). Run as root like vikunja does.
+    user: "0:0"
     depends_on:
       - librechat-mongodb
       - librechat-meilisearch
