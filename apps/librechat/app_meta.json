@@ -18,7 +18,7 @@
       "access": "private"
     }
   },
-  "minimum_portal_size": "l",
+  "minimum_portal_size": "m",
   "lifecycle": {
     "always_on": false,
     "idle_time_for_shutdown": 3600
