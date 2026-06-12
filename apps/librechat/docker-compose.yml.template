@@ -29,6 +29,14 @@ services:
       - DOMAIN_CLIENT=https://librechat.{{ portal.domain }}
       - DOMAIN_SERVER=https://librechat.{{ portal.domain }}
       - ALLOW_REGISTRATION=true
+      # Expose the major providers as BYO-key: the endpoints show up in the UI
+      # and the shard owner pastes their own API key under Settings (stored
+      # encrypted via CREDS_KEY). Without these vars the endpoints are hidden,
+      # leaving no models — and thus no way to create/select agents. Agents
+      # themselves are enabled by default (interface.agents=true upstream).
+      - OPENAI_API_KEY=user_provided
+      - ANTHROPIC_API_KEY=user_provided
+      - GOOGLE_KEY=user_provided
       - CREDS_KEY=9a7b3c1d5e8f0a2b4c6d8e0f1a3b5c7d9e1f2a4b6c8d0e2f4a6b8c0d2e4f6a8b
       - CREDS_IV=1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d
       - JWT_SECRET=5e7c9a1b3d5f7090a2c4e6f80b1d3f5a7c9e1b3d5f7a9c0e2b4d6f8a0c2e4f6b

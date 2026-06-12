@@ -32,7 +32,7 @@
     ],
     "hint": [
       "On first visit, create your account on the registration screen — the first registered user is your LibreChat login.",
-      "LibreChat needs an API key from at least one AI provider (e.g. OpenAI or Anthropic) to chat, or a reachable local model endpoint. Add keys under Settings after signing in.",
+      "Pick a provider (OpenAI, Anthropic or Google) in the model selector and paste your own API key when prompted — it's stored encrypted on your shard. Models then appear; agents are built in-app via the Agents endpoint (no keys baked in, you bring your own).",
       "File-retrieval (RAG) features are not enabled in this build; chat, model switching and search work out of the box."
     ]
   }
