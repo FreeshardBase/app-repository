@@ -263,15 +263,17 @@ Path matching: longest prefix wins; `""` is required fallback.
 
 ## `minimum_portal_size` Classes
 
-| Value | Use when |
-|---|---|
-| `"xs"` | Default; lightweight apps |
-| `"s"` | Moderately resource-heavy (e.g., apps needing ≥1 GB RAM) |
-| `"m"` | Heavier apps |
-| `"l"` | Resource-intensive apps |
-| `"xl"` | Most resource-intensive |
+Shards run on **OVH only** (Azure is EOL for shard hosting). Size against OVH specs. **Bias toward the smallest tier that runs** — better an app runs slowly than not at all; users can resize up. Don't pad "to be safe".
 
-Specific RAM/CPU thresholds per size are not documented; use judgment and set when app is notably resource-heavy.
+| Value | OVH flavor / vCore / RAM | Use when |
+|---|---|---|
+| `"xs"` | d2-2 — 1 / 2 GB | Single lightweight process; no DB |
+| `"s"` | d2-4 — 2 / 4 GB | **Default for most multi-process apps**, incl. a real DB, if idle stays under ~2 GB (e.g. Node + MongoDB + search) |
+| `"m"` | d2-8 — 4 / 8 GB | Idle genuinely exceeds ~2–3 GB, or needs ≥4 cores |
+| `"l"` | b3-16 — 4 / 16 GB | Large in-memory indexes / ML |
+| `"xl"` | b3-32 — 8 / 32 GB | Most intensive |
+
+**Source of truth:** freeshard-controller-backend `config.yml` → `ovhcloud.vm_sizes` (flavor mapping, specs in inline comments) and `freeshard_controller/service/pricing.py` (prices). Mirrored in KB `~/knowledge_base/freeshard/vm-sizes.md` (which lists every sync location). If these tiers change upstream, re-sync both this table and that note.
 
 ---
 

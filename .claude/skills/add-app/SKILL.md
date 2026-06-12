@@ -28,6 +28,7 @@ If preflight detects the app already exists, jump from phase 1 directly to `phas
 
 - `reference/freeshard-digest.md` — compact summary of `docs.freeshard.net`. Read by the research subagent and the proposal phase. Auto-refreshed in preflight if older than 30 days.
 - `reference/exit-criteria.md` — hard/soft exit rules and license classification.
+- `reference/deployment-gotchas.md` — recurring integration failure modes (non-root image bind-mount EACCES, all-prerelease repos). Consult in phases 3–4.
 - `templates/pr-body.md` — PR body templates (new-app and reevaluation variants).
 
 ## Principles
