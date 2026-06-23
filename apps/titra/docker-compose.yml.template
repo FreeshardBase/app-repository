@@ -5,7 +5,7 @@ networks:
 services:
     titra:
         restart: always
-        image: kromit/titra:v1.0.8
+        image: kromit/titra:v1.0.10
         container_name: titra
         environment:
         - ROOT_URL=https://titra.{{ portal.domain }}
