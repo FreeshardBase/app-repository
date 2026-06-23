@@ -6,7 +6,7 @@ networks:
 services:
   librechat:
     restart: always
-    image: ghcr.io/danny-avila/librechat:v0.7.9
+    image: ghcr.io/danny-avila/librechat:v0.8.6
     container_name: librechat
     # Image runs as non-root `node` (uid 1000); the fs.app_data bind mounts are
     # created root-owned by the Docker daemon, so node can't write logs/uploads/
