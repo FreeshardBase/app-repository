@@ -93,3 +93,7 @@ Per-app table: `[AUTO]` / `[REVIEW]` / `[ERROR]`, current → new, reason. Inclu
 - The `update.py apply` step runs `docker compose pull --dry-run` and aborts on failure; failed apps appear in `git status` as uncommitted edits if the abort path leaves them so — the skill's apply loop should `git checkout -- apps/<app>` to clean.
 - The skill never auto-merges. The PR stays open for the user to inspect, run smoke install, and merge.
 - Storage path `app-store/updates/$TS/updated_apps.zip` is deterministic; PR number is NOT in the URL — it is unknown when the PR description is written.
+- Recurring `apply` pull failures are registry lag, not bad versions — record as errors and continue, don't retry:
+  - ACR-mirrored apps (`filebrowser`, `mirotalk`, `mosquitto` → `portalapps.azurecr.io/ptl-apps/*`): new upstream tag must be pushed into ACR before the runner can pull it.
+  - Variant-tag apps (e.g. `glances` `nicolargo/glances:X-full`): the `-full`/`-nginx` variant can lag the plain tag on the registry — `4.5.5-full` failed dry-run while `4.5.4-full` was current. Same transient failure, not a flavor-tag skip.
+- Flavor-tag non-upgrades (same version, different variant suffix, e.g. `baikal 0.10.1 → 0.10.1-nginx`) are not real updates — skip, don't apply.
