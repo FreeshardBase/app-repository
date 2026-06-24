@@ -74,9 +74,9 @@ gh pr create --base main --head "updates/$TS" --title "App updates $TS" --body "
 ## Smoke-test bundle
 After CI completes the `preview` job, download and bulk-install on a fresh shard:
 
-```
-https://storageaccountportab0da.blob.core.windows.net/app-store/updates/$TS/updated_apps.zip
-```
+[updated_apps.zip](https://storageaccountportab0da.blob.core.windows.net/app-store/updates/$TS/updated_apps.zip)
+
+(Markdown link, not a fenced code block — the URL must be clickable in the rendered PR.)
 
 ## Errors / unattended apps
 <list any check errors or stub NotImplementedErrors>
