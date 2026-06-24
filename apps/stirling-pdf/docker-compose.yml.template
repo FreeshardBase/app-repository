@@ -5,7 +5,7 @@ networks:
 services:
     stirling-pdf:
         restart: always
-        image: stirlingtools/stirling-pdf:2.11.0
+        image: stirlingtools/stirling-pdf:2.13.1
         container_name: stirling-pdf
         environment:
         - MODE=BOTH
