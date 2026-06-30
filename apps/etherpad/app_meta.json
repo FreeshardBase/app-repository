@@ -34,7 +34,7 @@
     ],
     "hint": [
       "All documents are public, so you should chose hard-to-guess names for sensitive docs.",
-      "You can access the admin panel at /admin. User: admin, Password: admin."
+      "You can access the admin panel at /admin. User: admin. The password is your shard's full ID."
     ],
     "is_featured": true
   }

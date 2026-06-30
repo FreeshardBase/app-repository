@@ -7,7 +7,9 @@ services:
     image: etherpad/etherpad:3.3.2
     container_name: etherpad
     environment:
-      ADMIN_PASSWORD: admin
+      ADMIN_PASSWORD: "{{ portal.id }}"
+      ADMIN_SECRET: "{{ portal.id }}"
+      USER_SECRET: "{{ portal.id }}"
       DB_CHARSET: utf8mb4
       DB_HOST: postgres
       DB_NAME: etherpad
