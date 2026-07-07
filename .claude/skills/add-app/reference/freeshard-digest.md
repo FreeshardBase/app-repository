@@ -1,6 +1,6 @@
 # Freeshard App-Integration Reference Digest
 
-> Sources: agents.md (primary) + docs.freeshard.net developer docs (crawled 2026-05-11).
+> Sources: agents.md (primary) + docs.freeshard.net developer docs (crawled 2026-07-07).
 > Where they disagree this digest notes which source wins and why.
 
 ---
@@ -39,13 +39,17 @@ Schema URL: `https://storageaccountportab0da.blob.core.windows.net/json-schema/0
 | `upstream_repo` | string | N | — | GitHub repo URL for auto-update checking (v1.2+) |
 | `entrypoints` | array | Y | — | See below |
 | `paths` | object | Y | — | Access control; see below |
-| `lifecycle` | object | N | `{always_on:false, idle_time_for_shutdown:60}` | See below |
+| `lifecycle` | object | N* | `{always_on:false, idle_time_for_shutdown:60}` | See below |
 | `minimum_portal_size` | string | N | `"xs"` | Enum: `xs \| s \| m \| l \| xl` |
-| `store_info` | object | N | — | App store display; see below |
+| `store_info` | object | Y | — | App store display; see below |
 
 **Version history:** v1.0 → v1.1 added `pretty_name`; v1.2 added `homepage` and `upstream_repo`.
 
 > **agents.md marks `pretty_name` as optional; the JSON schema marks it required.** Follow the schema — mark `pretty_name` as required.
+
+> **`lifecycle` — docs disagree.** The `app_meta.json` docs table marks `lifecycle` (and both its inner fields) as required; agents.md marks it optional with a documented default. **agents.md wins in practice:** 4 of the 42 repo apps omit the block entirely and the shard applies the default (`always_on:false`, `idle_time_for_shutdown:60`). Omit `lifecycle` for a plain web app; include it only to override the default.
+
+> **`store_info` — treat as required.** The docs schema table marks it optional, but all 42 repo apps include it and agents.md marks it required. Always provide it (at minimum `description_short`).
 
 ### `entrypoints[]`
 
@@ -296,6 +300,10 @@ Shards run on **OVH only** (Azure is EOL for shard hosting). Size against OVH sp
 | `{{ fs.shared }}/pictures` | immich, photoprism |
 | `{{ fs.shared }}/media` | general media apps |
 
+### Data persistence & migration
+
+Mounted `fs.app_data` / `fs.shared` dirs survive app stop, restart, and version upgrades; an app_data dir starts empty on install. **Migration is the developer's responsibility:** on a version bump the app must detect data written by the old version and migrate it if the new version needs a different layout — the shard does nothing automatically. (This is why stateful multi-image apps also wire `upstream_compose_url`; see Update Flow.)
+
 ### Telemetry opt-out
 
 Always disable telemetry/analytics via env vars. Each app has its own var — check upstream docs. No platform-standard variable exists.
@@ -360,12 +368,14 @@ Full API reference: https://ptl.gitlab.io/portal_core/
 **Concept:** Each shard has a globally unique ID. Owners add other shard IDs to a contact list ("peers"). Both shards must add each other (mutual peering) before communication succeeds.
 
 **App developer responsibilities:**
-- Query shard core for known peers: `GET http://shard_core/...` (see core API docs)
+- Query shard core for known peers before communicating: `GET http://shard_core/protected/peers`
 - Expose peer-accessible paths in `app_meta.json` with `"access": "peer"`
+- Implement symmetric endpoints on both shards (each peer call needs a matching handler on the other side)
 - Route outgoing peer calls through the shard core (adds auth signatures):
   ```
   http://shard_core/internal/call_peer/<peer-id>/<path>
   ```
+  e.g. GET `foo/bar` on peer `b8rk3f` → `http://shard_core/internal/call_peer/b8rk3f/foo/bar`
 
 **Auth:** Shard IDs themselves provide end-to-end encrypted, authenticated messaging. No separate credential exchange needed.
 
@@ -411,7 +421,7 @@ Target Level 3 for all new app submissions. Level 4 requires peering (currently 
 5. Do not set `is_featured`
 6. For version updates: new PR on same branch convention
 
-Custom/sideloaded install (dev testing): ZIP the three files (ZIP name must match `app_meta.json` `name`), upload via shard UI → Apps → "Tools for app developers" → "Install Custom App".
+Custom/sideloaded install (dev testing): ZIP the files — `app_meta.json`, `docker-compose.yml.template`, and icon (icon optional) — the ZIP name must exactly match `app_meta.json` `name`. Upload via shard UI → Apps → "Tools for app developers" → "Install Custom App"; it then installs as if submitted to the store. The ZIP holds only config (not the images), so it's tiny and can be emailed to others to test.
 
 ---
 
