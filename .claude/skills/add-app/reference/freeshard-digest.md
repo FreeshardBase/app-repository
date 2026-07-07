@@ -421,7 +421,13 @@ Target Level 3 for all new app submissions. Level 4 requires peering (currently 
 5. Do not set `is_featured`
 6. For version updates: new PR on same branch convention
 
-Custom/sideloaded install (dev testing): ZIP the files — `app_meta.json`, `docker-compose.yml.template`, and icon (icon optional) — the ZIP name must exactly match `app_meta.json` `name`. Upload via shard UI → Apps → "Tools for app developers" → "Install Custom App"; it then installs as if submitted to the store. The ZIP holds only config (not the images), so it's tiny and can be emailed to others to test.
+Custom/sideloaded install (dev testing): ZIP the app folder — the ZIP name must exactly match `app_meta.json` `name`. Upload via shard UI → Apps → "Tools for app developers" → "Install Custom App"; it then installs as if submitted to the store. The ZIP holds only config (not the container images), so it's tiny and can be emailed to others to test.
+
+**Sidecar files are supported — the folder is NOT limited to the 3 standard files.** `build_store_data.py` (`make_app_zips`) zips EVERY file in the app folder recursively (`app_path.glob('**/*')`). Ship any config file — `Caddyfile`, `nginx.conf`, ClickHouse `config.d/*.xml`, a `.env` — alongside `app_meta.json` / the compose template / icon, and it extracts next to the rendered compose on the shard (= `{{ fs.installation_dir }}`). Reference shipped files two ways:
+- `env_file:` / `${VAR}` substitution — precedent `apps/immich/.env` (documented in `agents.md` folder layout as an optional file).
+- bind-mount read-only into a container: `{{ fs.installation_dir }}/<file>:/path/in/container:ro`.
+
+Caveat: sidecar files are shipped verbatim — only `docker-compose.yml.template` is run through Freeshard's `{{ }}` template rendering, so a sidecar cannot contain template vars. Do NOT reach for `command:` heredoc config injection; this mechanism already exists.
 
 ---
 
