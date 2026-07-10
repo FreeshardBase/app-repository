@@ -9,3 +9,4 @@ __pycache__/
 update/update_info
 update/github_token
 .claude/worktrees/
+.worktrees/
