@@ -16,10 +16,13 @@ services:
         - PAPERLESS_REDIS=redis://paperless-redis:6379
         - PAPERLESS_ADMIN_USER=admin
         - PAPERLESS_ADMIN_PASSWORD=admin
-        - PAPERLESS_AUTO_LOGIN_USERNAME=admin
         - PAPERLESS_URL=https://paperless-ngx.{{ portal.domain }}
         - PAPERLESS_EMAIL_TASK_CRON=* * * * *
         - "PAPERLESS_OCR_USER_ARGS={\"invalidate_digital_signatures\": true}"
+        - PAPERLESS_APPS=allauth.socialaccount.providers.openid_connect
+        - 'PAPERLESS_SOCIALACCOUNT_PROVIDERS={"openid_connect":{"APPS":[{"provider_id":"shard","name":"Shard","client_id":"{{ oidc.client_id }}","secret":"{{ oidc.client_secret }}","settings":{"server_url":"{{ oidc.issuer }}/.well-known/openid-configuration"}}]}}'
+        - PAPERLESS_SOCIAL_AUTO_SIGNUP=true
+        - PAPERLESS_REDIRECT_LOGIN_TO_SSO=true
         depends_on:
         - paperless-redis
         networks:
