@@ -31,7 +31,7 @@ services:
 
     overleaf-mongo:
         restart: always
-        image: mongo:8.0
+        image: mongo:8.0.4
         container_name: overleaf-mongo
         command: "--replSet overleaf"
         expose:
