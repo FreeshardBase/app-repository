@@ -28,7 +28,7 @@ services:
         - portal
 
     photoprism-mariadb:
-        image: mariadb:11
+        image: mariadb:10.11
         container_name: photoprism-mariadb
         ## If MariaDB gets stuck in a restart loop, this points to a memory or filesystem issue:
         ## https://docs.photoprism.app/getting-started/troubleshooting/#fatal-server-errors
