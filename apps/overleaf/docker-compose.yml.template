@@ -31,23 +31,27 @@ services:
 
     overleaf-mongo:
         restart: always
-        image: mongo:4.4
+        image: mongo:8.0
         container_name: overleaf-mongo
+        command: "--replSet overleaf"
         expose:
             - 27017
         volumes:
             - "{{ fs.app_data }}/mongo_data:/data/db"
+            - "{{ fs.installation_dir }}/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js:ro"
         networks:
             - portal
+        extra_hosts:
+            - "overleaf-mongo:127.0.0.1"
         healthcheck:
-            test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
+            test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
             interval: 10s
             timeout: 10s
             retries: 5
 
     overleaf-redis:
         restart: always
-        image: redis:6.2
+        image: redis:7.4
         container_name: overleaf-redis
         expose:
             - 6379
