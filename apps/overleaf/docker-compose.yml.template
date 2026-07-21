@@ -11,7 +11,7 @@ services:
             - overleaf-mongo
             - overleaf-redis
         volumes:
-        - "{{ fs.app_data }}/sharelatex_data:/var/lib/sharelatex"
+        - "{{ fs.app_data }}/sharelatex_data:/var/lib/overleaf"
         networks:
         - portal
         environment:
@@ -21,7 +21,7 @@ services:
         - ENABLED_LINKED_FILE_TYPES=project_file,project_output_file
         - ENABLE_CONVERSIONS=true
         - EMAIL_CONFIRMATION_DISABLED=true
-        - TEXMFVAR=/var/lib/sharelatex/tmp/texmf-var
+        - TEXMFVAR=/var/lib/overleaf/tmp/texmf-var
         - SHARELATEX_SITE_URL=https://overleaf.{{ portal.domain }}
         - SHARELATEX_NAV_TITLE=Overleaf on {{ portal.short_id }}
         - SHARELATEX_APP_NAME=Overleaf on {{ portal.short_id }}
