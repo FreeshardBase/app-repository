@@ -63,13 +63,38 @@ python3 update/update.py apply <app> <latest> --review --branch-ts "$TS" --reaso
 
 If `apply` exits non-zero (docker pull failure), record and continue with remaining apps.
 
-### 6. Push branch and open PR
+### 6. Refresh changed app icons
+
+Only for apps in **this run's update set** (auto or review) — don't audit every app. A version bump often ships a rebrand; the store icon is stale otherwise.
+
+For each updated app:
+
+1. Read the icon filename from `apps/<app>/app_meta.json` (`"icon": "<file>"`) and the `upstream_repo`.
+2. Locate the upstream brand asset. Enumerate the repo tree and grep for logo/icon assets:
+   ```bash
+   gh api "repos/<owner>/<repo>/git/trees/HEAD?recursive=1" --jq '.tree[].path' \
+     | grep -iE 'logo|favicon|icon' | grep -iE '\.(svg|png)$' \
+     | grep -ivE 'app/views/icons/_|node_modules|test|spec'
+   ```
+   Common good hits: `public/favicon.svg`, `public/logo.svg`, `assets/logo.svg`. Prefer a **self-contained tile form** (mark on a solid/white background, e.g. `favicon.svg`) over a bare transparent mark.
+3. Fetch it and compare to the current `apps/<app>/<icon>`. A changed dominant fill/color, a different `viewBox`, or a visibly different mark = rebrand. (A pure byte diff from reformatting is not — eyeball the colors/paths.)
+4. **If changed:** overwrite `apps/<app>/<icon>` with the new asset, keeping the **same filename** referenced in `app_meta.json` (regardless of the upstream filename). Commit separately:
+   ```bash
+   git commit -m "chore(<app>): refresh icon to new upstream brand logo"
+   ```
+   Record it for the PR "Icon changes" section (old → new dominant color / short note).
+5. **If unchanged or no clear upstream asset:** leave it.
+
+### 7. Push branch and open PR
 
 ```bash
 git push -u origin "updates/$TS"
 gh pr create --base main --head "updates/$TS" --title "App updates $TS" --body "$(cat <<EOF
 ## Summary
 <table of auto vs review apps, one line each>
+
+## Icon changes
+<list apps whose icon was refreshed in step 6, old → new; omit section if none>
 
 ## Smoke-test bundle
 After CI completes the `preview` job, download and bulk-install on a fresh shard:
@@ -84,9 +109,9 @@ EOF
 )"
 ```
 
-### 7. Print final summary
+### 8. Print final summary
 
-Per-app table: `[AUTO]` / `[REVIEW]` / `[ERROR]`, current → new, reason. Include the PR URL and the smoke-test bundle URL.
+Per-app table: `[AUTO]` / `[REVIEW]` / `[ERROR]`, current → new, reason. Note any icon refreshes. Include the PR URL and the smoke-test bundle URL.
 
 ## Notes
 
