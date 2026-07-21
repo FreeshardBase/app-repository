@@ -5,7 +5,7 @@ networks:
 services:
     overleaf-sharelatex:
         restart: always
-        image: sharelatex/sharelatex:6.1.2
+        image: sharelatex/sharelatex:6.2.2
         container_name: overleaf-sharelatex
         depends_on:
             - overleaf-mongo
