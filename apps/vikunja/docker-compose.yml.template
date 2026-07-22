@@ -5,7 +5,7 @@ networks:
 services:
     vikunja:
         restart: always
-        image: vikunja/vikunja:2.3.0
+        image: vikunja/vikunja:2.4.0
         container_name: vikunja
         volumes:
         - "{{ fs.app_data }}/files:/app/vikunja/files"
