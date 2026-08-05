@@ -1,0 +1,39 @@
+{
+  "v": "1.2",
+  "app_version": "v3.22.0",
+  "name": "mealie",
+  "pretty_name": "Mealie",
+  "icon": "icon.svg",
+  "homepage": "https://mealie.io",
+  "upstream_repo": "https://github.com/mealie-recipes/mealie",
+  "entrypoints": [
+    {
+      "container_name": "mealie",
+      "container_port": 9000,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Self-hosted recipe manager and meal planner with automatic recipe import from any URL.",
+    "description_long": [
+      "Mealie is a self-hosted recipe manager and meal planner. Paste the URL of almost any recipe site and Mealie scrapes the ingredients, instructions, images and metadata into a clean, ad-free entry in your own database — or write family recipes by hand in the built-in editor.",
+      "Beyond storage it plans the week: build meal plans, generate shopping lists that merge ingredients across recipes, organise recipes into cookbooks, and tag by category or dietary need. Recipes can be scaled, printed, or shared via link.",
+      "The whole household can use one instance. Mealie supports multiple users, groups and households with per-user permissions, and offers a full REST API plus a declarative backup and restore mechanism so your recipe collection stays portable."
+    ],
+    "hint": [
+      "Mealie creates its administrator account on first start. Log in with the e-mail address changeme@example.com and the password MyPassword.",
+      "Change that password immediately after your first login, under the profile menu. Mealie does not allow the initial password to be set in advance, so it is the same on every installation.",
+      "Your recipes, images and backups are stored on your shard. Use Settings -> Backups to download a copy you can keep somewhere else."
+    ],
+    "is_featured": false
+  }
+}
