@@ -33,7 +33,7 @@ services:
 
   redis:
     container_name: immich_redis
-    image: registry.hub.docker.com/library/redis:6.2-alpine
+    image: docker.io/valkey/valkey:9
     restart: always
     networks:
       - immich
