@@ -3,7 +3,7 @@
   "app_version": "v10.7.4",
   "name": "dozzle",
   "pretty_name": "Dozzle",
-  "icon": "dozzle.png",
+  "icon": "icon.svg",
   "upstream_repo": "https://github.com/amir20/dozzle",
   "entrypoints": [
     {
