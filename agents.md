@@ -321,3 +321,11 @@ For apps whose updates must be done manually — self-built images (e.g. `mosqui
 - [ ] Make changes
 - [ ] Ensure `app_version` in app_meta.json matches the image tag in docker-compose.yml.template
 - [ ] Run `python -m build_store_data` to regenerate the zip
+
+## Commits
+
+[Scoped Commits](https://scopedcommits.com/): `<scope>: <description>`. The scope is the area of the tree the change touches, never a change type — write `overleaf: pin mongo:8.0.4 — 8.0.x guard crashes on kernel 6.19+`, not `fix(overleaf): ...`. Body and trailers are optional; a change's reasoning belongs in the body, not in a code comment.
+
+Scopes for this repo: the app's own name for anything under `apps/` (`overleaf`, `photoprism`, `affine`, …), plus `update` `docs` `ci` `meta`
+
+`meta` covers repo-level files (agents.md, README, justfile). For a change spanning several scopes, use a broader one, list two comma-separated, or use `treewide`. Merges, reverts and generated commits (`update <app> from <old> to <new> [AUTO]`) keep their own format. Don't generate a changelog from the commit log — release notes come from merged PRs.
