@@ -53,6 +53,15 @@ For each candidate app, decide auto vs review by reading the spec'd signals:
 
 > Bumping a support image across an **on-disk-incompatible major** (postgres N→N+1, mongo skipping a major, meilisearch dump-version change) breaks existing shards' data volumes — those need a manual per-shard migration and are **not** a drop-in compose edit. A same-major swap (e.g. `postgres:16` → `pgvector/pgvector:pg16`) is drop-in. Call out which case in the PR.
 
+**Compare against upstream directly, not against the diff.** `compose_diff` only reports what upstream changed *between our old version and the new one*. Drift from an earlier upstream change we never followed produces an empty diff on every future bump — it reports "clean", which reads as "current". So fetch upstream's compose at the **target** version and compare it to our template, whenever a support image looks old.
+
+**What to do with drift you find, without asking:**
+
+- **Drop-in** — the service holds no persistent state (no volume), upstream's own reference compose pins the newer image, and the pull dry-run passes → realign it in the same PR, in its own commit, and say so in the PR body. This is not a judgement call; do not downgrade it to an observation in the summary.
+- **Stateful across an incompatible major** → do not edit the template. File or update an issue with the migration path, and report it in the PR body as a finding.
+
+(2026-08-25: immich sat on `redis:6.2-alpine` while upstream had moved to `valkey:9` — reported as an observation rather than fixed, and Max had to ask for it. Same pass: titra on `mongo:5.0` against upstream's `mongo:7.0`, which is the second case — `app-repository#46`.)
+
 Record a one-line reason per app. The reason becomes the commit message body line.
 
 ### 5. Apply each app
