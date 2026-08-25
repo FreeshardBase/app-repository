@@ -286,6 +286,15 @@ app-version bump (supporting-image tag or structural change) → forces REVIEW. 
 image is what caused the immich pgvecto.rs outage; this is the guard against a repeat. Only
 wire it for upstreams that publish a version-pinned compose.
 
+The diff has a blind spot worth knowing: it compares upstream's compose at the **old** and
+**new** version of the current bump, so it only ever catches drift that upstream introduces
+*inside that range*. If upstream changed a supporting image at some earlier point and we
+never followed, the diff is empty forever after and the drift stays invisible. Catching that
+needs a direct comparison of our template against upstream's compose at the version we are
+moving to — worth doing whenever an app's supporting image looks old (2026-08-24: immich sat
+on `redis:6.2-alpine` while upstream had long since moved to `valkey:9`; titra is still on
+`mongo:5.0` against upstream's `mongo:7.0`).
+
 Wired: immich, etherpad, paperless-ngx, titra. Deliberately NOT wired (and why):
 - `affine` — uses the mutable `:stable` tag, `check()` raises `NotImplementedError`; no version
   detection, so the diff never runs.
