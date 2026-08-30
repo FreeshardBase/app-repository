@@ -1,0 +1,40 @@
+{
+  "v": "1.2",
+  "app_version": "34.0.2",
+  "name": "nextcloud",
+  "pretty_name": "Nextcloud",
+  "icon": "icon.svg",
+  "homepage": "https://nextcloud.com",
+  "upstream_repo": "https://github.com/nextcloud/server",
+  "entrypoints": [
+    {
+      "container_name": "nextcloud",
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 300
+  },
+  "minimum_portal_size": "s",
+  "store_info": {
+    "description_short": "Self-hosted file sync and share, with calendar, contacts and collaborative documents.",
+    "description_long": [
+      "Nextcloud stores your files on your own shard and syncs them to your computers and phones through the official desktop and mobile clients, or over WebDAV. You get versioning, a trash bin, full-text search and sharing links, plus the built-in calendar, contacts and Markdown editor.",
+      "Beyond files, Nextcloud is a small platform: an app store inside the admin settings lets you add extras such as Deck, Notes or Talk after installation. It runs as two containers, its own PostgreSQL database alongside the app, and unpacks about 1 GB of application files, so it needs an 's' shard or larger."
+    ],
+    "hint": [
+      "Log in with user 'admin' and password 'admin' on first visit, then change the password immediately under Personal settings.",
+      "Nextcloud keeps its own accounts. Pairing your device with the shard gets you to the Nextcloud login screen, it does not sign you in — you will always see a second login.",
+      "Any extra users you create inside Nextcloud are Nextcloud accounts, not shard identities. They share this one shard and are not separately protected by pairing.",
+      "Nextcloud's public share links do not work from outside, because the whole app is reachable only from your paired devices."
+    ],
+    "is_featured": false
+  }
+}
