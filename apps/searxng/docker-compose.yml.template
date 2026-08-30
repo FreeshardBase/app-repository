@@ -1,0 +1,16 @@
+networks:
+    portal:
+        external: true
+
+services:
+    searxng:
+        restart: always
+        image: searxng/searxng:2026.8.4-c63835bd2
+        container_name: searxng
+        volumes:
+        - "{{ fs.app_data }}/config:/etc/searxng"
+        - "{{ fs.app_data }}/data:/var/cache/searxng"
+        environment:
+        - SEARXNG_BASE_URL=https://searxng.{{ portal.domain }}
+        networks:
+        - portal
