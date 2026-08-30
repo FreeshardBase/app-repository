@@ -20,6 +20,11 @@
       "access": "public"
     }
   },
+  "oidc": {
+    "redirect_uris": [
+      "https://paperless-ngx.{{ portal.domain }}/accounts/oidc/shard/login/callback/"
+    ]
+  },
   "minimum_portal_size": "s",
   "lifecycle": {
     "always_on": false,
