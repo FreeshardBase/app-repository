@@ -1,10 +1,11 @@
 {
-  "v": "1.1",
-  "app_version": "v0.95.0",
+  "v": "1.2",
+  "app_version": "v0.104.1",
   "name": "trilium-next",
-  "pretty_name": "Trilium Next",
+  "pretty_name": "Trilium Notes",
   "icon": "icon.png",
-  "upstream_repo": "https://github.com/TriliumNext/Notes",
+  "homepage": "https://triliumnotes.org",
+  "upstream_repo": "https://github.com/TriliumNext/Trilium",
   "entrypoints": [
     {
       "container_name": "trilium-next",
@@ -31,8 +32,12 @@
     "idle_time_for_shutdown": 3600
   },
   "store_info": {
-    "description_short": "Build your personal knowledge base with TriliumNext Notes",
-    "description_long": "TriliumNext Notes is an open-source, cross-platform hierarchical note taking application with focus on building large personal knowledge bases.",
+    "description_short": "Build your personal knowledge base with Trilium Notes",
+    "description_long": "Trilium Notes is an open-source, cross-platform hierarchical note taking application with focus on building large personal knowledge bases.",
+    "hint": [
+      "Updating an existing installation from v0.95 migrates the database one way. The built-in AI/LLM integration was removed in v0.102, and downgrading after the migration requires restoring a backup.",
+      "Backend scripting and the SQL console are disabled by default since v0.104."
+    ],
     "is_featured": false
   }
 }
