@@ -27,6 +27,24 @@ pass the inclusion criteria (non-FOSS license, no Docker image, paid
 tier, etc.). See `blocked_apps/README.md` for the file schema. Written
 automatically by the `/add-app` skill on every hard exit.
 
+### What is published to the store
+
+`build_store_data.py` globs **every** directory under `apps/` with no filter —
+so anything in `apps/<name>/` is published to the store. The three top-level
+buckets are:
+
+- **`apps/`** — published. Present in `store_metadata.json`, gets a zip, offered to users.
+- **`inactive_apps/`** — in the repo but **not** published (not globbed by the build). The
+  home for apps that are broken, deprecated, or pulled during a quality cleanup, plus the
+  `template/` skeleton.
+- **`blocked_apps/`** — markdown records only, **no app dir**. Candidates researched and
+  turned down; kept so nobody re-analyses them.
+
+**To deactivate a published app:** `git mv apps/<name> inactive_apps/<name>`. That alone
+removes it from the store (the build stops seeing it). If it was deactivated because it is
+broken, drop a `REACTIVATION.md` in the moved dir documenting the blocker and a checklist,
+so a future agent doesn't re-diagnose from scratch (see `inactive_apps/overleaf/`).
+
 ## Creating a New App
 
 1. Run `just new-app <name>` to scaffold from the template.
