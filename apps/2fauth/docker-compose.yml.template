@@ -1,0 +1,28 @@
+networks:
+    portal:
+        external: true
+
+services:
+    2fauth:
+        restart: always
+        image: 2fauth/2fauth:8.0.1
+        container_name: 2fauth
+        user: "0:0"
+        entrypoint:
+        - /bin/sh
+        - -c
+        - |
+          adduser -D -H -u 1000 twofauth 2>/dev/null || true
+          [ -s /2fauth/appkey ] || head -c 24 /dev/urandom | base64 > /2fauth/appkey
+          chown -R 1000:1000 /2fauth
+          exec su -s /bin/sh twofauth -c 'exec /usr/local/bin/entrypoint.sh'
+        volumes:
+        - "{{ fs.app_data }}/data:/2fauth"
+        environment:
+        - APP_URL=https://2fauth.{{ portal.domain }}
+        - APP_KEY_FILE=/2fauth/appkey
+        - AUTHENTICATION_GUARD=web-guard
+        - TRUSTED_PROXIES=*
+        - USERPREF_DEFAULT__GET_OFFICIAL_ICONS=false
+        networks:
+        - portal
