@@ -273,8 +273,11 @@ Flow on a single run:
 `update/smoke_test.py <bundle>` runs step 5 unattended against a throwaway shard:
 
 ```bash
-python3 update/smoke_test.py https://storageaccountportab0da.blob.core.windows.net/app-store/updates/<ts>/updated_apps.zip
+uv run update/smoke_test.py https://storageaccountportab0da.blob.core.windows.net/app-store/updates/<ts>/updated_apps.zip
 ```
+
+It is the one script under `update/` with a dependency (httpx), declared in a PEP 723
+header, so `uv run` installs it on the fly and the repo still needs no manifest.
 
 It assigns a trial shard (`POST /api/shards/assign_trial` on the controller — no
 auth, returns domain plus a single-use pairing code), pairs as a terminal, removes
