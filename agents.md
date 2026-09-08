@@ -268,6 +268,37 @@ Flow on a single run:
 4. Skill opens a PR; GH `preview` job builds `updated_apps.zip`, uploads to `app-store/updates/<iso-ts>/updated_apps.zip`, comments the URL.
 5. User downloads bundle, smoke-installs on a fresh shard, merges PR.
 
+### Smoke-testing a bundle
+
+`update/smoke_test.py <bundle>` runs step 5 unattended against a throwaway shard:
+
+```bash
+python3 update/smoke_test.py https://storageaccountportab0da.blob.core.windows.net/app-store/updates/<ts>/updated_apps.zip
+```
+
+It assigns a trial shard (`POST /api/shards/assign_trial` on the controller — no
+auth, returns domain plus a single-use pairing code), pairs as a terminal, removes
+the apps a fresh shard ships with, then per app installs the zip, waits for the
+install to finish and requests `https://<app>.<domain>/` until it answers. It logs
+progress and per-phase durations, prints a table, and exits non-zero if any app
+failed. The shard's hash-id is printed so a new pairing code can be issued from the
+controller to inspect it by hand; the shard deletes itself 24h after assignment.
+
+Deliberately not a CI job: a run takes tens of minutes and consumes a standby shard.
+
+Three responses while an app boots are expected and none means a broken app: the
+core's splash page with the upstream's 502/503, a 404 (the app has no Traefik router
+yet — still queued, in ERROR, or the shared dynamic config was mid-rewrite), and a
+connection error during a Traefik reload. The splash always carries the error status,
+never 200, so a 2xx can only come from the app. On a 404 the script asks the core for
+the app's status and only fails when it is ERROR. Keep `--poll-interval` below 5s:
+that is the shard's `RECENT_ACCESS_GRACE`, within which the memory-pressure tier will
+not demote the app being tested.
+
+`--keep-installed` skips the per-app uninstall so a run doubles as a memory-pressure
+test. Only meaningful on a shard with `apps.lifecycle.pause_enabled` on; it is off by
+default in the core, and without it nothing reclaims memory within a run.
+
 ### Per-app `update_check.py`
 
 Every app folder has `update_check.py` defining `def check(current_version: str) -> dict` returning:
