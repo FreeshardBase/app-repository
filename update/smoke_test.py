@@ -20,6 +20,7 @@ tuned from once a few runs have produced numbers.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import io
 import logging
 import sys
@@ -147,6 +148,27 @@ def app_status(client: httpx.Client, domain: str, name: str) -> tuple[str, str]:
     return body.get("status", "unknown"), body.get("status_message") or ""
 
 
+def terminal_fingerprint(client: httpx.Client, domain: str) -> Optional[str]:
+    """Hash the web terminal's page.
+
+    Traefik's dynamic config carries a catch-all `PathPrefix("/")` router for the
+    web terminal with no host constraint, so any subdomain without a router of its
+    own answers 200 with that page — an app that failed to install, or has not been
+    routed yet, is otherwise indistinguishable from one that works.
+    """
+    response = core_request(client, "GET", f"https://{domain}/")
+    if response.status_code != 200:
+        log.warning(
+            "could not fingerprint the web terminal (HTTP %s); a catch-all response "
+            "will not be recognised",
+            response.status_code,
+        )
+        return None
+    digest = hashlib.sha256(response.content).hexdigest()
+    log.info("web terminal fingerprint %s (%d bytes)", digest[:12], len(response.content))
+    return digest
+
+
 def remove_preinstalled_apps(
     client: httpx.Client, domain: str, timeout: int, poll_interval: float
 ) -> None:
@@ -221,6 +243,7 @@ def open_app(
     poll_interval: float,
     result: AppResult,
     prefix: str = "",
+    terminal_hash: Optional[str] = None,
 ) -> None:
     """Request the app until it answers, or the budget runs out.
 
@@ -228,6 +251,9 @@ def open_app(
     app is broken:
 
     - 502/503 with the core's splash page, served while the container starts.
+    - 200 carrying the web terminal's page, served by Traefik's catch-all router
+      when the app has no router of its own yet. Compared against the terminal's
+      fingerprint, because it is a 200 that means the opposite of success.
     - 404, which means the app currently has no Traefik router: it is still
       queued, in ERROR, or the shared dynamic config was mid-rewrite. Only a
       status of ERROR from the API makes that permanent, so the status is what
@@ -245,20 +271,31 @@ def open_app(
     seen: set[str] = set()
 
     while time.monotonic() < deadline:
+        catch_all = False
         try:
-            status = client.get(url, timeout=30).status_code
+            response = client.get(url, timeout=30)
         except httpx.HTTPError as e:
             status = None
             observation = f"transport error ({type(e).__name__})"
         else:
-            observation = f"HTTP {status}"
+            status = response.status_code
+            catch_all = (
+                terminal_hash is not None
+                and status == 200
+                and hashlib.sha256(response.content).hexdigest() == terminal_hash
+            )
+            observation = (
+                "HTTP 200 (web terminal catch-all — the app has no route yet)"
+                if catch_all
+                else f"HTTP {status}"
+            )
 
         if observation not in seen:
             seen.add(observation)
             result.observed.append(observation)
             log.info("%s: %s", prefix, observation)
 
-        if status is not None and 200 <= status < 400:
+        if status is not None and 200 <= status < 400 and not catch_all:
             result.http_status = status
             result.start_seconds = time.monotonic() - started
             result.outcome = "PASS"
@@ -376,6 +413,7 @@ def run(args: argparse.Namespace) -> int:
         log.info("shard domain:  %s", domain)
 
         pair(client, domain, shard["code"])
+        terminal_hash = terminal_fingerprint(client, domain)
         remove_preinstalled_apps(client, domain, args.timeout, args.poll_interval)
 
         for index, (name, zip_bytes) in enumerate(apps.items(), start=1):
@@ -412,7 +450,14 @@ def run(args: argparse.Namespace) -> int:
             )
 
             open_app(
-                client, domain, name, args.timeout, args.poll_interval, result, prefix
+                client,
+                domain,
+                name,
+                args.timeout,
+                args.poll_interval,
+                result,
+                prefix,
+                terminal_hash,
             )
             if result.outcome != "PASS":
                 log.error("%s: %s", prefix, result.detail)

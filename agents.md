@@ -302,7 +302,13 @@ controller to inspect it by hand; the shard deletes itself 24h after assignment.
 
 Deliberately not a CI job: a run takes tens of minutes and consumes a standby shard.
 
-Three responses while an app boots are expected and none means a broken app: the
+A 200 is not automatically a pass. Traefik's dynamic config carries a catch-all
+`PathPrefix("/")` router for the web terminal with no host constraint, so **any**
+subdomain without a router of its own answers 200 with the terminal's page —
+`nonexistent-app.<shard>` included. The script fingerprints the terminal before
+installing anything and treats a body matching it as "no route yet", not success.
+
+Three further responses while an app boots are expected and none means a broken app: the
 core's splash page with the upstream's 502/503, a 404 (the app has no Traefik router
 yet — still queued, in ERROR, or the shared dynamic config was mid-rewrite), and a
 connection error during a Traefik reload. The splash always carries the error status,
