@@ -5,7 +5,7 @@ networks:
 services:
     element:
         restart: always
-        image: vectorim/element-web:v1.12.26
+        image: vectorim/element-web:v1.12.27
         container_name: element
         volumes:
         - "{{ fs.app_data }}/data:/data"
