@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import io
+import json
 import logging
 import sys
 import time
@@ -38,6 +39,9 @@ TERMINAL_NAME = "smoke-test"
 # controller UI. The .invalid TLD is reserved (RFC 2606) and cannot resolve, so
 # nothing addressed to it can reach a real mailbox.
 OWNER_EMAIL = "smoke-test@freeshard.invalid"
+# The terminal JWT is kept so a finished run can be revisited: --domain alone then
+# re-attaches without a fresh pairing code, which only the controller can issue.
+SESSION_FILE = Path(__file__).parent / "smoke_test_session.json"
 
 # Statuses an app can be parked in once installation finished. An app is not
 # started by installing it — it starts on the first request.
@@ -131,6 +135,43 @@ def pair(client: httpx.Client, domain: str, code: str) -> None:
     if not client.cookies.get("authorization", domain=f".{domain}"):
         sys.exit("pairing returned no authorization cookie")
     log.info("paired as terminal %r", TERMINAL_NAME)
+
+
+def save_session(client: httpx.Client, shard: dict) -> bool:
+    domain = shard["domain"]
+    jwt = client.cookies.get("authorization", domain=f".{domain}")
+    if not jwt:
+        log.warning("no terminal cookie to save")
+        return False
+    SESSION_FILE.write_text(
+        json.dumps(
+            {
+                "domain": domain,
+                "hash_id": shard.get("hash_id"),
+                "authorization": jwt,
+                "saved_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            },
+            indent=2,
+        )
+    )
+    SESSION_FILE.chmod(0o600)
+    log.info("terminal session saved to %s", SESSION_FILE)
+    return True
+
+
+def load_session(client: httpx.Client, domain: str) -> None:
+    if not SESSION_FILE.exists():
+        sys.exit(
+            f"no saved session at {SESSION_FILE}; pass --pairing-code to pair afresh"
+        )
+    data = json.loads(SESSION_FILE.read_text())
+    if data.get("domain") != domain:
+        sys.exit(
+            f"the saved session is for {data.get('domain')}, not {domain}; "
+            "pass --pairing-code to pair afresh"
+        )
+    client.cookies.set("authorization", data["authorization"], domain=f".{domain}")
+    log.info("reusing the terminal session saved at %s", data.get("saved_at"))
 
 
 def list_apps(client: httpx.Client, domain: str) -> list[dict]:
@@ -362,7 +403,11 @@ def read_bundle(source: str) -> dict[str, bytes]:
 
 
 def print_summary(
-    results: list[AppResult], shard: dict, keep_installed: bool, assigned: bool = True
+    results: list[AppResult],
+    shard: dict,
+    keep_installed: bool,
+    assigned: bool = True,
+    saved: bool = False,
 ) -> None:
     name_width = max((len(r.name) for r in results), default=4) + 2
     lines = [
@@ -388,6 +433,10 @@ def print_summary(
     lines.append("apps left installed" if keep_installed else "apps uninstalled")
     if assigned:
         lines.append("the shard deletes itself 24h after assignment")
+    if saved:
+        lines.append(
+            f"revisit it with: uv run update/smoke_test.py <bundle> --domain {shard['domain']}"
+        )
     lines.append("=" * (name_width + 40))
     print("\n".join(lines))
 
@@ -412,7 +461,12 @@ def run(args: argparse.Namespace) -> int:
         domain = shard["domain"]
         log.info("shard domain:  %s", domain)
 
-        pair(client, domain, shard["code"])
+        if shard["code"]:
+            pair(client, domain, shard["code"])
+            saved = save_session(client, shard)
+        else:
+            load_session(client, domain)
+            saved = True
         terminal_hash = terminal_fingerprint(client, domain)
         remove_preinstalled_apps(client, domain, args.timeout, args.poll_interval)
 
@@ -467,7 +521,9 @@ def run(args: argparse.Namespace) -> int:
                 uninstall_app(client, domain, name)
 
     log.info("run finished in %ds", round(time.monotonic() - run_started))
-    print_summary(results, shard, args.keep_installed, assigned=not args.domain)
+    print_summary(
+        results, shard, args.keep_installed, assigned=not args.domain, saved=saved
+    )
     return 0 if all(r.passed for r in results) else 1
 
 
@@ -505,14 +561,15 @@ def main() -> None:
     )
     parser.add_argument(
         "--pairing-code",
-        help="pairing code for --domain, issued from the controller "
-        "(GET /api/shards/<db_id>/pairing_code, needs SUPPORT_SHARD)",
+        help="pairing code for --domain. Omit it to reuse the terminal session "
+        "saved by the previous run; codes are single-use, and only the controller "
+        "can issue one (GET /api/shards/<db_id>/pairing_code, needs SUPPORT_SHARD)",
     )
     parser.add_argument("--controller", default=DEFAULT_CONTROLLER)
     parser.add_argument("--verbose", "-v", action="store_true")
     args = parser.parse_args()
-    if bool(args.domain) != bool(args.pairing_code):
-        parser.error("--domain and --pairing-code must be given together")
+    if args.pairing_code and not args.domain:
+        parser.error("--pairing-code needs --domain")
 
     logging.basicConfig(
         level=logging.DEBUG if args.verbose else logging.INFO,

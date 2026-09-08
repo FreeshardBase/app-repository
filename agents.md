@@ -283,7 +283,20 @@ Shards it assigns are stamped with the owner email `smoke-test@freeshard.invalid
 makes test shards obvious in the controller UI. The `.invalid` TLD is reserved and cannot
 resolve, so nothing addressed to it reaches a mailbox.
 
-To re-run without consuming another standby shard, attach to a shard you already have:
+Every run saves its terminal JWT to `update/smoke_test_session.json` (gitignored,
+mode 600), so the shard stays reachable after the run finishes — for poking at an app
+that failed, reading logs, or installing something by hand:
+
+```bash
+uv run update/smoke_test.py <bundle> --domain abc123.freeshard.cloud
+```
+
+The token is what pairing produced and is valid for ten years, but the shard itself is
+gone 24h after assignment, so the file goes stale quickly and holds nothing of value
+once it has.
+
+Without a saved session (a different machine, a shard someone else created), attach with
+a pairing code instead:
 
 ```bash
 uv run update/smoke_test.py <bundle> --domain abc123.freeshard.cloud --pairing-code <code>

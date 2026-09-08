@@ -8,5 +8,6 @@ __pycache__/
 
 update/update_info
 update/github_token
+update/smoke_test_session.json
 .claude/worktrees/
 .worktrees/
