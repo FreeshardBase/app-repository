@@ -279,6 +279,19 @@ uv run update/smoke_test.py https://storageaccountportab0da.blob.core.windows.ne
 It is the one script under `update/` with a dependency (httpx), declared in a PEP 723
 header, so `uv run` installs it on the fly and the repo still needs no manifest.
 
+Shards it assigns are stamped with the owner email `smoke-test@freeshard.invalid`, which
+makes test shards obvious in the controller UI. The `.invalid` TLD is reserved and cannot
+resolve, so nothing addressed to it reaches a mailbox.
+
+To re-run without consuming another standby shard, attach to a shard you already have:
+
+```bash
+uv run update/smoke_test.py <bundle> --domain abc123.freeshard.cloud --pairing-code <code>
+```
+
+Pairing codes are single-use; issue a fresh one per attach from the controller
+(`GET /api/shards/<db_id>/pairing_code`, needs the `SUPPORT_SHARD` permission).
+
 It assigns a trial shard (`POST /api/shards/assign_trial` on the controller — no
 auth, returns domain plus a single-use pairing code), pairs as a terminal, removes
 the apps a fresh shard ships with, then per app installs the zip, waits for the

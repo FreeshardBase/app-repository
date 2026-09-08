@@ -33,6 +33,10 @@ import httpx
 
 DEFAULT_CONTROLLER = "https://controller.freeshard.net"
 TERMINAL_NAME = "smoke-test"
+# Stamped on every shard this script assigns, so test shards are obvious in the
+# controller UI. The .invalid TLD is reserved (RFC 2606) and cannot resolve, so
+# nothing addressed to it can reach a real mailbox.
+OWNER_EMAIL = "smoke-test@freeshard.invalid"
 
 # Statuses an app can be parked in once installation finished. An app is not
 # started by installing it — it starts on the first request.
@@ -97,8 +101,10 @@ def core_request(
 
 
 def assign_trial_shard(client: httpx.Client, controller: str) -> dict:
-    log.info("requesting a trial shard from %s", controller)
-    response = client.post(f"{controller}/api/shards/assign_trial", json={})
+    log.info("requesting a trial shard from %s as %s", controller, OWNER_EMAIL)
+    response = client.post(
+        f"{controller}/api/shards/assign_trial", json={"owner_email": OWNER_EMAIL}
+    )
     if response.status_code == 503:
         sys.exit(
             "no standby shard available — the pool is empty, try again once the "
@@ -318,7 +324,9 @@ def read_bundle(source: str) -> dict[str, bytes]:
     return dict(sorted(apps.items()))
 
 
-def print_summary(results: list[AppResult], shard: dict, keep_installed: bool) -> None:
+def print_summary(
+    results: list[AppResult], shard: dict, keep_installed: bool, assigned: bool = True
+) -> None:
     name_width = max((len(r.name) for r in results), default=4) + 2
     lines = [
         "",
@@ -340,12 +348,9 @@ def print_summary(results: list[AppResult], shard: dict, keep_installed: bool) -
     lines.append(f"{passed}/{len(results)} apps started")
     lines.append(f"shard hash-id: {shard['hash_id']}")
     lines.append(f"shard domain:  {shard['domain']}")
-    if keep_installed:
-        lines.append(
-            "apps left installed; the shard deletes itself 24h after assignment"
-        )
-    else:
-        lines.append("apps uninstalled; the shard deletes itself 24h after assignment")
+    lines.append("apps left installed" if keep_installed else "apps uninstalled")
+    if assigned:
+        lines.append("the shard deletes itself 24h after assignment")
     lines.append("=" * (name_width + 40))
     print("\n".join(lines))
 
@@ -357,9 +362,17 @@ def run(args: argparse.Namespace) -> int:
     run_started = time.monotonic()
 
     with httpx.Client(follow_redirects=True, timeout=60) as client:
-        shard = assign_trial_shard(client, args.controller)
+        if args.domain:
+            shard = {
+                "hash_id": "unknown (attached to an existing shard)",
+                "domain": args.domain,
+                "code": args.pairing_code,
+            }
+            log.info("attaching to existing shard %s", args.domain)
+        else:
+            shard = assign_trial_shard(client, args.controller)
+            log.info("shard hash-id: %s", shard["hash_id"])
         domain = shard["domain"]
-        log.info("shard hash-id: %s", shard["hash_id"])
         log.info("shard domain:  %s", domain)
 
         pair(client, domain, shard["code"])
@@ -409,7 +422,7 @@ def run(args: argparse.Namespace) -> int:
                 uninstall_app(client, domain, name)
 
     log.info("run finished in %ds", round(time.monotonic() - run_started))
-    print_summary(results, shard, args.keep_installed)
+    print_summary(results, shard, args.keep_installed, assigned=not args.domain)
     return 0 if all(r.passed for r in results) else 1
 
 
@@ -440,9 +453,21 @@ def main() -> None:
         help="do not uninstall an app after it passes, so the run doubles as a "
         "memory-pressure test (only meaningful where apps.lifecycle.pause_enabled is on)",
     )
+    parser.add_argument(
+        "--domain",
+        help="attach to an existing shard (e.g. abc123.freeshard.cloud) instead of "
+        "assigning a trial one; requires --pairing-code",
+    )
+    parser.add_argument(
+        "--pairing-code",
+        help="pairing code for --domain, issued from the controller "
+        "(GET /api/shards/<db_id>/pairing_code, needs SUPPORT_SHARD)",
+    )
     parser.add_argument("--controller", default=DEFAULT_CONTROLLER)
     parser.add_argument("--verbose", "-v", action="store_true")
     args = parser.parse_args()
+    if bool(args.domain) != bool(args.pairing_code):
+        parser.error("--domain and --pairing-code must be given together")
 
     logging.basicConfig(
         level=logging.DEBUG if args.verbose else logging.INFO,
