@@ -38,6 +38,11 @@ TERMINAL_NAME = "smoke-test"
 # started by installing it — it starts on the first request.
 INSTALL_DONE = {"stopped", "running", "paused"}
 
+# Installing or uninstalling any app rewrites the shared Traefik dynamic config,
+# and the core's own routers live in that same file, so a call landing inside the
+# rewrite gets Traefik's 404 instead of an answer from the core.
+TRANSIENT_STATUS = {404, 500, 502, 503, 504}
+
 log = logging.getLogger("smoke_test")
 
 
@@ -56,6 +61,41 @@ class AppResult:
         return self.outcome == "PASS"
 
 
+def core_request(
+    client: httpx.Client,
+    method: str,
+    url: str,
+    *,
+    attempts: int = 6,
+    delay: float = 2.0,
+    **kwargs,
+) -> httpx.Response:
+    """Call the shard core, riding out the window where Traefik has no routers."""
+    last: httpx.Response | httpx.HTTPError | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            response = client.request(method, url, **kwargs)
+        except httpx.HTTPError as e:
+            last = e
+        else:
+            if response.status_code not in TRANSIENT_STATUS:
+                return response
+            last = response
+        if attempt < attempts:
+            log.debug(
+                "core %s %s: %s, retrying (%d/%d)",
+                method,
+                url,
+                last.status_code if isinstance(last, httpx.Response) else type(last).__name__,
+                attempt,
+                attempts,
+            )
+            time.sleep(delay)
+    if isinstance(last, httpx.Response):
+        return last
+    raise last
+
+
 def assign_trial_shard(client: httpx.Client, controller: str) -> dict:
     log.info("requesting a trial shard from %s", controller)
     response = client.post(f"{controller}/api/shards/assign_trial", json={})
@@ -72,7 +112,9 @@ def assign_trial_shard(client: httpx.Client, controller: str) -> dict:
 
 
 def pair(client: httpx.Client, domain: str, code: str) -> None:
-    response = client.post(
+    response = core_request(
+        client,
+        "POST",
         f"https://{domain}/core/public/pair/terminal",
         params={"code": code},
         json={"name": TERMINAL_NAME},
@@ -85,13 +127,13 @@ def pair(client: httpx.Client, domain: str, code: str) -> None:
 
 
 def list_apps(client: httpx.Client, domain: str) -> list[dict]:
-    response = client.get(f"https://{domain}/core/protected/apps")
+    response = core_request(client, "GET", f"https://{domain}/core/protected/apps")
     response.raise_for_status()
     return response.json()
 
 
 def app_status(client: httpx.Client, domain: str, name: str) -> tuple[str, str]:
-    response = client.get(f"https://{domain}/core/protected/apps/{name}")
+    response = core_request(client, "GET", f"https://{domain}/core/protected/apps/{name}")
     if response.status_code == 404:
         return "absent", ""
     response.raise_for_status()
@@ -114,7 +156,7 @@ def remove_preinstalled_apps(
     )
     started = time.monotonic()
     for name in preinstalled:
-        response = client.delete(f"https://{domain}/core/protected/apps/{name}")
+        response = core_request(client, "DELETE", f"https://{domain}/core/protected/apps/{name}")
         if response.status_code not in (204, 404):
             sys.exit(
                 f"could not uninstall pre-installed app {name}: "
@@ -134,12 +176,15 @@ def remove_preinstalled_apps(
 
 
 def install_app(client: httpx.Client, domain: str, name: str, zip_bytes: bytes) -> None:
-    response = client.post(
+    response = core_request(
+        client,
+        "POST",
         f"https://{domain}/core/protected/apps",
         files={"file": (f"{name}.zip", zip_bytes, "application/zip")},
         timeout=300,
     )
-    if response.status_code != 201:
+    # 409 means a retried upload landed after the first one had in fact been accepted.
+    if response.status_code not in (201, 409):
         raise RuntimeError(
             f"upload rejected: HTTP {response.status_code}: {response.text[:300]}"
         )
@@ -245,7 +290,7 @@ def open_app(
 
 
 def uninstall_app(client: httpx.Client, domain: str, name: str) -> None:
-    response = client.delete(f"https://{domain}/core/protected/apps/{name}")
+    response = core_request(client, "DELETE", f"https://{domain}/core/protected/apps/{name}")
     if response.status_code not in (204, 404):
         log.warning(
             "could not uninstall %s: HTTP %s: %s",
