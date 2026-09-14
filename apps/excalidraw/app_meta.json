@@ -1,0 +1,38 @@
+{
+  "v": "1.2",
+  "app_version": "0.18.1",
+  "name": "excalidraw",
+  "pretty_name": "Excalidraw",
+  "icon": "icon.svg",
+  "homepage": "https://excalidraw.com",
+  "upstream_repo": "https://github.com/excalidraw/excalidraw",
+  "entrypoints": [
+    {
+      "container_name": "excalidraw",
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "public"
+    }
+  },
+  "minimum_portal_size": "s",
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Virtual collaborative whiteboard for sketching hand-drawn-style diagrams.",
+    "description_long": [
+      "Excalidraw is an open-source virtual whiteboard for sketching hand-drawn-style diagrams, wireframes and sketches. It is fast, has an infinite canvas, and needs no account.",
+      "This is the fully self-hosted stack: the Excalidraw editor, a real-time collaboration server, and a storage backend that persists shared boards on your shard. Invite others to a live board with a link and draw together in real time.",
+      "Boards are shared by link only, with no sign-up. Drawing data for collaboration links is end-to-end encrypted, so the link itself is the key to a board."
+    ],
+    "hint": [
+      "Boards are reached by link. Anyone with a board link can open and collaborate on it, and a lost link cannot be recovered by an administrator, so keep collaboration links safe."
+    ],
+    "is_featured": false
+  }
+}
