@@ -5,7 +5,12 @@ networks:
 services:
     mirotalk:
         restart: always
-        image: portalapps.azurecr.io/ptl-apps/mirotalk:master
+        # upstream publishes only the mutable :latest tag, so pin by digest (see app_version)
+        image: mirotalk/p2p@sha256:fd136fd65f14937e486c19d98e669b488a845637539c646b91cfcce59c89db2e
         container_name: mirotalk
+        environment:
+        - STATS_ENABLED=false
+        - SURVEY_ENABLED=false
+        - TURN_SERVER_ENABLED=false
         networks:
         - portal

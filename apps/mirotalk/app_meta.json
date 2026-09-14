@@ -1,9 +1,11 @@
 {
-  "v": "1.1",
-  "app_version": "0.1.1",
+  "v": "1.2",
+  "app_version": "1.8.92",
   "name": "mirotalk",
   "pretty_name": "MiroTalk",
   "icon": "icon.png",
+  "homepage": "https://p2p.mirotalk.com",
+  "upstream_repo": "https://github.com/miroslavpejic85/mirotalk",
   "entrypoints": [
     {
       "container_name": "mirotalk",
