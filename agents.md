@@ -279,9 +279,14 @@ uv run update/smoke_test.py https://storageaccountportab0da.blob.core.windows.ne
 It is the one script under `update/` with a dependency (httpx), declared in a PEP 723
 header, so `uv run` installs it on the fly and the repo still needs no manifest.
 
-Shards it assigns are stamped with the owner email `smoke-test@freeshard.invalid`, which
-makes test shards obvious in the controller UI. The `.invalid` TLD is reserved and cannot
-resolve, so nothing addressed to it reaches a mailbox.
+Shards it assigns are stamped with the owner email `clayde@vtettenborn.net`, which makes
+test shards obvious in the controller UI. It has to be a **routable** address. The core
+validates the owner email the controller hands it, and an unroutable one is not merely
+ignored: on core 0.40.5 it bricked the shard. `enrich_identity_from_profile` fires on the
+first pairing, writes the address into the identity row and only then validates it, so
+every later read of that row raises and the shard can never be paired. A reserved TLD such
+as `.invalid` (RFC 2606) is rejected by exactly that check. See diagnostic
+`8d52dbf2-6a5b-4ba1-818f-e6053943947c` and FreeshardBase/freeshard-controller#229.
 
 Every run saves its terminal JWT to `update/smoke_test_session.json` (gitignored,
 mode 600), so the shard stays reachable after the run finishes — for poking at an app

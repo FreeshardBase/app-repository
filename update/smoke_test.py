@@ -36,9 +36,10 @@ import httpx
 DEFAULT_CONTROLLER = "https://controller.freeshard.net"
 TERMINAL_NAME = "smoke-test"
 # Stamped on every shard this script assigns, so test shards are obvious in the
-# controller UI. The .invalid TLD is reserved (RFC 2606) and cannot resolve, so
-# nothing addressed to it can reach a real mailbox.
-OWNER_EMAIL = "smoke-test@freeshard.invalid"
+# controller UI. It has to be a routable address: the core validates the owner
+# email it receives from the controller, and a reserved TLD such as .invalid is
+# rejected. See the "Smoke-testing a bundle" section of agents.md.
+OWNER_EMAIL = "clayde@vtettenborn.net"
 # The terminal JWT is kept so a finished run can be revisited: --domain alone then
 # re-attaches without a fresh pairing code, which only the controller can issue.
 SESSION_FILE = Path(__file__).parent / "smoke_test_session.json"
