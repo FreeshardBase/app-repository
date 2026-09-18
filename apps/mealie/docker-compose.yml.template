@@ -1,0 +1,16 @@
+networks:
+    portal:
+        external: true
+
+services:
+    mealie:
+        restart: always
+        image: ghcr.io/mealie-recipes/mealie:v3.22.0
+        container_name: mealie
+        volumes:
+        - "{{ fs.app_data }}/data:/app/data"
+        environment:
+        - BASE_URL=https://mealie.{{ portal.domain }}
+        - ALLOW_SIGNUP=false
+        networks:
+        - portal
