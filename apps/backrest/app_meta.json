@@ -1,0 +1,43 @@
+{
+    "v": "1.2",
+    "app_version": "v1.14.1",
+    "name": "backrest",
+    "pretty_name": "Backrest",
+    "icon": "icon.png",
+    "homepage": "https://garethgeorge.github.io/backrest/",
+    "upstream_repo": "https://github.com/garethgeorge/backrest",
+    "entrypoints": [
+        {
+            "container_name": "backrest",
+            "container_port": 9898,
+            "entrypoint_port": "http"
+        }
+    ],
+    "paths": {
+        "": {
+            "access": "private"
+        }
+    },
+    "lifecycle": {
+        "always_on": true
+    },
+    "minimum_portal_size": "s",
+    "store_info": {
+        "description_short": "Scheduled, encrypted backups of your shard to storage you control, with browse and restore from the browser.",
+        "description_long": [
+            "Backrest is a web interface and scheduler built on top of restic, a fast and well-audited encrypted backup tool. Restic does the deduplication, encryption, and integrity checking; Backrest gives it a UI, so you can create repositories, browse snapshots, and restore individual files from your browser instead of a terminal.",
+            "Backrest does not come with storage. You point it at a destination you already own — Backblaze B2, Amazon S3 or another S3-compatible bucket, Google Cloud Storage, Azure, an SFTP server, or any rclone remote — and give it a set of paths to protect. It then takes snapshots on a schedule and runs the maintenance restic needs to stay healthy: forget policies to age out old snapshots, prune to reclaim space, and periodic integrity checks.",
+            "Your shard's shared storage is mounted read-only at /shared, and the data of your other installed apps is mounted read-only at /app_data, so a single plan can protect both your files and your apps. Backrest can read these paths but never modify them. Restores are written to /shared/restored, which appears in your shared storage alongside your other files.",
+            "The point of running this on your own shard is that the resulting backup is yours: the encryption key is yours, the destination account is yours, and you can restore from it yourself without anyone else's involvement. Because Backrest only orchestrates restic, the repositories it creates are ordinary restic repositories — you can restore them with the restic CLI from any machine, with Backrest out of the picture entirely."
+        ],
+        "hint": [
+            "Backrest starts with its own login turned off. Only your paired devices can reach it, but anyone on a paired device then has full control over your backups and can read every mounted path. Add a user and password in Backrest's settings to put a second lock on it.",
+            "You need to supply a destination. Add a repository pointing at a bucket, an SFTP server, or an rclone remote that you control, and keep the repository password somewhere safe — without it the backup cannot be restored, by you or by anyone else.",
+            "Backing up to a path on the shard itself is not a backup. It is lost together with the shard, so use an off-shard destination for anything you actually care about.",
+            "When you include /app_data in a plan, exclude /app_data/backrest — that is Backrest's own restic cache and log database, and it will grow your backup without adding anything you could restore.",
+            "App data under /app_data is copied while those apps may still be running, so an app with a database can end up with an inconsistent copy. Stop the app from your shard's app list before a snapshot if you want a guaranteed-clean one.",
+            "Schedules are evaluated in UTC."
+        ],
+        "is_featured": false
+    }
+}
