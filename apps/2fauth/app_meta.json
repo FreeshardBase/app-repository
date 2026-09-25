@@ -1,0 +1,42 @@
+{
+  "v": "1.2",
+  "app_version": "8.0.1",
+  "name": "2fauth",
+  "pretty_name": "2FAuth",
+  "icon": "icon.svg",
+  "homepage": "https://docs.2fauth.app/",
+  "upstream_repo": "https://github.com/Bubka/2FAuth",
+  "entrypoints": [
+    {
+      "container_name": "2fauth",
+      "container_port": 8000,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Manage your two-factor authentication (2FA) accounts and generate their security codes.",
+    "description_long": [
+      "2FAuth is a web app for managing the two-factor authentication accounts you would otherwise keep in a phone authenticator app. It stores the TOTP and HOTP secrets of your online accounts and generates the one-time codes you need to log in to them.",
+      "You add accounts by scanning a QR code, uploading a QR image, or typing the secret by hand, and 2FAuth then shows a live code for each one. Accounts can be grouped, searched, and reordered, and the interface works on phone, tablet, and desktop.",
+      "Because it runs on your own shard, your 2FA secrets stay on hardware you control instead of on a vendor's servers. The app is reachable only from your paired devices, and it keeps its own login on top of that."
+    ],
+    "hint": [
+      "BACK UP YOUR ACCOUNTS. 2FAuth holds the secrets that generate your second-factor codes. If you lose this shard and have no export, you lose the second factor for every account kept here, and you may be permanently locked out of them.",
+      "Export as soon as you have added your first accounts, and again after every change: on the main view press 'Manage', then 'Export', then 'All', and pick the '2FAuth format' option - that is the one that can be restored later. Store the downloaded file somewhere safe and offline; it contains your secrets in plain text.",
+      "Do not let 2FAuth be the only place holding these secrets. Keep the recovery codes your service providers gave you, or keep a second authenticator app in sync.",
+      "On your first visit you create the account yourself, and the first user created becomes the administrator. Only your paired devices can reach the registration page.",
+      "Secrets are stored unencrypted by default. To encrypt them at rest, enable 'Protect sensitive data' on the admin 'App setup' page.",
+      "Fetching official service logos is switched off, so that adding an account does not tell an external icon CDN which services you use. You can switch it back on under Settings > Options."
+    ],
+    "is_featured": false
+  }
+}
