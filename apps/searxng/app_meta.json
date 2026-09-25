@@ -1,0 +1,38 @@
+{
+  "v": "1.2",
+  "app_version": "2026.8.4-c63835bd2",
+  "name": "searxng",
+  "pretty_name": "SearXNG",
+  "icon": "icon.svg",
+  "homepage": "https://searxng.org",
+  "upstream_repo": "https://github.com/searxng/searxng",
+  "entrypoints": [
+    {
+      "container_name": "searxng",
+      "container_port": 8080,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Your own search engine that never profiles you.",
+    "description_long": [
+      "SearXNG is a metasearch engine. Instead of running its own crawler, it forwards your query to established search services - Google, Wikipedia, Startpage, Brave and around 200 more - and merges what comes back into a single ranked list. The search engines see a request from your shard, not from you: no cookies are passed on, no advertising profile is built, and your searches are not logged anywhere.",
+      "Because it aggregates rather than indexes, you can switch individual engines on and off, and search the web, images, videos, code repositories, maps or science papers from the same box. There is no account and no login screen - your preferences live in your own browser, and your shard's pairing is what keeps the instance private.",
+      "Set it as the default search engine in your browser and every search you make goes through your own shard."
+    ],
+    "hint": [
+      "Some engines answer better than others. Because your searches leave from your shard's server address rather than a home connection, engines that aggressively block automated traffic - DuckDuckGo, Startpage and Brave among them - may return a CAPTCHA or rate-limit error, while Google and Wikipedia answer reliably. Turn the engines that misbehave off under Preferences.",
+      "To use SearXNG as your browser's default search engine, open it once and add it from the address bar. Your browser will reach it at the same paired-device-only address."
+    ],
+    "is_featured": false
+  }
+}
