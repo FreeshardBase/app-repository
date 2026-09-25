@@ -1,0 +1,48 @@
+networks:
+  portal:
+    external: true
+  nextcloud:
+
+services:
+  nextcloud:
+    restart: always
+    image: nextcloud:34.0.2-apache
+    container_name: nextcloud
+    volumes:
+      - "{{ fs.app_data }}/html:/var/www/html"
+    environment:
+      - POSTGRES_HOST=nextcloud-postgres
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=nextcloud
+      - NEXTCLOUD_ADMIN_USER=admin
+      - NEXTCLOUD_ADMIN_PASSWORD=admin
+      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.{{ portal.domain }}
+      - OVERWRITEHOST=nextcloud.{{ portal.domain }}
+      - OVERWRITEPROTOCOL=https
+      - OVERWRITECLIURL=https://nextcloud.{{ portal.domain }}
+      - TRUSTED_PROXIES=172.16.0.0/12
+    depends_on:
+      nextcloud-postgres:
+        condition: service_healthy
+    networks:
+      - portal
+      - nextcloud
+
+  nextcloud-postgres:
+    restart: always
+    image: postgres:17-alpine
+    container_name: nextcloud-postgres
+    volumes:
+      - "{{ fs.app_data }}/pgdata:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=nextcloud
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nextcloud -d nextcloud"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - nextcloud

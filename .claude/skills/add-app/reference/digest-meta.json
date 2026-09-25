@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-07",
+  "generated_at": "2026-08-07",
   "source_urls": [
     "https://docs.freeshard.net/",
     "https://docs.freeshard.net/overview/",
@@ -16,9 +16,12 @@
     "https://docs.freeshard.net/developer_docs/existing_apps/",
     "https://docs.freeshard.net/developer_docs/custom_apps/",
     "https://docs.freeshard.net/developer_docs/revenue_share/",
+    "https://docs.freeshard.net/developer_docs/app_template/",
     "https://docs.freeshard.net/overview/concepts/apps/",
     "https://docs.freeshard.net/overview/concepts/single_user_isolation/",
     "https://docs.freeshard.net/overview/concepts/devices/",
+    "https://docs.freeshard.net/blog/2026/07/25/putting-apps-to-sleep-and-waking-them-in-under-two-seconds/",
+    "https://docs.freeshard.net/blog/2026/05/29/unblocking-apps-by-fixing-a-performance-bottleneck/",
     "https://storageaccountportab0da.blob.core.windows.net/json-schema/0-30-2/schema_app_meta_1.2.json"
   ]
 }
