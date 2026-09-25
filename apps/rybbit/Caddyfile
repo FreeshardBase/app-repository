@@ -1,0 +1,8 @@
+:80 {
+	handle /api/* {
+		reverse_proxy rybbit-backend:3001
+	}
+	handle {
+		reverse_proxy rybbit-client:3002
+	}
+}

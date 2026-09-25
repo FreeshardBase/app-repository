@@ -1,0 +1,100 @@
+networks:
+  portal:
+    external: true
+  rybbit:
+
+services:
+  rybbit:
+    restart: always
+    image: caddy:2.10.0
+    container_name: rybbit
+    depends_on:
+      - rybbit-client
+      - rybbit-backend
+    volumes:
+      - "{{ fs.installation_dir }}/Caddyfile:/etc/caddy/Caddyfile:ro"
+    networks:
+      - portal
+      - rybbit
+
+  rybbit-client:
+    restart: always
+    image: ghcr.io/rybbit-io/rybbit-client:v2.7.0
+    container_name: rybbit-client
+    environment:
+      - NODE_ENV=production
+    networks:
+      - rybbit
+
+  rybbit-backend:
+    restart: always
+    image: ghcr.io/rybbit-io/rybbit-backend:v2.7.0
+    container_name: rybbit-backend
+    user: "0:0"
+    depends_on:
+      - rybbit-clickhouse
+      - rybbit-postgres
+      - rybbit-redis
+    volumes:
+      - "{{ fs.app_data }}/backend-data:/app/data"
+    environment:
+      - NODE_ENV=production
+      - BASE_URL=https://rybbit.{{ portal.domain }}
+      - DISABLE_SIGNUP=false
+      - DISABLE_TELEMETRY=true
+      - CLICKHOUSE_HOST=http://rybbit-clickhouse:8123
+      - CLICKHOUSE_DB=analytics
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=freeshard_rybbit_clickhouse_pw
+      - POSTGRES_HOST=rybbit-postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=analytics
+      - POSTGRES_USER=rybbit
+      - POSTGRES_PASSWORD=freeshard_rybbit_postgres_pw
+      - REDIS_HOST=rybbit-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=freeshard_rybbit_redis_pw
+      - BETTER_AUTH_SECRET=a1c3e5079b2d4f6a8c0e2f4b6d8a0c2e4f6b8d0a2c4e6f8b0d2f4a6c8e0b2d4f
+    networks:
+      - rybbit
+
+  rybbit-clickhouse:
+    restart: always
+    image: clickhouse/clickhouse-server:25.4.2
+    container_name: rybbit-clickhouse
+    user: "0:0"
+    environment:
+      - CLICKHOUSE_DB=analytics
+    volumes:
+      - "{{ fs.app_data }}/clickhouse-data:/var/lib/clickhouse"
+      - "{{ fs.installation_dir }}/clickhouse/config.d/rybbit.xml:/etc/clickhouse-server/config.d/rybbit.xml:ro"
+      - "{{ fs.installation_dir }}/clickhouse/users.d/rybbit.xml:/etc/clickhouse-server/users.d/rybbit.xml:ro"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    networks:
+      - rybbit
+
+  rybbit-postgres:
+    restart: always
+    image: postgres:17.4
+    container_name: rybbit-postgres
+    environment:
+      - POSTGRES_DB=analytics
+      - POSTGRES_USER=rybbit
+      - POSTGRES_PASSWORD=freeshard_rybbit_postgres_pw
+    volumes:
+      - "{{ fs.app_data }}/postgres-data:/var/lib/postgresql/data"
+    networks:
+      - rybbit
+
+  rybbit-redis:
+    restart: always
+    image: redis:7-alpine
+    container_name: rybbit-redis
+    command: redis-server --requirepass freeshard_rybbit_redis_pw --maxmemory-policy noeviction --appendonly yes
+    volumes:
+      - "{{ fs.app_data }}/redis-data:/data"
+    networks:
+      - rybbit

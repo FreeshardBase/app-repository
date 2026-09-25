@@ -1,0 +1,40 @@
+{
+  "v": "1.2",
+  "app_version": "v2.7.0",
+  "name": "rybbit",
+  "pretty_name": "Rybbit",
+  "icon": "rybbit.svg",
+  "homepage": "https://rybbit.com",
+  "upstream_repo": "https://github.com/rybbit-io/rybbit",
+  "entrypoints": [
+    {
+      "container_name": "rybbit",
+      "container_port": 80,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    },
+    "/api/": {
+      "access": "public"
+    }
+  },
+  "lifecycle": {
+    "always_on": true
+  },
+  "minimum_portal_size": "m",
+  "store_info": {
+    "description_short": "Open-source, privacy-friendly web and product analytics — a self-hostable Google Analytics / Plausible alternative.",
+    "description_long": [
+      "Rybbit is an open-source, privacy-first web and product analytics platform — a self-hostable alternative to Google Analytics and Plausible. It gives you real-time visitor dashboards, funnels, user journeys, sessions, retention, and event tracking without cookies and without shipping your visitors' data to a third party.",
+      "A lightweight (~18 KB) tracking script is GDPR/CCPA-friendly and requires no cookie banner. The stack is fully self-contained: a Next.js dashboard, a Node API, ClickHouse for high-volume event storage, Postgres for application and auth data, and Redis for sessions and background jobs.",
+      "Licensed AGPL-3.0, self-hosting is entirely free with no license keys or mandatory cloud services. Rybbit is a resource-heavy application (ClickHouse in particular) and targets larger shards."
+    ],
+    "hint": [
+      "On first visit, register the admin account through the Rybbit login screen — the dashboard is private to your paired devices.",
+      "Add a website in the dashboard, then embed the generated tracking snippet on the site you want to measure. The tracking endpoint is publicly reachable so your visitors' events can be collected."
+    ]
+  }
+}
