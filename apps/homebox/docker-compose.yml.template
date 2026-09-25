@@ -1,0 +1,26 @@
+networks:
+    portal:
+        external: true
+
+services:
+    homebox:
+        restart: always
+        image: ghcr.io/sysadminsmedia/homebox:0.26.2
+        container_name: homebox
+        entrypoint:
+        - /bin/sh
+        - -c
+        - |
+          [ -s /data/api_key_pepper ] || head -c 48 /dev/urandom | base64 > /data/api_key_pepper
+          read -r HBOX_AUTH_API_KEY_PEPPER < /data/api_key_pepper
+          export HBOX_AUTH_API_KEY_PEPPER
+          exec /app/api
+        volumes:
+        - "{{ fs.app_data }}/data:/data"
+        environment:
+        - HBOX_OPTIONS_HOSTNAME=https://homebox.{{ portal.domain }}
+        - HBOX_OPTIONS_TRUST_PROXY=true
+        - HBOX_OPTIONS_ALLOW_ANALYTICS=false
+        - HBOX_OPTIONS_GITHUB_RELEASE_CHECK=false
+        networks:
+        - portal
