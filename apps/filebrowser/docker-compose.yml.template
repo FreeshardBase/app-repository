@@ -5,10 +5,93 @@ networks:
 services:
     filebrowser:
         restart: always
-        image: portalapps.azurecr.io/ptl-apps/filebrowser:v2.30.0
+        image: filebrowser/filebrowser:v2.63.23
         container_name: filebrowser
+        user: "0:0"
+        environment:
+        - FB_DATABASE=/database/filebrowser.db
+        - FB_ROOT=/data
+        - FB_ADDRESS=0.0.0.0
+        - FB_PORT=80
+        entrypoint: ["tini", "--", "/bin/sh", "-c"]
+        command:
+        - |
+          set -e
+
+          if [ ! -s /database/filebrowser.db ]; then
+            cat > /tmp/freeshard-config.json <<'FREESHARD_CONFIG'
+          {
+            "settings": {
+              "signup": false,
+              "createUserDir": false,
+              "authMethod": "proxy",
+              "defaults": {
+                "scope": ".",
+                "locale": "en",
+                "viewMode": "list",
+                "singleClick": false,
+                "sorting": {
+                  "by": "name",
+                  "asc": false
+                },
+                "perm": {
+                  "admin": false,
+                  "execute": true,
+                  "create": true,
+                  "rename": true,
+                  "modify": true,
+                  "delete": true,
+                  "share": true,
+                  "download": true
+                },
+                "commands": [],
+                "hideDotfiles": false
+              },
+              "branding": {
+                "name": "",
+                "disableExternal": false,
+                "files": "",
+                "theme": ""
+              },
+              "shell": [],
+              "rules": [
+                {
+                  "regex": false,
+                  "allow": false,
+                  "path": "/app_data/filebrowser/database"
+                }
+              ]
+            },
+            "server": {
+              "root": "/data",
+              "baseURL": "",
+              "socket": "",
+              "tlsKey": "",
+              "tlsCert": "",
+              "port": "80",
+              "address": "",
+              "log": "stdout",
+              "enableThumbnails": false,
+              "resizePreview": false,
+              "enableExec": false
+            },
+            "auther": {
+              "header": "X-Ptl-Client-Type"
+            }
+          }
+          FREESHARD_CONFIG
+            filebrowser config import /tmp/freeshard-config.json
+            rm -f /tmp/freeshard-config.json
+            filebrowser config set --fileMode 0644 --dirMode 0755
+          fi
+
+          filebrowser users find terminal >/dev/null 2>&1 \
+            || filebrowser users add terminal unused-proxy-auth-placeholder --lockPassword
+
+          exec filebrowser
         volumes:
         - "{{ fs.app_data }}/data:/data"
+        - "{{ fs.app_data }}/database:/database"
         - "{{ fs.shared }}:/data/shared"
         - "{{ fs.all_app_data }}:/data/app_data"
         networks:
