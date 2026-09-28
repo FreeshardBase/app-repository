@@ -14,7 +14,7 @@ convention as `apps/` and `inactive_apps/`).
 # <Pretty Name>
 
 **Blocked:** YYYY-MM-DD
-**Exit code:** <a | b | f | j | reject>
+**Exit code:** <a | b | f | j | k | reject>
 **Reason:** one-line summary
 
 | Field | Value |
@@ -47,9 +47,15 @@ Exit codes match `.claude/skills/add-app/reference/exit-criteria.md`:
 | b | Non-FOSS license |
 | f | Paid / license-key required |
 | j | First-run bootstrap requires shell access |
+| k | Requires a platform feature not yet released to shards |
 | reject | User rejected during ambiguity gate in phase 3 |
 
 ## Reconsidering a blocked app
 
 If upstream changes (license relicensed to FOSS, image published, free
 tier added), delete the file and re-run `/add-app <name>`.
+
+A `k` block is the one that clears without upstream doing anything: it lifts
+when the platform feature it names ships to shards. Such a file records what
+it is waiting for, and normally carries the drafted `app_meta.json` and
+compose template so the re-run is a paste rather than a fresh integration.
