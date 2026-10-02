@@ -1,0 +1,14 @@
+networks:
+    portal:
+        external: true
+
+services:
+    pinchflat-ngx:
+        restart: always
+        image: ghcr.io/thebadfella/pinchflat-ngx:2026.9.28
+        container_name: pinchflat-ngx
+        volumes:
+        - "{{ fs.app_data }}/config:/config"
+        - "{{ fs.shared }}/media:/downloads"
+        networks:
+        - portal
