@@ -5,7 +5,7 @@ networks:
 services:
     docuseal:
         restart: always
-        image: docuseal/docuseal:3.2.6
+        image: docuseal/docuseal:3.3.0
         container_name: docuseal
         volumes:
         - "{{ fs.app_data }}/data:/data"
