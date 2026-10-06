@@ -19,3 +19,20 @@ Some projects mark **all** releases `prerelease` (never promote a stable one). `
 **Fix:** in `update_check.py`, track the registry tags instead — `latest_ghcr_tag("<org>/<image>", filter_regex=r"^v\d+\.\d+\.\d+$")` (drops rc/dev/latest), and fetch notes per-tag with `github_release_body("<org>/<repo>", version)` (works for prerelease tags). Precedent: `librechat`.
 
 **Detect:** `gh api repos/<org>/<repo>/releases --jq '[.[].prerelease] | all'` → `true` means every release is prerelease.
+
+## Worktree-isolated session refuses compound shell commands
+
+The skill runs inside a git worktree (phase 1). In a worktree-isolated session the Bash
+tool statically parses every command to prove it stays inside the worktree and **refuses any
+it cannot verify** — a `for` loop, a `gh ... --jq` or `python3 -c`/`python3 - <<EOF` carrying a
+shell-expanded variable, a pipe into a subshell, a `cd` to a computed path. The refusal fires
+even for a read-only `gh api` or `curl`.
+
+**Symptom:** `Refusing to run it — a worktree-isolated session's git operations must target its
+own worktree`, with "a construct too complex to verify … cannot be shown not to be git".
+
+**Fix:** split into plain, separate commands — one `gh api` / `curl` / `python3` per call,
+literal paths, no loops and no command-substituted variables. This is **not** a permission
+issue, so a `permissions.allow` entry does not clear it (the parser, not the permission gate, is
+refusing). Prefer the dedicated file tools (Read/Write/Edit) over here-doc scripts when you can.
+
