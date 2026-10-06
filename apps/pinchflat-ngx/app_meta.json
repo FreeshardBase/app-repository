@@ -1,0 +1,38 @@
+{
+    "v": "1.2",
+    "app_version": "2026.9.28",
+    "name": "pinchflat-ngx",
+    "pretty_name": "Pinchflat-NGX",
+    "icon": "icon.png",
+    "homepage": "https://github.com/TheBadFella/Pinchflat-NGX",
+    "upstream_repo": "https://github.com/TheBadFella/Pinchflat-NGX",
+    "entrypoints": [
+        {
+            "container_name": "pinchflat-ngx",
+            "container_port": 8945,
+            "entrypoint_port": "http"
+        }
+    ],
+    "paths": {
+        "": {
+            "access": "private"
+        }
+    },
+    "lifecycle": {
+        "always_on": false,
+        "idle_time_for_shutdown": 3600
+    },
+    "minimum_portal_size": "s",
+    "store_info": {
+        "description_short": "Self-hosted YouTube media manager that auto-archives channels and playlists to disk.",
+        "description_long": [
+            "Pinchflat-NGX is a self-hosted application for archiving YouTube content, built on yt-dlp as an enhanced fork of Pinchflat. You define rules for which channels or playlists to follow, and it periodically checks for and downloads new media automatically. It is designed for archival and media-center workflows rather than in-app viewing: downloaded files land on disk where media-center apps such as Jellyfin, Plex, and Kodi can pick them up.",
+            "Compared to upstream Pinchflat, the NGX fork adds a Material 3 web interface, optional OAuth2/OpenID Connect single sign-on, and a local disk staging pipeline that completes downloads on fast local storage before moving finished files to their final location. Inherited features include automatic redownload of new media, optional deletion of old content, podcast-style RSS feeds, and audio-only downloads.",
+            "On your shard, Pinchflat-NGX's download folder is mapped to the shared media storage, so archived videos appear under the same paths other Freeshard apps use and can be served by a media-center app on the same shard. Access is gated by shard pairing, so no separate app login is required."
+        ],
+        "hint": [
+            "The app sleeps when its web interface is idle and wakes when you open it. Scheduled channel and playlist checks run while the app is awake, so open it periodically (or leave a tab open) to let long download queues finish."
+        ],
+        "is_featured": false
+    }
+}

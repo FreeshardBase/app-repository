@@ -1,447 +1,244 @@
-# Freeshard App-Integration Reference Digest
+# Freeshard App Integration Digest
 
-> Sources: agents.md (primary) + docs.freeshard.net developer docs (crawled 2026-07-07).
-> Where they disagree this digest notes which source wins and why.
+Compact reference for integrating a new app into the Freeshard app store.
+Generated 2026-10-02 from docs.freeshard.net developer docs.
 
----
+## Mental model
 
-## App Model
+- A **shard** = one owner's dedicated VM + disk (single-user isolation). No multi-tenant
+  anything; privacy comes from infrastructure isolation, not app-level ACLs.
+- An **app** = one or more Docker images run as containers on the shard, plus metadata files.
+  Exactly one container must serve **plain HTTP (not HTTPS!)** on a port — the shard terminates
+  TLS for you.
+- Apps behave like phone apps: installed in large numbers, started on demand, stopped when idle.
+- Because each shard serves one person, do NOT make the app ask users to register/log in. Let
+  Freeshard's auth-proxy handle identity (see Routing & AC).
+- Sharing between users uses peering / sharing links, not multi-user accounts.
 
-An app is a Docker Compose project installed onto a user's shard (single-tenant VM). The shard:
-- Renders the `docker-compose.yml.template` at install time (variable substitution)
-- Uses `app_meta.json` to configure its reverse proxy, lifecycle manager, and app store display
-- Routes HTTP traffic via subdomain: `<app-name>.<shard-id>.<domain>` → app container port
-- Routes MQTT traffic on port 8883 (no access control; raw TLS termination only)
-- Provides a splash screen while containers start on first request
+## Three files per app (the deliverable)
 
-**Fundamental constraints from dev docs:**
-- One container must serve HTTP (not HTTPS) on a configured port
-- UI must be responsive (notebook / tablet / smartphone)
-- No external SaaS dependencies; only internal shard services
-- No manual post-install configuration required; apps must self-configure on first start
+An app = a folder in `FreeshardBase/app-repository` containing exactly:
 
----
+1. `app_meta.json` — run instructions + app-store metadata
+2. `docker-compose.yml.template` — compose file with template variables
+3. the icon file (PNG/JPEG/SVG), referenced by `icon` in meta
 
-## `app_meta.json` Schema
+The actual Docker images live on a registry (e.g. Docker Hub); the repo holds only metadata.
+On install the shard fetches the template, substitutes variables, and runs it.
 
-Schema URL: `https://storageaccountportab0da.blob.core.windows.net/json-schema/0-30-2/schema_app_meta_1.2.json`
+## app_meta.json
 
-### Root fields
+Schema v1.2: `https://storageaccountportab0da.blob.core.windows.net/json-schema/0-30-2/schema_app_meta_1.2.json`
 
-| Field | Type | Req | Default | Notes |
-|---|---|---|---|---|
-| `v` | string | Y | — | Format version. Use `"1.2"` for new apps |
-| `app_version` | string | Y | — | Must match Docker image tag |
-| `name` | string | Y | — | Lowercase, `[a-z0-9-]` only; must match folder name; becomes subdomain |
-| `pretty_name` | string | Y | — | Display name (v1.1+) |
-| `icon` | string | Y | — | Filename in app folder; PNG / JPEG / SVG |
-| `homepage` | string | N | — | App homepage URL (v1.2+) |
-| `upstream_repo` | string | N | — | GitHub repo URL for auto-update checking (v1.2+) |
-| `entrypoints` | array | Y | — | See below |
-| `paths` | object | Y | — | Access control; see below |
-| `lifecycle` | object | N* | `{always_on:false, idle_time_for_shutdown:60}` | See below |
-| `minimum_portal_size` | string | N | `"xs"` | Enum: `xs \| s \| m \| l \| xl` |
-| `store_info` | object | Y | — | App store display; see below |
-
-**Version history:** v1.0 → v1.1 added `pretty_name`; v1.2 added `homepage` and `upstream_repo`.
-
-> **agents.md marks `pretty_name` as optional; the JSON schema marks it required.** Follow the schema — mark `pretty_name` as required.
-
-> **`lifecycle` — docs disagree.** The `app_meta.json` docs table marks `lifecycle` (and both its inner fields) as required; agents.md marks it optional with a documented default. **agents.md wins in practice:** 4 of the 42 repo apps omit the block entirely and the shard applies the default (`always_on:false`, `idle_time_for_shutdown:60`). Omit `lifecycle` for a plain web app; include it only to override the default.
-
-> **`store_info` — treat as required.** The docs schema table marks it optional, but all 42 repo apps include it and agents.md marks it required. Always provide it (at minimum `description_short`).
-
-### `entrypoints[]`
+### Fields
 
 | Field | Type | Req | Notes |
 |---|---|---|---|
-| `container_name` | string | Y | Must match `container_name` in compose template |
-| `container_port` | integer | Y | Port the container listens on internally (plain HTTP) |
-| `entrypoint_port` | string | Y | `"http"` (→ 443 externally) or `"mqtt"` (→ 8883 externally) |
+| `v` | string | yes | Format version, `"1.2"` |
+| `app_version` | string | yes | App version, used for update detection |
+| `name` | string | yes | Unique id used in URLs; lowercase letters, numbers, dashes only |
+| `pretty_name` | string | yes | Display name (spaces/capitals ok) |
+| `icon` | string | yes | Icon filename (png/jpeg/svg) present in the folder |
+| `homepage` | string | no | App's info website URL |
+| `upstream_repo` | string | no | GitHub repo URL, used by update checks |
+| `entrypoints` | array | yes | Port exposure, see below |
+| `paths` | object | yes | Access control by path prefix, see below |
+| `lifecycle` | object | yes* | Start/stop behavior, see below (defaults exist) |
+| `minimum_portal_size` | string | no | enum `xs` `s` `m` `l` `xl`, default `xs`; set higher for heavy apps |
+| `store_info` | object | no | App-store display metadata, see below |
 
-At least one entrypoint required. MQTT entrypoints bypass access control entirely.
+**entrypoints[]** (required object fields):
+- `container_name` (string) — must match a service/container_name in the compose file
+- `container_port` (integer) — internal HTTP port the container serves
+- `entrypoint_port` (enum) — `"http"` (public 443) or `"mqtt"` (public 8883)
 
-### `paths` (access control)
+**paths** — object keyed by URL path prefix; each value:
+- `access` (enum, required): `"public"` | `"private"` | `"peer"`
+- `headers` (object of string→string, optional) — extra headers to inject for that path
+- Must include the default empty-string key `""`. Longest prefix wins (longest→shortest match).
 
-Object keyed by path prefix string. Empty string `""` is required catch-all (evaluated last — longest match wins).
+**lifecycle**:
+- `always_on` (bool, default `false`) — if `true`, app never auto-stops and
+  `idle_time_for_shutdown` is forbidden
+- `idle_time_for_shutdown` (int seconds, default `60`) — idle time before stop; incompatible
+  with `always_on: true`
 
-| Field | Type | Req | Notes |
-|---|---|---|---|
-| `access` | string | Y | `"public"` \| `"private"` \| `"peer"` |
-| `headers` | object | N | Key→value; values may use template variables (see below) |
+**store_info** (all optional, but see Submission for rules):
+- `description_short` (string) — 1–2 sentences, fits the app card
+- `description_long` (string or array of strings → paragraphs)
+- `hint` (string or array of strings → bullet points)
+- `is_featured` (bool) — DO NOT set in submissions (reserved for Freeshard)
 
-### `lifecycle`
+### Example
 
-| Field | Type | Notes |
-|---|---|---|
-| `always_on` | bool | `true` = never auto-stop; mutually exclusive with `idle_time_for_shutdown` |
-| `idle_time_for_shutdown` | int (seconds) | Inactivity before `docker-compose stop`; default 60 |
+```json
+{
+  "v": "1.2",
+  "app_version": "0.1.1",
+  "name": "my-app",
+  "pretty_name": "My App",
+  "icon": "icon.png",
+  "homepage": "https://myapp.com",
+  "upstream_repo": "https://github.com/namespace/myapp",
+  "entrypoints": [
+    { "container_name": "my-app", "container_port": 8080, "entrypoint_port": "http" }
+  ],
+  "paths": { "": { "access": "private" } },
+  "lifecycle": { "always_on": false, "idle_time_for_shutdown": 3600 },
+  "minimum_portal_size": "s",
+  "store_info": {
+    "description_short": "This is a very good app.",
+    "description_long": ["This app is so good, you won't believe it.", "It is the best app ever."],
+    "hint": "Although this app is very good, you still have to create an account to use it.",
+    "is_featured": true
+  }
+}
+```
 
-### `store_info`
+## docker-compose.yml.template
 
-| Field | Type | Notes |
-|---|---|---|
-| `description_short` | string | Required for store listing; 1–2 sentences, fits app card |
-| `description_long` | string or string[] | Optional; array = paragraphs |
-| `hint` | string or string[] | Optional; array = bullets |
-| `is_featured` | bool | Do not set — Freeshard team sets this |
+Standard compose file; the shard substitutes Jinja2-style `{{ variable }}` placeholders at
+install time. Conventions:
 
----
+- `version: '3.5'`.
+- Declare the external network `portal` and attach every service to it:
+  ```yaml
+  networks:
+    portal:
+      external: true
+  ```
+- Each service needs an explicit `container_name`. The web service's `container_name` +
+  `container_port` must match an `entrypoints[]` entry. Convention for extra containers:
+  `my-app-<name>` (e.g. `my-app-redis`).
+- The web service serves plain HTTP; no TLS, no cert handling in the app.
+- App is reached at `https://<name>.<shard-domain>`.
 
-## `docker-compose.yml.template` Rules
+### Template variables
 
-1. **Portal network**: Declare `portal` as external; every proxy-reachable container must join it.
-2. **`container_name`**: Every service needs explicit `container_name`; main service must match `entrypoints[].container_name`.
-3. **Naming convention**: Supporting services → `<app-name>-<service>` (e.g., `myapp-postgres`).
-4. **Image tags**: Pin to exact version matching `app_version`. Never `latest`.
-5. **`restart`**: Always `always` (or `unless-stopped`). Use `restart: no` only for one-shot init containers.
-6. **Multi-service isolation**: Only the entrypoint container joins `portal`; create an app-private network for inter-service comms.
-7. **Docker socket**: Mount read-only only: `/var/run/docker.sock:/var/run/docker.sock:ro`.
-8. **Filesystem access**: Mount only paths provided by `fs.*` variables. Mounting `fs.all_app_data` requires justification.
+Portal:
+- `portal.domain` — shard FQDN (e.g. `8271dd.<domain>`)
+- `portal.id` — full shard hash id
+- `portal.short_id` — first six chars of the id
+- `portal.public_key_pem` — shard public key (PEM)
 
-### Minimal template
+Filesystem (only these may be mounted):
+- `fs.app_data` — this app's private dir (starts empty, app owns it)
+- `fs.all_app_data` — parent of all apps' data dirs
+- `fs.shared` — cross-app shared dir (subdirs like `documents`, `media`, `music`)
+- `fs.installation_dir` — installation files location
+
+### Volumes / env
+
+- Mount format: `"{{ fs.app_data }}/data:/data"`, `"{{ fs.shared }}/documents:/documents"`.
+- Docker socket, if needed, must be read-only: `"/var/run/docker.sock:/var/run/docker.sock:ro"`.
+- Inject env with template vars, e.g. `BASE_URL=https://my-app.{{ portal.domain }}`,
+  `TITLE=My app on {{ portal.short_id }}`, `REDIS_HOST=my-app-redis`.
+
+### Example (multi-container)
 
 ```yaml
+version: '3.5'
 networks:
   portal:
     external: true
-
 services:
   my-app:
-    restart: always
-    image: org/my-app:1.0.0
+    image: my-app:v4
     container_name: my-app
+    depends_on:
+      - my-app-redis
     volumes:
       - "{{ fs.app_data }}/data:/data"
+      - "{{ fs.shared }}/shared_data:/shared_data"
+    networks:
+      - portal
     environment:
+      - REDIS_HOST=my-app-redis
       - BASE_URL=https://my-app.{{ portal.domain }}
+      - TITLE=My app on {{ portal.short_id }}
+  my-app-redis:
+    image: redis:6.2
+    container_name: my-app-redis
+    volumes:
+      - "{{ fs.app_data }}/redis_data:/redis_data"
     networks:
       - portal
 ```
 
-### Multi-service template (with DB + cache)
+## Routing & access control
 
-```yaml
-networks:
-  portal:
-    external: true
-  my-app:
-
-services:
-  my-app:
-    restart: always
-    image: org/my-app:1.0.0
-    container_name: my-app
-    depends_on: [my-app-postgres, my-app-redis]
-    environment:
-      - DATABASE_URL=postgres://myapp:myapp@my-app-postgres:5432/myapp
-      - BASE_URL=https://my-app.{{ portal.domain }}
-    networks: [portal, my-app]
-
-  my-app-postgres:
-    restart: always
-    image: postgres:16
-    container_name: my-app-postgres
-    volumes:
-      - "{{ fs.app_data }}/pgdata:/var/lib/postgresql/data"
-    environment:
-      - POSTGRES_USER=myapp
-      - POSTGRES_PASSWORD=myapp
-      - POSTGRES_DB=myapp
-    networks: [my-app]
-
-  my-app-redis:
-    restart: always
-    image: redis:7-alpine
-    container_name: my-app-redis
-    networks: [my-app]
-```
-
----
-
-## Template Variables
-
-Rendered at install time via Jinja-like `{{ variable }}` syntax.
-
-| Variable | Description | Example |
-|---|---|---|
-| `portal.domain` | Shard's FQDN | `8271dd.example.com` |
-| `portal.id` | Full shard hash-ID | `8271dd...` (long) |
-| `portal.short_id` | First 6 chars of shard ID | `8271dd` |
-| `portal.public_key_pem` | Shard's public key (PEM) | `-----BEGIN PUBLIC KEY-----...` |
-| `fs.app_data` | App-specific persistent storage | `/home/user/.freeshard/user_data/app_data/my-app` |
-| `fs.all_app_data` | Parent of all app data dirs | `/home/user/.freeshard/user_data/app_data` |
-| `fs.shared` | Cross-app shared data dir | `/home/user/.freeshard/user_data/shared` |
-| `fs.installation_dir` | Installation files location | `/home/user/.freeshard/core/installed_apps/my-app` |
-
-> `fs.installation_dir` is documented in the dev docs but absent from agents.md. Included here from the dev docs.
-
-Available in `paths[].headers` values only (not compose template):
-
-| Variable | Values |
-|---|---|
-| `{{ auth.client_type }}` | `"terminal"` / `"peer"` / `"anonymous"` |
-| `{{ auth.client_id }}` | Cryptographic client identifier |
-| `{{ auth.client_name }}` | User-assigned client name |
-
-Portal variables (`portal.*`) are also usable in headers values.
-
----
-
-## Access Modes and Header Templating
-
-### Access modes
-
-| Mode | Who can access |
-|---|---|
-| `"private"` | Only paired devices (shard owner's terminals) |
-| `"public"` | Anyone (no auth) |
-| `"peer"` | Other shards added as peers (mutual peering required) |
-
-Access control applies to HTTP entrypoints only. MQTT entrypoints have no AC.
-
-Path matching: longest prefix wins; `""` is required fallback.
-
-### Common access patterns
-
-**Fully private:**
-```json
-"paths": { "": { "access": "private" } }
-```
-
-**Auth-proxy (private + header):**
-```json
-"paths": {
-  "": {
-    "access": "private",
-    "headers": { "X-Ptl-User": "admin" }
-  }
-}
-```
-
-**Public (app manages own auth):**
-```json
-"paths": { "": { "access": "public" } }
-```
-
-**Mixed (private default, some paths public):**
-```json
-"paths": {
-  "": { "access": "private" },
-  "/share/": { "access": "public" },
-  "/api/public/": { "access": "public" }
-}
-```
-
-**Peer access (multi-shard app):**
-```json
-"paths": {
-  "": { "access": "private" },
-  "/api/peer/": {
-    "access": "peer",
-    "headers": {
-      "X-Ptl-Client-Id": "{{ auth.client_id }}",
-      "X-Ptl-Client-Type": "{{ auth.client_type }}"
-    }
-  }
-}
-```
-
----
+- Shard has a unique domain `xyz123.<domain>`; apps live at `<name>.xyz123.<domain>`.
+- Shard core reverse-proxies HTTP to the container port from `entrypoints`. TLS is terminated
+  by the shard (one cert covers all app subdomains). App exposes plain HTTP only.
+- `paths` map decides AC per URL prefix (longest prefix first; `""` is the required default):
+  - `public` — anyone, no auth
+  - `private` — only the owner's paired devices
+  - `peer` — peered shards
+- On every forwarded request the shard injects identity headers the app can trust:
+  - Client: `X-Ptl-Client-Id`, `X-Ptl-Client-Name`, `X-Ptl-Client-Type`
+  - (peer requests carry the peer's id/name analogously)
+- **How the owner authenticates:** a paired device holds a JWT (device id + secret) as a cookie;
+  the shard validates it and forwards the request with the `X-Ptl-Client-*` headers set. The app
+  does not implement login.
+- Two AC strategies:
+  1. **Path-based** — set public/private/peer per path in `app_meta.json`; app needs no auth code.
+  2. **App-specific** — set paths to `public` and let the app authorize itself using the injected
+     `X-Ptl-Client-*` headers (useful when adapting an app with its own user model).
 
 ## Lifecycle
 
-| Scenario | Config |
-|---|---|
-| Simple web app | `idle_time_for_shutdown: 60` (default, omit lifecycle block) |
-| Background processing | `idle_time_for_shutdown: 300` – `3600` |
-| IoT / messaging (mosquitto, node-red) | `always_on: true` |
-| Slow-starting app | Higher idle timeout to avoid churn |
+- Install: containers created but not started (`docker-compose up --no-start`).
+- Start: reverse proxy sees incoming HTTP, signals shard core to launch; a splash screen shows
+  during startup.
+- Stop: after `idle_time_for_shutdown` seconds without HTTP, shard core runs
+  `docker-compose stop`; containers persist and can restart.
+- `always_on: true` keeps it running permanently.
+- No documented uninstall/update hooks or custom scripts; app must self-migrate data across
+  version changes.
 
-**Lifecycle stages (from dev docs):**
-1. Install: `docker-compose up --no-start` — containers created, not running
-2. Start: reverse proxy detects HTTP traffic → starts containers; splash screen shown during startup
-3. Stop: `docker-compose stop` after idle timeout (containers halted, not removed; data persists)
+## Persisting data
 
----
+- `fs.app_data` — app-private dir, starts empty, survives stop/restart/update. App owns layout
+  and is responsible for its own data migrations across versions.
+- `fs.shared` — one shared dir per shard for cross-app exchange and common user resources
+  (documents, media, music). Mount the subdirs you need.
+- All mounted dirs persist across restarts.
 
-## `minimum_portal_size` Classes
+## Internal services
 
-Shards run on **OVH only** (Azure is EOL for shard hosting). Size against OVH specs. **Bias toward the smallest tier that runs** — better an app runs slowly than not at all; users can resize up. Don't pad "to be safe".
+- **Shard core** REST API at `http://shard_core` (reachable on the `portal` network). Manages
+  identities, terminals, peers, apps. E.g. `GET http://shard_core/protected/apps` lists installed
+  apps. WARNING: these APIs are unauthenticated from inside the shard — an app can read/modify/
+  break critical shard state. Use with care.
+- **Peering**: get the peer list from shard core, then send HTTP to peers *through* shard core
+  (not directly); shard core signs/authenticates and forwards. Restrict peer-only paths via
+  `paths` with `access: "peer"`; incoming peer requests carry peer id/name headers.
+- **Events** (event broker, subscribe/publish on app-namespaced topics): NOT yet implemented.
+- **Inter-app APIs**: NOT yet implemented.
 
-| Value | OVH flavor / vCore / RAM | Use when |
-|---|---|---|
-| `"xs"` | d2-2 — 1 / 2 GB | Single lightweight process; no DB |
-| `"s"` | d2-4 — 2 / 4 GB | **Default for most multi-process apps**, incl. a real DB, if idle stays under ~2 GB (e.g. Node + MongoDB + search) |
-| `"m"` | d2-8 — 4 / 8 GB | Idle genuinely exceeds ~2–3 GB, or needs ≥4 cores |
-| `"l"` | b3-16 — 4 / 16 GB | Large in-memory indexes / ML |
-| `"xl"` | b3-32 — 8 / 32 GB | Most intensive |
+## Submission
 
-**Source of truth:** freeshard-controller-backend `config.yml` → `ovhcloud.vm_sizes` (flavor mapping, specs in inline comments) and `freeshard_controller/service/pricing.py` (prices). Mirrored in KB `~/knowledge_base/freeshard/vm-sizes.md` (which lists every sync location). If these tiers change upstream, re-sync both this table and that note.
+- Repo: `FreeshardBase/app-repository` on GitHub.
+- Add one folder for your app containing `app_meta.json`, `docker-compose.yml.template`, and the
+  icon. Open a PR; branch naming convention `app/<your-app>`.
+- You may NOT modify any app other than your own. Updates = another PR touching only your files.
+- `store_info`: `description_short` required (1–2 sentences); `description_long` and `hint`
+  optional; do NOT set `is_featured`.
+- Test before submitting by installing as a **custom app**: zip the three files (zip filename must
+  exactly equal the `name` from `app_meta.json`), then Apps page → "Tools for app developers" →
+  "Install Custom App" → upload. The zip can be shared with others to install directly, no store
+  submission needed.
 
----
+### Level-2 (existing-app) checklist
 
-## Common Patterns
+To package a third-party/existing app it must: be containerized; depend only on Freeshard
+internal services; need no manual setup after startup; have modest resource demands. Then adapt
+its compose into the template, write `app_meta.json`, test as custom app, and improve UX by
+disabling its built-in user management in favor of proxy auth + path/app-specific AC.
 
-### Auth-proxy env vars by app family
+## Revenue share
 
-| App | Env vars |
-|---|---|
-| linkding | `LD_ENABLE_AUTH_PROXY=True`, `LD_AUTH_PROXY_USERNAME_HEADER=HTTP_X_PTL_USER` |
-| navidrome | `ND_REVERSEPROXYUSERHEADER=X-Ptl-User`, `ND_REVERSEPROXYWHITELIST=0.0.0.0/0` |
-| paperless-ngx | `PAPERLESS_AUTO_LOGIN_USERNAME=admin` |
-
-### Shared data paths
-
-| Path | Used by |
-|---|---|
-| `{{ fs.shared }}/documents` | paperless-ngx |
-| `{{ fs.shared }}/music` | navidrome |
-| `{{ fs.shared }}/pictures` | immich, photoprism |
-| `{{ fs.shared }}/media` | general media apps |
-
-### Data persistence & migration
-
-Mounted `fs.app_data` / `fs.shared` dirs survive app stop, restart, and version upgrades; an app_data dir starts empty on install. **Migration is the developer's responsibility:** on a version bump the app must detect data written by the old version and migrate it if the new version needs a different layout — the shard does nothing automatically. (This is why stateful multi-image apps also wire `upstream_compose_url`; see Update Flow.)
-
-### Telemetry opt-out
-
-Always disable telemetry/analytics via env vars. Each app has its own var — check upstream docs. No platform-standard variable exists.
-
-### Base URL pattern
-
-```
-BASE_URL=https://<name>.{{ portal.domain }}
-```
-
----
-
-## Update Flow
-
-`update.py` automates version bumping for apps with `upstream_repo` set (GitHub releases only).
-
-```
-python update.py check    # Check for new GitHub releases
-python update.py skip <app1> <app2>  # Skip specific apps
-python update.py update   # Write new version strings
-python update.py test     # Verify Docker images pullable
-python update.py build    # Rebuild zips
-python update.py commit   # Branch + per-app commits + merge
-```
-
-Manual update checklist:
-1. Update `app_version` in `app_meta.json`
-2. Update image tag in `docker-compose.yml.template`
-3. Update `.env` if it contains version pins
-4. Run `python -m build_store_data`
-
-### `adapt_version_string` — known entries
-
-| App(s) | Transform |
-|---|---|
-| actual, audiobookshelf, drawio, etherpad, kavita, linkding, navidrome, paperless-ngx, stirling-pdf, grist, memos | Strip leading `v` |
-| element | Strip suffix after `-` |
-| glances | Append `-full` |
-
----
-
-## Internal Services (Shard Core API)
-
-Apps can call the shard core REST API via Docker networking.
-
-**Base URL:** `http://shard_core`
-
-**Example:** `GET http://shard_core/protected/apps` — list all installed apps
-
-Full API reference: https://ptl.gitlab.io/portal_core/
-
-**Security warning (from dev docs):** These APIs are currently accessible without auth checks. An app can read, modify, or delete critical shard data. Treat with care.
-
-**Inter-app APIs:** Not yet implemented. Description in docs is aspirational; do not rely on it.
-
----
-
-## Peering (Multi-Shard / Federation)
-
-> New concept not in agents.md — documented in dev docs. Feature currently disabled pending real-world implementations.
-
-**Concept:** Each shard has a globally unique ID. Owners add other shard IDs to a contact list ("peers"). Both shards must add each other (mutual peering) before communication succeeds.
-
-**App developer responsibilities:**
-- Query shard core for known peers before communicating: `GET http://shard_core/protected/peers`
-- Expose peer-accessible paths in `app_meta.json` with `"access": "peer"`
-- Implement symmetric endpoints on both shards (each peer call needs a matching handler on the other side)
-- Route outgoing peer calls through the shard core (adds auth signatures):
-  ```
-  http://shard_core/internal/call_peer/<peer-id>/<path>
-  ```
-  e.g. GET `foo/bar` on peer `b8rk3f` → `http://shard_core/internal/call_peer/b8rk3f/foo/bar`
-
-**Auth:** Shard IDs themselves provide end-to-end encrypted, authenticated messaging. No separate credential exchange needed.
-
-**Use case:** Multi-user apps (chat, collaboration) that remain single-user-isolated but communicate across shards.
-
----
-
-## Events / MQTT Broker (Upcoming)
-
-> Feature not yet implemented. Details below are from dev docs aspirational description only.
-
-**Built-in event broker:** Each shard will have an MQTT-based event broker. Apps will be able to subscribe to any topic and publish under an app-specific namespace.
-
-**Current MQTT entrypoints:** The `"mqtt"` entrypoint_port exposes port 8883 externally (TLS) for external MQTT clients. Internal app-to-app MQTT (events) is a separate, not-yet-implemented system.
-
-**Mosquitto (external IoT use case):** Mosquitto is an installable app (not a built-in service). For IoT:
-- External MQTT clients connect to `mosquitto.<shard-id>.<domain>:8883`
-- WebSocket clients use port 443
-- Internal apps (Node-RED, Home Assistant) connect to `mosquitto:1883` via portal network
-- Client/ACL management via Cedalo Management Center (bundled with Mosquitto app)
-
----
-
-## Integration Levels (from dev docs)
-
-| Level | Description |
-|---|---|
-| 1 — Blocked | No Docker image, external service deps, or specific hardware required |
-| 2 — Usable with caveats | Functional but rough UX; unnecessary login screens, etc. |
-| 3 — Generally adapted | Proxy auth enabled, clean public/private path split |
-| 4 — Specifically adapted | Leverages peering for multi-user features |
-
-Target Level 3 for all new app submissions. Level 4 requires peering (currently disabled).
-
----
-
-## App Store Submission
-
-1. Fork `https://github.com/FreeshardBase/app-repository`
-2. Add folder `apps/<your-app>/` with `app_meta.json`, `docker-compose.yml.template`, icon
-3. Branch name: `app/<your-app>`
-4. Open PR; do not modify other apps' folders
-5. Do not set `is_featured`
-6. For version updates: new PR on same branch convention
-
-Custom/sideloaded install (dev testing): ZIP the app folder — the ZIP name must exactly match `app_meta.json` `name`. Upload via shard UI → Apps → "Tools for app developers" → "Install Custom App"; it then installs as if submitted to the store. The ZIP holds only config (not the container images), so it's tiny and can be emailed to others to test.
-
-**Sidecar files are supported — the folder is NOT limited to the 3 standard files.** `build_store_data.py` (`make_app_zips`) zips EVERY file in the app folder recursively (`app_path.glob('**/*')`). Ship any config file — `Caddyfile`, `nginx.conf`, ClickHouse `config.d/*.xml`, a `.env` — alongside `app_meta.json` / the compose template / icon, and it extracts next to the rendered compose on the shard (= `{{ fs.installation_dir }}`). Reference shipped files two ways:
-- `env_file:` / `${VAR}` substitution — precedent `apps/immich/.env` (documented in `agents.md` folder layout as an optional file).
-- bind-mount read-only into a container: `{{ fs.installation_dir }}/<file>:/path/in/container:ro`.
-
-Caveat: sidecar files are shipped verbatim — only `docker-compose.yml.template` is run through Freeshard's `{{ }}` template rendering, so a sidecar cannot contain template vars. Do NOT reach for `command:` heredoc config injection; this mechanism already exists.
-
----
-
-## New Concepts from Dev Docs Not in agents.md
-
-| Concept | Summary |
-|---|---|
-| `fs.installation_dir` | Additional template var pointing to install-time files dir |
-| Internal services API warning | No auth checks on shard core; apps have full destructive access |
-| Inter-app APIs | Planned but not implemented |
-| Events/MQTT broker | Built-in broker planned; not implemented; app-namespace topic scoping planned |
-| Integration levels 1–4 | Formal taxonomy for how well an app is adapted to the platform |
-| Peering / `call_peer` API | Mechanism for cross-shard communication via shard core proxy |
-| Revenue share | Monthly flat-fee split proportional to install duration; developer payout model |
-| Mutual peering requirement | Both shards must add each other before peer access works |
-| Splash screen on cold start | Shown by shard UI automatically during container startup |
-| `docker-compose up --no-start` | How the shard installs apps (containers created but not started) |
+Each user subscription includes a flat app fee (e.g. ~3.00€/month) split monthly across their
+installed apps proportional to usage time. Users can "boost" favorites to shift their share.
+Developers earn per install for as long as the app stays installed, across all shards; earnings
+accumulate for monthly withdrawal.
