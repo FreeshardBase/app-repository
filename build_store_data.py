@@ -16,6 +16,7 @@ def _make_metadata_entry(app_path: Path):
 		"app_version": app_meta['app_version'],
 		"icon": app_meta['icon'],
 		"minimum_portal_size": app_meta.get('minimum_portal_size', 'xs'),
+		"minimum_freeshard_version": app_meta.get('minimum_freeshard_version'),
 		"store_info": app_meta['store_info'],
 	}
 
