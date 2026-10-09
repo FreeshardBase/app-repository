@@ -70,8 +70,8 @@ Schema v1.2: `https://storageaccountportab0da.blob.core.windows.net/json-schema/
 - `hint` (string or array of strings → bullet points)
 - `is_featured` (bool) — DO NOT set in submissions (reserved for Freeshard)
 
-**minimum_freeshard_version** — a version string (e.g. `"0.41.0"`, PEP 440 / semver
-ordering) naming the oldest shard that can run the app. The shard compares it against its
+**minimum_freeshard_version** — a version string (e.g. `"0.41.0"`, PEP 440 ordering via
+`packaging.version.Version`) naming the oldest shard that can run the app. The shard compares it against its
 own running version with `>=`; an installed app on too-old a shard is left inactive and
 shown a "Shard too old" splash. Absent/`None` means no requirement (the common case). Set
 it only when the app depends on a shard feature added in a known release. Additive and
