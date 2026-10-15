@@ -1,0 +1,37 @@
+{
+  "v": "1.2",
+  "app_version": "1.0.0",
+  "name": "webcalendar",
+  "pretty_name": "WebCalendar",
+  "icon": "icon.svg",
+  "homepage": "https://freeshard.net",
+  "upstream_repo": "https://github.com/FreeshardBase/calendar",
+  "entrypoints": [
+    {
+      "container_name": "webcalendar",
+      "container_port": 3000,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    },
+    "/api/public/": {
+      "access": "public"
+    }
+  },
+  "minimum_portal_size": "s",
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Self-hosted CalDAV web calendar with month/week/day/agenda views, calendar sharing, public ICS links and optional Google Calendar sync.",
+    "description_long": [
+      "FreeShard WebCalendar is a self-hosted CalDAV calendar for your shard. It offers month, week, day and agenda views, recurring events, calendar sharing between shard users, public ICS links, and app-passwords for connecting external CalDAV clients (Thunderbird, DAVx5, iOS, macOS).",
+      "Internally it bundles a Radicale CalDAV server for storage and an optional background worker that two-way-syncs linked Google calendars. You can also link external CalDAV accounts (e.g. Nextcloud) per user; their credentials are stored AES-encrypted."
+    ],
+    "is_featured": false
+  }
+}

@@ -1,0 +1,60 @@
+networks:
+    portal:
+        external: true
+    webcalendar:
+
+services:
+    webcalendar:
+        restart: always
+        image: freeshard/webcalendar:1.0.0
+        container_name: webcalendar
+        user: "0:0"
+        depends_on:
+            - webcalendar-caldav
+        environment:
+            - NODE_ENV=production
+            - AUTH_METHOD=env
+            - CALDAV_USERNAME=owner
+            - DATABASE_PATH=/app/data/webcalendar.db
+            - SSL_KEY_PATH=
+            - SSL_CERT_PATH=
+            - INTERNAL_CALDAV_URL=http://webcalendar-caldav:5232
+            - SESSION_SECRET={{ portal.id }}
+            - ENCRYPTION_KEY={{ portal.id }}
+            - SYSTEM_SYNC_SECRET={{ portal.id }}
+            - BASE_URL=https://webcalendar.{{ portal.domain }}
+        volumes:
+            - "{{ fs.app_data }}/data:/app/data"
+        networks:
+            - portal
+            - webcalendar
+
+    webcalendar-caldav:
+        restart: always
+        image: freeshard/radicale:1.0.0
+        container_name: webcalendar-caldav
+        user: "0:0"
+        environment:
+            - DATABASE_PATH=/data/webcalendar.db
+            - SYSTEM_SYNC_SECRET={{ portal.id }}
+        volumes:
+            - "{{ fs.app_data }}/data:/data"
+            - "{{ fs.installation_dir }}/radicale.config:/etc/radicale/config:ro"
+        networks:
+            - webcalendar
+
+    webcalendar-sync:
+        restart: always
+        image: freeshard/sync-worker:1.0.0
+        container_name: webcalendar-sync
+        user: "0:0"
+        environment:
+            - DATABASE_PATH=/data/webcalendar.db
+            - STATUS_ROOT=/data/vdir_status
+            - LOCAL_CALDAV_URL=http://webcalendar-caldav:5232
+            - SYSTEM_SYNC_SECRET={{ portal.id }}
+            - ENCRYPTION_KEY={{ portal.id }}
+        volumes:
+            - "{{ fs.app_data }}/data:/data"
+        networks:
+            - webcalendar
