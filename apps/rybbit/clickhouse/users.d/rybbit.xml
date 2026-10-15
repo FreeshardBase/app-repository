@@ -1,0 +1,12 @@
+<clickhouse>
+	<users>
+		<default>
+			<password>freeshard_rybbit_clickhouse_pw</password>
+		</default>
+	</users>
+	<profiles>
+		<default>
+			<enable_json_type>1</enable_json_type>
+		</default>
+	</profiles>
+</clickhouse>
