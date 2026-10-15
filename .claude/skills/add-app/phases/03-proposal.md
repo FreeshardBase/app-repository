@@ -24,7 +24,11 @@ Outputs (in `./.add-app-scratch/`):
    - The user does NOT have SSH/shell access to the shard,
 
    then the app violates Freeshard's "no manual post-install configuration" rule. Resolution priority:
-   1. Pick `access: private` and leave self-registration ENABLED upstream-default. Pairing acts as the authorization boundary; first paired visitor registers. Document in `decisions.md`.
+
+   **Constraint — shards cannot send email.** There is no outbound SMTP on a shard, so any signup/login flow that requires an emailed verification or confirmation link is a dead end: the user can never complete registration. The initial user must be creatable **without** email — i.e. self-registration with email verification disabled, or seeded via env vars. Check this before relying on option 1: an app whose registration is "enabled" but email-verification-gated is NOT usable as-is.
+
+   1. Pick `access: private` and leave self-registration ENABLED upstream-default, **with email verification off** (set the upstream env var that disables it if verification is on by default). Pairing acts as the authorization boundary; first paired visitor registers. Document in `decisions.md`.
+   1a. If the app supports seeding the first user via env vars (admin email/password), prefer that — it needs no email and no registration UI. Set the env vars in the compose template.
    2. If registration cannot be enabled at all (admin-only signup), add an init container that seeds an admin user with a generated password written into a file under `fs.app_data` and document the file path as a `hint` in `store_info`. Ugly but workable.
    3. If neither is possible, **hard-exit code j** (see `exit-criteria.md`) — the app is not Freeshard-suitable.
 
