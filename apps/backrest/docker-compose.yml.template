@@ -1,0 +1,23 @@
+networks:
+    portal:
+        external: true
+
+services:
+    backrest:
+        restart: always
+        image: ghcr.io/garethgeorge/backrest:v1.14.1
+        container_name: backrest
+        volumes:
+        - "{{ fs.app_data }}/config:/config"
+        - "{{ fs.app_data }}/data:/data"
+        - "{{ fs.app_data }}/cache:/cache"
+        - "{{ fs.shared }}:/shared:ro"
+        - "{{ fs.shared }}/restored:/shared/restored"
+        - "{{ fs.all_app_data }}:/app_data:ro"
+        environment:
+        - BACKREST_PORT=0.0.0.0:9898
+        - BACKREST_CONFIG=/config/config.json
+        - BACKREST_DATA=/data
+        - XDG_CACHE_HOME=/cache
+        networks:
+        - portal
