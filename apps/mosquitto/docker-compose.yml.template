@@ -5,9 +5,116 @@ networks:
 services:
     mosquitto:
         restart: always
-        image: portalapps.azurecr.io/ptl-apps/mosquitto:main
+        image: eclipse-mosquitto:2.0.22
         container_name: mosquitto
         volumes:
         - "{{ fs.app_data }}/mosquitto/config:/mosquitto/config"
         networks:
         - portal
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          if [ -z "$$(ls -A /mosquitto/config)" ]; then
+            cat > /mosquitto/config/mosquitto.conf <<'CONF'
+          listener 1883
+          protocol mqtt
+
+          listener 9001
+          protocol websockets
+
+          require_certificate false
+
+          per_listener_settings false
+
+          plugin /usr/lib/mosquitto_dynamic_security.so
+          plugin_opt_config_file /mosquitto/config/dynamic_security.json
+          CONF
+            cat > /mosquitto/config/dynamic_security.json <<'DYNSEC'
+          {
+            "defaultACLAccess": {
+              "publishClientSend": false,
+              "publishClientReceive": true,
+              "subscribe": false,
+              "unsubscribe": true
+            },
+            "clients": [
+              {
+                "username": "admin",
+                "textname": "Dynsec admin user",
+                "roles": [
+                  {
+                    "rolename": "admin"
+                  }
+                ],
+                "password": "xHrePRFxvhHRGCWpXzg3TWAnPUc9MoDFTah68IWPgOPVf2bzX1Sl8OjqMnGp8SAg6KtaHWIG5l8HocL0Qii4pw==",
+                "salt": "4ad7/uINpqWDaFQA",
+                "iterations": 101
+              }
+            ],
+            "groups": [],
+            "roles": [
+              {
+                "rolename": "admin",
+                "acls": [
+                  {
+                    "acltype": "publishClientSend",
+                    "topic": "$$CONTROL/dynamic-security/#",
+                    "priority": 0,
+                    "allow": true
+                  },
+                  {
+                    "acltype": "publishClientReceive",
+                    "topic": "$$CONTROL/dynamic-security/#",
+                    "priority": 0,
+                    "allow": true
+                  },
+                  {
+                    "acltype": "publishClientReceive",
+                    "topic": "$$SYS/#",
+                    "priority": 0,
+                    "allow": true
+                  },
+                  {
+                    "acltype": "publishClientReceive",
+                    "topic": "#",
+                    "priority": 0,
+                    "allow": true
+                  },
+                  {
+                    "acltype": "subscribePattern",
+                    "topic": "$$CONTROL/dynamic-security/#",
+                    "priority": 0,
+                    "allow": true
+                  },
+                  {
+                    "acltype": "subscribePattern",
+                    "topic": "$$SYS/#",
+                    "priority": 0,
+                    "allow": true
+                  },
+                  {
+                    "acltype": "subscribePattern",
+                    "topic": "#",
+                    "priority": 0,
+                    "allow": true
+                  },
+                  {
+                    "acltype": "unsubscribePattern",
+                    "topic": "#",
+                    "priority": 0,
+                    "allow": true
+                  }
+                ]
+              }
+            ]
+          }
+          DYNSEC
+            chown mosquitto:mosquitto /mosquitto/config/dynamic_security.json
+            chmod 0700 /mosquitto/config/dynamic_security.json
+            echo "seeded initial mosquitto config"
+          else
+            echo "existing mosquitto config found, leaving it untouched"
+          fi
+          exec /usr/sbin/mosquitto -c /mosquitto/config/mosquitto.conf
