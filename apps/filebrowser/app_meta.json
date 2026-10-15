@@ -1,8 +1,10 @@
 {
-  "v": "1.0",
-  "app_version": "v2.30.0",
+  "v": "1.2",
+  "app_version": "v2.63.23",
   "name": "filebrowser",
   "icon": "icon.svg",
+  "homepage": "https://filebrowser.org/",
+  "upstream_repo": "https://github.com/filebrowser/filebrowser",
   "entrypoints": [
     {
       "container_name": "filebrowser",
