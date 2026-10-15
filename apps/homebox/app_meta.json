@@ -1,0 +1,41 @@
+{
+  "v": "1.2",
+  "app_version": "0.26.2",
+  "name": "homebox",
+  "pretty_name": "Homebox",
+  "icon": "icon.svg",
+  "homepage": "https://homebox.software",
+  "upstream_repo": "https://github.com/sysadminsmedia/homebox",
+  "entrypoints": [
+    {
+      "container_name": "homebox",
+      "container_port": 7745,
+      "entrypoint_port": "http"
+    }
+  ],
+  "paths": {
+    "": {
+      "access": "private"
+    }
+  },
+  "lifecycle": {
+    "always_on": false,
+    "idle_time_for_shutdown": 3600
+  },
+  "store_info": {
+    "description_short": "Keep track of everything you own, where it is, and what it is worth.",
+    "description_long": [
+      "Homebox is an inventory system for the things you own. You enter items, put them in locations, and tag them with labels, and from then on you can answer 'where is it' and 'what did it cost' without hunting through drawers or old emails.",
+      "Each item can carry a photo, a purchase date and price, a warranty expiry, a serial number, a manual, and scanned receipts. That turns it into the record you actually need when something breaks, when a warranty is about to run out, or when you have to tell an insurer what was in the house. Items can be nested inside other items, so a case and its contents stay one unit.",
+      "It suits a household as well as a small business tracking tools, equipment, or stock. There is a built-in QR label maker for physical items, CSV import and export so the data is never trapped, and a search that spans names, descriptions, and labels.",
+      "Running on your own shard means the inventory of your home, and the receipts and serial numbers that go with it, stays on hardware you control. Only your paired devices can reach it."
+    ],
+    "hint": [
+      "On your first visit, choose 'Register' and create your account. Homebox starts empty and the first account you create owns the data. Only your paired devices can reach the registration page.",
+      "Start with locations before items. Create a rough map of your home first - rooms, then cupboards and shelves inside them - and adding items afterwards is much quicker.",
+      "Attach the receipt and the manual to each item as you enter it. That is the part you will actually want later, when a warranty claim or an insurance list comes up.",
+      "You can pull your whole inventory out as CSV at any time: open the 'Tools' tab, then 'Import/Export', then 'Export Inventory'. Worth doing occasionally as a second copy outside the shard."
+    ],
+    "is_featured": false
+  }
+}
