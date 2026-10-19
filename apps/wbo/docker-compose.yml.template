@@ -5,7 +5,7 @@ networks:
 services:
     wbo:
         restart: always
-        image: lovasoa/wbo:v2.17.1
+        image: lovasoa/wbo:v2.18.13
         container_name: wbo
         volumes:
         - "{{ fs.app_data }}/opt/app/server-data:/opt/app/server-data"

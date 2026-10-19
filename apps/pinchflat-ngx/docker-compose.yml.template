@@ -5,7 +5,7 @@ networks:
 services:
     pinchflat-ngx:
         restart: always
-        image: ghcr.io/thebadfella/pinchflat-ngx:2026.9.28
+        image: ghcr.io/thebadfella/pinchflat-ngx:2026.10.16
         container_name: pinchflat-ngx
         volumes:
         - "{{ fs.app_data }}/config:/config"
