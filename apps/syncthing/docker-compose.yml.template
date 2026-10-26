@@ -5,7 +5,7 @@ networks:
 services:
     syncthing:
         restart: always
-        image: syncthing/syncthing:2.1.6
+        image: syncthing/syncthing:2.1.7
         container_name: syncthing
         hostname: syncthing
         volumes:
