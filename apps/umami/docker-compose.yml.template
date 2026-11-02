@@ -17,6 +17,7 @@ services:
       - APP_SECRET={{ portal.id }}
       - DISABLE_LOGIN=1
       - DISABLE_TELEMETRY=1
+      - MCP_ENABLED=1
       - BASE_URL=https://umami.{{ portal.domain }}
     networks:
       - portal

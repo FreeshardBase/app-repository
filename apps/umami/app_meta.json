@@ -22,6 +22,9 @@
     },
     "/api/send": {
       "access": "public"
+    },
+    "/mcp": {
+      "access": "public"
     }
   },
   "lifecycle": {
@@ -34,7 +37,10 @@
       "Umami is an open-source, privacy-first alternative to Google Analytics. It tracks page views, events, traffic sources and conversions without cookies, without selling visitor data, and without needing a cookie-consent banner in most jurisdictions.",
       "Everything stays on your own shard: Umami stores its data in a PostgreSQL database running alongside it, and nothing is sent to a third party except optional anonymous telemetry, which is disabled by default on Freeshard."
     ],
-    "hint": "The dashboard is paired-devices-only (Umami's own login is disabled). The tracking script (/script.js) and data-collection endpoint (/api/send) are public so visitors to the websites you track can reach them without being paired to your shard.",
+    "hint": [
+      "The dashboard is paired-devices-only (Umami's own login is disabled). The tracking script (/script.js) and data-collection endpoint (/api/send) are public so visitors to the websites you track can reach them without being paired to your shard.",
+      "An MCP server is enabled at /mcp so AI assistants (Claude, ChatGPT, Cursor, etc.) can query your analytics. It's public but requires a Umami API key: in the dashboard, go to Settings → API keys → Create key, then configure your MCP client with that key as a Bearer token against https://umami.<your-shard-domain>/mcp. Keep the key secret — it's the only thing gating that endpoint."
+    ],
     "is_featured": false
   }
 }
