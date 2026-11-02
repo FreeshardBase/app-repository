@@ -16,11 +16,16 @@
   "paths": {
     "": {
       "access": "private"
+    },
+    "/script.js": {
+      "access": "public"
+    },
+    "/api/send": {
+      "access": "public"
     }
   },
   "lifecycle": {
-    "always_on": false,
-    "idle_time_for_shutdown": 3600
+    "always_on": true
   },
   "minimum_portal_size": "s",
   "store_info": {
@@ -29,7 +34,7 @@
       "Umami is an open-source, privacy-first alternative to Google Analytics. It tracks page views, events, traffic sources and conversions without cookies, without selling visitor data, and without needing a cookie-consent banner in most jurisdictions.",
       "Everything stays on your own shard: Umami stores its data in a PostgreSQL database running alongside it, and nothing is sent to a third party except optional anonymous telemetry, which is disabled by default on Freeshard."
     ],
-    "hint": "Umami's own login is disabled; access is controlled by your shard's pairing, same as every other private app.",
+    "hint": "The dashboard is paired-devices-only (Umami's own login is disabled). The tracking script (/script.js) and data-collection endpoint (/api/send) are public so visitors to the websites you track can reach them without being paired to your shard.",
     "is_featured": false
   }
 }
