@@ -22,7 +22,7 @@ Inputs: `name` from preflight scratch.
    - env vars present in current vs documented in `research_notes.md` (new required, deprecated)
    - `auth_proxy_support` change (gained / lost)
    - container port change
-   - agents.md best-practice drift (compare current `app_meta.json` shape against the schema in the digest: missing `upstream_repo`, missing `v: "1.2"` upgrade opportunity, missing telemetry opt-outs documented in notes, etc.)
+   - agents.md best-practice drift (compare current `app_meta.json` shape against the schema in the digest: missing `upstream_repo`, a `v` older than the current format version in the digest, missing telemetry opt-outs documented in notes, etc.)
 
 7. **Classify diff.** Significant changes = anything in step 6 except pure version bump. If only `app_version` and image tag changed: print:
    ```
