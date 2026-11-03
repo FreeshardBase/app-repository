@@ -15,7 +15,6 @@ services:
       - DATABASE_URL=postgresql://umami:umami@umami-postgres:5432/umami
       - DATABASE_TYPE=postgresql
       - APP_SECRET={{ portal.id }}
-      - DISABLE_LOGIN=1
       - DISABLE_TELEMETRY=1
       - MCP_ENABLED=1
       - BASE_URL=https://umami.{{ portal.domain }}
