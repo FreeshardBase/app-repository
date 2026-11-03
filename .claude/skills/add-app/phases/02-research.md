@@ -23,7 +23,8 @@ Outputs (in `./.add-app-scratch/`):
    entry rather than continuing to dig.
 
    READ FIRST (as background, do not re-output):
-   - /home/ubuntu/projects/freeshard/app-repository/.claude/skills/add-app/reference/freeshard-digest.md
+   - <absolute path of `.add-app-scratch/freeshard-digest.md` in this worktree>
+   - <absolute path of `agents.md` at this worktree's root> (repo layout and tooling: `just new-app`, `update_check.py`, `build_store_data`)
 
    INVESTIGATE:
    - Docker Hub, GitHub Container Registry, quay.io for an official
