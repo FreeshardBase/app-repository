@@ -12,9 +12,9 @@ services:
     depends_on:
       - umami-postgres
     environment:
-      - DATABASE_URL=postgresql://umami:umami@umami-postgres:5432/umami
+      - DATABASE_URL=postgresql://umami:{{ secret('db_password') }}@umami-postgres:5432/umami
       - DATABASE_TYPE=postgresql
-      - APP_SECRET={{ portal.id }}
+      - APP_SECRET={{ secret('app_secret') }}
       - DISABLE_TELEMETRY=1
       - MCP_ENABLED=1
       - BASE_URL=https://umami.{{ portal.domain }}
@@ -31,6 +31,6 @@ services:
     environment:
       - POSTGRES_DB=umami
       - POSTGRES_USER=umami
-      - POSTGRES_PASSWORD=umami
+      - POSTGRES_PASSWORD={{ secret('db_password') }}
     networks:
       - umami
