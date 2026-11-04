@@ -1,0 +1,35 @@
+{
+  "v": "1.2",
+  "app_version": "1.21.0",
+  "name": "dawarich",
+  "pretty_name": "Dawarich",
+  "icon": "icon.svg",
+  "homepage": "https://dawarich.app",
+  "upstream_repo": "https://github.com/Freika/dawarich",
+  "entrypoints": [
+    { "container_name": "dawarich", "container_port": 3000, "entrypoint_port": "http" }
+  ],
+  "paths": {
+    "": { "access": "private" },
+    "/api/v1/owntracks/": { "access": "public" },
+    "/api/v1/overland/": { "access": "public" },
+    "/api/v1/traccar/": { "access": "public" }
+  },
+  "minimum_portal_size": "s",
+  "minimum_freeshard_version": ">=0.41.3",
+  "lifecycle": { "always_on": true },
+  "store_info": {
+    "description_short": "Self-hosted replacement for Google Timeline: track, map and analyse your own location history.",
+    "description_long": [
+      "Dawarich is a self-hosted replacement for Google Timeline. It collects the location history your phone already records, keeps it on your own shard instead of a provider's servers, and gives you an interactive map to explore it: heatmaps, individual points, connecting lines, and a fog-of-war layer that reveals only the parts of the world you have actually visited.",
+      "Your phone feeds it through one of the supported tracking apps, such as OwnTracks or Overland. Existing history comes in from a Google Takeout export, from GPX and GeoJSON files, or from the EXIF coordinates embedded in your photos. Everything you put in can be exported again as GeoJSON or GPX, so the data never becomes hostage to the app.",
+      "Beyond the map, Dawarich builds trips out of your movements, summarises where and how far you travelled by month and year, and can share a live view with family members on the same instance. Reverse geocoding, which turns coordinates into place names, is optional and off until you point it at a geocoding provider; until you do, no location data leaves your shard."
+    ],
+    "hint": [
+      "Dawarich creates a default account on first start: demo@dawarich.app with the password safepassword. Sign in with it and change both in account settings straight away.",
+      "The first start takes a few minutes while the database is prepared and seeded. Later starts are quick.",
+      "The tracker ingest endpoints for OwnTracks, Overland and Traccar are reachable from the internet so your phone can submit locations. They are protected by the API key you generate in Dawarich, not by shard pairing. The rest of Dawarich stays private to your paired devices.",
+      "Importing a large Google Takeout archive is memory-hungry and can take a while on a small shard."
+    ]
+  }
+}
