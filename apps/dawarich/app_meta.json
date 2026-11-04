@@ -16,7 +16,8 @@
     "/api/v1/traccar/": { "access": "public" },
     "/api/v1/users/me": { "access": "public" },
     "/api/v1/health": { "access": "public" },
-    "/api/v1/ready": { "access": "public" }
+    "/api/v1/ready": { "access": "public" },
+    "/api/v1/settings/mobile": { "access": "public" }
   },
   "minimum_portal_size": "s",
   "minimum_freeshard_version": ">=0.41.3",
