@@ -41,7 +41,7 @@ Outputs:
 
    If something was fetched, save as `apps/<name>/icon.svg` (or `icon.png` if PNG), overwriting the scaffold's placeholder. Update `apps/<name>/app_meta.json`'s `icon` field accordingly. If nothing found, leave whatever the scaffold provided and add a note to `research_notes.md`: "Icon missing — please add manually."
 
-5. **update.py entry.** If `research.json.tag_strip_v_needed == true`, open `update.py`, find the `adapt_version_string` function, and add `<name>` to the list of apps that strip the `v` prefix. Match surrounding style. If a different tag transformation is needed (suffix strip, prefix add), insert a custom branch and document the rule in `decisions.md`.
+5. **Tag v-prefix stripping, if needed.** If `research.json.tag_strip_v_needed == true`, handle it inside `update_check.py` itself — call `latest_github_release(..., filter_regex=r"^v\d+\.\d+\.\d+$")` and strip the prefix with `rel["tag_name"].lstrip("v")` before returning `latest_version`. No `update.py` edit is needed or possible — there is no central registry function for this. Precedent: `navidrome`, `vikunja`, `paperless-ngx`. If a different tag transformation is needed (suffix strip, prefix add), do the equivalent inline in `update_check.py` and document the rule in `decisions.md`.
 
 6. **Build store data / zip.** Run `just build-store-data` (fallback: `python3 -m build_store_data` if `just` is unavailable). This regenerates `apps/<name>/<name>.zip` and refreshes `apps/store_metadata.json`. Both are gitignored but the zip is uploaded as a PR artifact in phase 5. If the build fails, stop and surface the error — do not push a half-built zip.
 
