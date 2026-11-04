@@ -17,7 +17,8 @@
     "/api/v1/users/me": { "access": "public" },
     "/api/v1/health": { "access": "public" },
     "/api/v1/ready": { "access": "public" },
-    "/api/v1/settings/mobile": { "access": "public" }
+    "/api/v1/settings/mobile": { "access": "public" },
+    "/api/v1/points": { "access": "public" }
   },
   "minimum_portal_size": "s",
   "minimum_freeshard_version": ">=0.41.3",
@@ -32,7 +33,7 @@
     "hint": [
       "Dawarich creates a default account on first start: demo@dawarich.app with the password safepassword. Sign in with it and change both in account settings straight away.",
       "The first start takes a few minutes while the database is prepared and seeded. Later starts are quick.",
-      "The tracker ingest endpoints for OwnTracks, Overland and Traccar, and the account-lookup endpoint the official mobile app uses to verify its API key, are reachable from the internet so your phone can submit locations and connect. They are protected by the API key you generate in Dawarich, not by shard pairing. The rest of Dawarich stays private to your paired devices.",
+      "The official mobile app and third-party trackers (OwnTracks, Overland, Traccar) need Dawarich's data API reachable from the internet to submit and sync your locations, so it isn't behind shard pairing like the rest of Dawarich. It's protected by your Dawarich API key instead: anyone with that key can read, add to, or delete your entire location history, not just submit new points. Keep it as secret as a password, and regenerate it in Account settings if you ever suspect it's leaked.",
       "Importing a large Google Takeout archive is memory-hungry and can take a while on a small shard."
     ]
   }
