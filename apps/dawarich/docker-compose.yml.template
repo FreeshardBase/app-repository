@@ -1,0 +1,86 @@
+networks:
+    portal:
+        external: true
+    dawarich:
+
+services:
+    dawarich:
+        restart: always
+        image: freikin/dawarich:1.21.0
+        container_name: dawarich
+        entrypoint: web-entrypoint.sh
+        command: ['bin/rails', 'server', '-p', '3000', '-b', '::']
+        stop_grace_period: 60s
+        volumes:
+        - "{{ fs.app_data }}/public:/var/app/public"
+        - "{{ fs.app_data }}/storage:/var/app/storage"
+        - "{{ fs.app_data }}/watched:/var/app/tmp/imports/watched"
+        environment:
+        - RAILS_ENV=production
+        - SELF_HOSTED=true
+        - APPLICATION_HOSTS=dawarich.{{ portal.domain }}
+        - APPLICATION_PROTOCOL=https
+        - SECRET_KEY_BASE={{ secret('secret_key_base') }}
+        - DATABASE_HOST=dawarich-db
+        - DATABASE_PORT=5432
+        - DATABASE_USERNAME=dawarich
+        - DATABASE_PASSWORD={{ secret('db_password') }}
+        - DATABASE_NAME=dawarich
+        - REDIS_URL=redis://dawarich-redis:6379
+        - RAILS_LOG_TO_STDOUT=true
+        - STORE_GEODATA=true
+        - PROMETHEUS_EXPORTER_ENABLED=false
+        - SIDEKIQ_EMBEDDED=true
+        - WEB_CONCURRENCY=0
+        - BACKGROUND_PROCESSING_CONCURRENCY=2
+        - TIME_ZONE=Europe/Berlin
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'"]
+            interval: 10s
+            retries: 30
+            start_period: 30s
+            timeout: 10s
+        depends_on:
+            dawarich-db:
+                condition: service_healthy
+            dawarich-redis:
+                condition: service_healthy
+        networks:
+        - portal
+        - dawarich
+
+    dawarich-db:
+        restart: always
+        image: postgis/postgis:17-3.5-alpine
+        container_name: dawarich-db
+        shm_size: 1G
+        volumes:
+        - "{{ fs.app_data }}/pgdata:/var/lib/postgresql/data"
+        environment:
+        - POSTGRES_USER=dawarich
+        - POSTGRES_PASSWORD={{ secret('db_password') }}
+        - POSTGRES_DB=dawarich
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U dawarich"]
+            interval: 10s
+            retries: 5
+            start_period: 30s
+            timeout: 5s
+        networks:
+        - dawarich
+
+    dawarich-redis:
+        restart: always
+        image: redis:8-alpine
+        container_name: dawarich-redis
+        command: redis-server --save 900 1 --save 300 10 --appendonly no
+        volumes:
+        - "{{ fs.app_data }}/redis:/data"
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 10s
+            retries: 5
+            start_period: 10s
+            timeout: 5s
+        networks:
+        - dawarich

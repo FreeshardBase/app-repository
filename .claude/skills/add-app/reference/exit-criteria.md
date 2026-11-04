@@ -8,6 +8,7 @@
 | b | Non-FOSS license | `license_class ∈ {source-available, proprietary}` |
 | f | Paid / license-key required | `paid == true` AND no documented free self-host tier |
 | j | First-run bootstrap requires shell access | App has built-in auth, admin user cannot self-register, and creation requires `docker exec` / SSH. Freeshard shard owners have no shell access to app containers. See `phases/03-proposal.md` step 2a for workaround priority before applying this exit. |
+| k | Requires a platform feature not yet released to shards | The app cannot run correctly without a core capability that is unreleased (or merged but not rolled out). An app cannot declare a minimum core version — FreeshardBase/freeshard#242 — so shipping it early breaks every lagging shard. Record what it waits on and keep the drafted files. |
 | reject | User rejected proposal at ambiguity gate | Phase 3 step 10 — user does not approve drafted files |
 
 On any hard exit, the skill MUST still document the analysis by writing
