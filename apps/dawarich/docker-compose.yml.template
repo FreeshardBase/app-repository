@@ -35,7 +35,7 @@ services:
         - BACKGROUND_PROCESSING_CONCURRENCY=2
         - TIME_ZONE=Europe/Berlin
         healthcheck:
-            test: ["CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'"]
+            test: ["CMD-SHELL", "wget -qO - --header='X-Forwarded-Proto: https' http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'"]
             interval: 10s
             retries: 30
             start_period: 30s
