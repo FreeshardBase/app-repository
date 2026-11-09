@@ -6,7 +6,7 @@ networks:
 services:
     dawarich:
         restart: always
-        image: freikin/dawarich:1.21.0
+        image: freikin/dawarich:1.22.0
         container_name: dawarich
         entrypoint: web-entrypoint.sh
         command: ['bin/rails', 'server', '-p', '3000', '-b', '::']
