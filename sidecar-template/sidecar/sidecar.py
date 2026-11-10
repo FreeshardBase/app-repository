@@ -5,7 +5,7 @@ This is not a real sidecar for any app. It exists only to:
 
   1. prove the build/publish pipeline in .github/workflows/sidecars.yml
      builds and pushes a real image end-to-end, and
-  2. give the author of a real per-app sidecar (see apps/sidecar-containers.md
+  2. give the author of a real per-app sidecar (see agents.md's "Sidecar Containers" section
      for the full contract) a minimal skeleton that already follows the
      GET -> compare -> PATCH-only-on-mismatch idempotency contract and the
      three-outcome exit/log contract.
