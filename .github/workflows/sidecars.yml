@@ -1,0 +1,119 @@
+name: Sidecars
+
+# Builds and publishes per-app "sidecar" images (see apps/sidecar-containers.md).
+# Only the sidecar(s) whose files actually changed are built - never a
+# rebuild-everything job - via the detect job's matrix output.
+#
+# On a pull request: build only (no push), to catch a broken Dockerfile
+# before merge.
+# On push to main: build and push ghcr.io/freeshardbase/<app>-sidecar:<version>,
+# where <version> is read from that sidecar's own VERSION file. Publishing a
+# version that's already in the registry is refused - bump VERSION to publish.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/*/sidecar/**'
+      - 'sidecar-template/sidecar/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'apps/*/sidecar/**'
+      - 'sidecar-template/sidecar/**'
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      sidecars: ${{ steps.detect.outputs.sidecars }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Find changed sidecars
+        id: detect
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}"
+            range="origin/${{ github.base_ref }}...HEAD"
+          elif [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            # first push on a new branch pointed at main: nothing to diff against
+            range="${{ github.sha }}~1..${{ github.sha }}"
+          else
+            range="${{ github.event.before }}..${{ github.sha }}"
+          fi
+
+          changed=$(git diff --name-only $range -- 'apps/*/sidecar/**' 'sidecar-template/sidecar/**')
+          echo "Changed sidecar files:"
+          echo "$changed"
+
+          # Each match looks like <root>/<app>/sidecar/<rest>. Derive the
+          # sidecar's build context (everything up to and including
+          # "sidecar") and its app name (the directory right before it).
+          pairs=$(echo "$changed" | awk -F/ '
+            { for (i=1; i<=NF; i++) {
+                if ($i == "sidecar") {
+                  ctx=$1; for (j=2; j<=i; j++) ctx = ctx "/" $j
+                  print $(i-1) "|" ctx
+                  break
+                }
+              }
+            }' | sort -u)
+
+          json="[]"
+          if [ -n "$pairs" ]; then
+            json=$(echo "$pairs" | awk -F'|' '{printf "{\"app\":\"%s\",\"context\":\"%s\"}\n", $1, $2}' | jq -s -c .)
+          fi
+          echo "Sidecars matrix: $json"
+          echo "sidecars=$json" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: detect
+    if: needs.detect.outputs.sidecars != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        sidecar: ${{ fromJson(needs.detect.outputs.sidecars) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Read version
+        id: version
+        run: echo "version=$(cat '${{ matrix.sidecar.context }}/VERSION' | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Refuse to republish an existing version
+        if: github.event_name == 'push'
+        run: |
+          image="ghcr.io/freeshardbase/${{ matrix.sidecar.app }}-sidecar:${{ steps.version.outputs.version }}"
+          if docker manifest inspect "$image" > /dev/null 2>&1; then
+            echo "::error::$image already exists. Bump ${{ matrix.sidecar.context }}/VERSION before merging."
+            exit 1
+          fi
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ matrix.sidecar.context }}
+          push: ${{ github.event_name == 'push' }}
+          tags: ghcr.io/freeshardbase/${{ matrix.sidecar.app }}-sidecar:${{ steps.version.outputs.version }}
