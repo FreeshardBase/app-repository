@@ -14,14 +14,23 @@ services:
         - "{{ fs.app_data }}/usr/src/export/data:/usr/src/paperless/export"
         environment:
         - PAPERLESS_REDIS=redis://paperless-redis:6379
-        - PAPERLESS_SECRET_KEY={{ portal.id }}
+        - PAPERLESS_SECRET_KEY={{ secret('secret_key') }}
         - PAPERLESS_ADMIN_USER=admin
-        - PAPERLESS_ADMIN_PASSWORD=admin
-        - PAPERLESS_AUTO_LOGIN_USERNAME=admin
+        - PAPERLESS_ADMIN_PASSWORD={{ secret('admin_password') }}
         - PAPERLESS_URL=https://paperless-ngx.{{ portal.domain }}
         - PAPERLESS_EMAIL_TASK_CRON=*/10 * * * *
         - PAPERLESS_CONSUMER_DELETE_DUPLICATES=true
         - "PAPERLESS_OCR_USER_ARGS={\"invalidate_digital_signatures\": true}"
+        - PAPERLESS_APPS=allauth.socialaccount.providers.openid_connect
+        - 'PAPERLESS_SOCIALACCOUNT_PROVIDERS={"openid_connect":{"APPS":[{"provider_id":"shard","name":"Shard","client_id":"{{ oidc.client_id }}","secret":"{{ oidc.client_secret }}","settings":{"server_url":"{{ oidc.issuer }}/.well-known/openid-configuration","email_authentication":true}}]}}'
+        - PAPERLESS_SOCIALACCOUNT_ALLOW_SIGNUPS=false
+        - PAPERLESS_REDIRECT_LOGIN_TO_SSO=true
+        healthcheck:
+            test: ["CMD", "curl", "-fs", "-S", "-L", "--max-time", "2", "http://localhost:8000"]
+            interval: 10s
+            timeout: 5s
+            retries: 30
+            start_period: 60s
         depends_on:
         - paperless-redis
         networks:
@@ -31,5 +40,22 @@ services:
         image: docker.io/valkey/valkey:9-alpine
         restart: always
         container_name: paperless-redis
+        networks:
+        - portal
+
+    paperless-ngx-sidecar:
+        image: ghcr.io/freeshardbase/paperless-ngx-sidecar:0.1.0
+        restart: always
+        container_name: paperless-ngx-sidecar
+        depends_on:
+            paperless-ngx:
+                condition: service_healthy
+        environment:
+        - PAPERLESS_URL=http://paperless-ngx:8000
+        - CORE_URL=http://shard_core
+        - ADMIN_USERNAME=admin
+        - ADMIN_PASSWORD={{ secret('admin_password') }}
+        - SYSTEM_USERNAME=freeshard-system
+        - SYSTEM_PASSWORD={{ secret('system_password') }}
         networks:
         - portal
