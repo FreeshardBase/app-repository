@@ -42,3 +42,20 @@ services:
         container_name: paperless-redis
         networks:
         - portal
+
+    paperless-ngx-sidecar:
+        image: ghcr.io/freeshardbase/paperless-ngx-sidecar:0.1.0
+        restart: always
+        container_name: paperless-ngx-sidecar
+        depends_on:
+            paperless-ngx:
+                condition: service_healthy
+        environment:
+        - PAPERLESS_URL=http://paperless-ngx:8000
+        - CORE_URL=http://shard_core
+        - ADMIN_USERNAME=admin
+        - ADMIN_PASSWORD={{ secret('admin_password') }}
+        - SYSTEM_USERNAME=freeshard-system
+        - SYSTEM_PASSWORD={{ secret('system_password') }}
+        networks:
+        - portal
