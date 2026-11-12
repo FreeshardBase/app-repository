@@ -178,6 +178,42 @@ class ReconcileTest(unittest.TestCase):
         wire(self, backend, admin_pw="newsecret")
         sidecar.reconcile()
         self.assertEqual(backend.users["admin"]["email"], "owner@example.com")
+        # The wiped password must stay wiped: never resurrect the retired
+        # shared admin login by rotating it back to the per-shard secret.
+        self.assertEqual(backend.users["admin"]["password"], "!wiped!")
+        password_patches = [c for c in backend.calls
+                            if c[0] == "PATCH" and c[2] and "password" in c[2]]
+        self.assertEqual(password_patches, [])
+
+    def test_owner_404_leaves_admin_unchanged(self):
+        # /internal/owner 404s when the owner row isn't provisioned yet.
+        backend = FakeBackend(
+            users=[
+                {"username": "admin", "password": "newsecret", "email": "old@example.com"},
+                {"username": "freeshard-system", "password": "syssecret"},
+            ],
+            owner_email=None,
+            owner_status=404,
+        )
+        wire(self, backend, admin_pw="newsecret")
+        sidecar.reconcile()
+        email_patches = [c for c in backend.calls
+                         if c[0] == "PATCH" and c[2] and "email" in c[2]]
+        self.assertEqual(email_patches, [])
+        self.assertEqual(backend.users["admin"]["email"], "old@example.com")
+
+    def test_rotation_noop_when_secret_is_literally_admin(self):
+        # If secret() ever yields "admin", the guard must stop a pointless
+        # (and confusing) password PATCH.
+        backend = FakeBackend(
+            users=[{"username": "admin", "password": "admin", "email": ""}],
+            owner_email="owner@example.com",
+        )
+        wire(self, backend, admin_pw="admin")
+        sidecar.reconcile()
+        password_patches = [c for c in backend.calls
+                            if c[0] == "PATCH" and c[2] and "password" in c[2]]
+        self.assertEqual(password_patches, [])
 
     def test_bootstrap_fails_cleanly_when_no_admin_login_works(self):
         # admin password wiped and system absent: a RuntimeError, not a crash.
