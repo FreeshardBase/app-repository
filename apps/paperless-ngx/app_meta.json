@@ -14,7 +14,7 @@
   ],
   "paths": {
     "": {
-      "access": "private"
+      "access": "public"
     },
     "/share/": {
       "access": "public"
