@@ -14,7 +14,7 @@ services:
         - "{{ fs.app_data }}/usr/src/export/data:/usr/src/paperless/export"
         environment:
         - PAPERLESS_REDIS=redis://paperless-redis:6379
-        - PAPERLESS_SECRET_KEY={{ portal.id }}
+        - PAPERLESS_SECRET_KEY={{ secret('secret_key') }}
         - PAPERLESS_ADMIN_USER=admin
         - PAPERLESS_ADMIN_PASSWORD={{ secret('admin_password') }}
         - PAPERLESS_URL=https://paperless-ngx.{{ portal.domain }}
