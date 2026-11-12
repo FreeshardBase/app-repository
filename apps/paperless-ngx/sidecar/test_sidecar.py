@@ -8,6 +8,7 @@ created, password rotated, email patched) that a real pass would produce.
 """
 import base64
 import unittest
+import unittest.mock
 import urllib.error
 import urllib.parse
 
@@ -21,7 +22,7 @@ class FakeBackend:
     password does not match a user yields 401, as paperless's basic auth does.
     """
 
-    def __init__(self, users, owner_email, owner_status=200):
+    def __init__(self, users, owner_email, owner_status=200, break_system_create=False):
         # users: list of dicts with username/password/email (id auto-assigned)
         self.users = {}
         self._next_id = 1
@@ -29,6 +30,7 @@ class FakeBackend:
             self._insert(u)
         self.owner_email = owner_email
         self.owner_status = owner_status
+        self.break_system_create = break_system_create
         self.calls = []
 
     def _insert(self, u):
@@ -78,8 +80,9 @@ class FakeBackend:
             return 200, {"count": len(results), "results": results}
 
         if method == "POST" and url.endswith("/api/users/"):
+            stored_pw = "wrong" if self.break_system_create else payload["password"]
             uid = self._insert({"username": payload["username"],
-                                "password": payload["password"],
+                                "password": stored_pw,
                                 "email": payload.get("email", "")})
             self.users[payload["username"].lower()].update(
                 {k: v for k, v in payload.items() if k in ("first_name", "last_name")})
@@ -193,6 +196,32 @@ class ReconcileTest(unittest.TestCase):
         self.patch("SYSTEM_PASSWORD", "syssecret")
         with self.assertRaises(urllib.error.URLError):
             sidecar.reconcile()
+
+    def test_system_account_created_but_unauthenticatable_raises(self):
+        backend = FakeBackend(
+            users=[{"username": "admin", "password": "admin", "email": ""}],
+            owner_email="owner@example.com",
+            break_system_create=True,
+        )
+        wire(self, backend, admin_pw="newsecret")
+        with self.assertRaises(RuntimeError):
+            sidecar.reconcile()
+
+    def test_non_json_200_is_raised_as_runtimeerror(self):
+        # _api must not let a JSONDecodeError escape uncaught; main() only
+        # catches URLError/OSError/RuntimeError, so it is surfaced as the last.
+        class FakeResp:
+            status = 200
+            def read(self):
+                return b"<html>not json</html>"
+            def __enter__(self):
+                return self
+            def __exit__(self, *a):
+                return False
+        self.patch("SYSTEM_PASSWORD", "syssecret")
+        with unittest.mock.patch("urllib.request.urlopen", return_value=FakeResp()):
+            with self.assertRaises(RuntimeError):
+                sidecar._api("GET", "http://x/internal/owner")
 
 
 if __name__ == "__main__":

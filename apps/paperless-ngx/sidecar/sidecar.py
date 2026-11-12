@@ -37,6 +37,7 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 log = logging.getLogger("paperless-sidecar")
 
 PAPERLESS_URL = os.environ.get("PAPERLESS_URL", "http://paperless-ngx:8000").rstrip("/")
+# shard_core is the core container's name on the shared `portal` network.
 CORE_URL = os.environ.get("CORE_URL", "http://shard_core").rstrip("/")
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin")
@@ -72,6 +73,8 @@ def _api(method: str, url: str, auth: str | None = None, payload: dict | None = 
             return resp.status, (json.loads(raw) if raw else None)
     except urllib.error.HTTPError as exc:
         return exc.code, None
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"non-JSON response from {url}: {exc}") from exc
 
 
 def _authenticates(auth: str) -> bool:
@@ -135,6 +138,8 @@ def _ensure_system_account(system_auth: str) -> str:
     status, _ = _api("POST", f"{PAPERLESS_URL}/api/users/", admin_auth, payload)
     if status not in (200, 201):
         raise RuntimeError(f"POST /api/users/ for system account returned HTTP {status}")
+    if not _authenticates(system_auth):
+        raise RuntimeError("system account was created but cannot authenticate")
     log.info("created the %s superuser", SYSTEM_USERNAME)
     return system_auth
 
