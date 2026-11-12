@@ -160,6 +160,10 @@ Templates use Jinja-like `{{ variable }}` syntax. Variables are replaced at inst
 | `{{ fs.app_data }}` | App-specific persistent storage path | `/data/apps/my-app` |
 | `{{ fs.all_app_data }}` | Parent directory of all app data | `/data/apps` |
 | `{{ fs.shared }}` | Shared directory for inter-app data | `/data/shared` |
+| `{{ secret('name') }}` | Per-app, per-shard secret; minted once and persisted on first use, stable across renders | `aB3...` (32 chars) |
+| `{{ oidc.client_id }}` / `{{ oidc.client_secret }}` / `{{ oidc.issuer }}` | OIDC client the shard registers for this app; only populated when `app_meta.json` declares an `oidc` block and the shard has the provider enabled | — |
+
+Use `secret('name')` for any value that must be unguessable and distinct per shard (DB passwords, admin credentials, session-signing keys) instead of deriving it from a public value like `portal.id`. Referencing the same name twice in one template yields the same value, so a credential shared between two services (e.g. an app and its sidecar) stays consistent.
 
 ### Minimal Template (simple single-container app)
 
@@ -451,10 +455,11 @@ installable app.
 
 ### Planned consumers
 
-The first real sidecars (tracked separately, not part of the pipeline work
-itself) are expected to patch Paperless-ngx's and Immich's admin-account
-email to the shard owner's verified email, so each app's native OIDC
-auto-link can fire on first login.
+The sidecars patch an app's admin account to the shard owner's verified
+email so the app's native OIDC auto-link fires on first login.
+`apps/paperless-ngx/sidecar/` is the first real one (long-lived: it also
+reconciles existing shards, not just fresh installs). Immich's is still
+planned, tracked separately.
 
 ## Version Updates
 
