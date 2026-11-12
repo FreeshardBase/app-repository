@@ -25,6 +25,12 @@ services:
         - 'PAPERLESS_SOCIALACCOUNT_PROVIDERS={"openid_connect":{"APPS":[{"provider_id":"shard","name":"Shard","client_id":"{{ oidc.client_id }}","secret":"{{ oidc.client_secret }}","settings":{"server_url":"{{ oidc.issuer }}/.well-known/openid-configuration","email_authentication":true}}]}}'
         - PAPERLESS_SOCIALACCOUNT_ALLOW_SIGNUPS=false
         - PAPERLESS_REDIRECT_LOGIN_TO_SSO=true
+        healthcheck:
+            test: ["CMD", "curl", "-fs", "-S", "-L", "--max-time", "2", "http://localhost:8000"]
+            interval: 10s
+            timeout: 5s
+            retries: 30
+            start_period: 60s
         depends_on:
         - paperless-redis
         networks:
