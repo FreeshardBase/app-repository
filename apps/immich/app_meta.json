@@ -16,6 +16,13 @@
       "access": "public"
     }
   },
+  "oidc": {
+    "redirect_uris": [
+      "https://immich.{{ portal.domain }}/auth/login",
+      "https://immich.{{ portal.domain }}/user-settings",
+      "app.immich:///oauth-callback"
+    ]
+  },
   "minimum_portal_size": "s",
   "lifecycle": {
     "always_on": false,
