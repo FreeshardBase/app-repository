@@ -23,8 +23,7 @@ class FakeImmich:
     yields 401, as Immich's guard does.
     """
 
-    def __init__(self, users=None, owner=None, owner_status=200,
-                 bootstrap_key=None, break_system_create=False):
+    def __init__(self, users=None, owner=None, owner_status=200, bootstrap_key=None):
         self.users = {}
         self._next_id = 1
         for u in (users or []):
@@ -39,7 +38,6 @@ class FakeImmich:
             if admin is not None:
                 self.api_keys.append({"id": "bk1", "name": sidecar.BOOTSTRAP_KEY_NAME,
                                       "secret": bootstrap_key, "userId": admin["id"]})
-        self.break_system_create = break_system_create
         self.system_config = {"oauth": {"enabled": False, "issuerUrl": "", "clientId": "",
                                         "clientSecret": "", "autoRegister": True, "autoLaunch": False,
                                         "buttonText": "Login with OAuth"},
@@ -109,8 +107,7 @@ class FakeImmich:
         if url.endswith("/api/admin/users") and method == "POST":
             if not is_admin:
                 return 401, None
-            stored_pw = "wrong" if self.break_system_create else payload["password"]
-            uid = self._insert({"email": payload["email"], "password": stored_pw,
+            uid = self._insert({"email": payload["email"], "password": payload["password"],
                                 "name": payload.get("name", ""), "isAdmin": payload.get("isAdmin", False),
                                 "storageLabel": payload.get("storageLabel")})
             return 201, {"id": uid}
@@ -215,6 +212,10 @@ class ReconcileTest(unittest.TestCase):
             owner={"email": "owner@example.com", "name": "Owner"},
             bootstrap_key="rawkey",
         )
+        # The owner may hold their own API key; only the bootstrap key may be deleted.
+        admin_id = next(u["id"] for u in backend.users.values() if u["isAdmin"])
+        backend.api_keys.append({"id": "owners-own", "name": "my own key",
+                                 "secret": "zzz", "userId": admin_id})
         self.wire(backend, bootstrap_key="rawkey")
         sidecar.reconcile()
 
@@ -223,8 +224,8 @@ class ReconcileTest(unittest.TestCase):
         self.assertEqual(len(owners), 1)
         self.assertEqual(owners[0]["email"], "owner@example.com")
         self.assertEqual(owners[0]["storageLabel"], "admin")
-        # The seeded bootstrap key must be gone afterwards.
-        self.assertEqual(backend.api_keys, [])
+        # The seeded bootstrap key must be gone, the owner's own key untouched.
+        self.assertEqual([k["name"] for k in backend.api_keys], ["my own key"])
 
     def test_existing_shard_without_db_key_raises(self):
         backend = FakeImmich(
@@ -354,6 +355,9 @@ class ReconcileTest(unittest.TestCase):
         sidecar.reconcile()
         self.assertEqual(backend.system_config["ffmpeg"], {"crf": 23})
         self.assertEqual(backend.system_config["oauth"]["clientId"], "cid")
+        # The confidential-client secret is the credential sign-in depends on;
+        # assert it is pushed, not just the non-secret fields.
+        self.assertEqual(backend.system_config["oauth"]["clientSecret"], "csecret")
 
     def test_oauth_not_rewritten_when_already_correct(self):
         backend = FakeImmich(
@@ -382,8 +386,7 @@ class ReconcileTest(unittest.TestCase):
             sidecar.reconcile()
 
     def test_system_created_but_unauthenticatable_raises(self):
-        backend = FakeImmich(users=[], owner={"email": "owner@example.com"},
-                             break_system_create=False)
+        backend = FakeImmich(users=[], owner={"email": "owner@example.com"})
         # Fresh install path uses admin-sign-up, which stores the real pw, so
         # break the subsequent login by mismatching the password instead.
         self.wire(backend, system_pw="syssecret")
@@ -413,6 +416,53 @@ class ReconcileTest(unittest.TestCase):
     def test_main_refuses_without_system_password(self):
         self.patch("SYSTEM_PASSWORD", "")
         self.assertEqual(sidecar.main(), 1)
+
+    def test_main_swallows_transient_and_pass_errors_and_loops(self):
+        # The long-lived loop must log-and-continue on both a transport error
+        # and a RuntimeError, not crash out of main().
+        self.patch("SYSTEM_PASSWORD", "syssecret")
+        errors = iter([urllib.error.URLError("down"), RuntimeError("boom")])
+
+        def fake_reconcile():
+            raise next(errors)
+        self.patch("reconcile", fake_reconcile)
+
+        class Stop(Exception):
+            pass
+        slept = {"n": 0}
+
+        def fake_sleep(_):
+            slept["n"] += 1
+            if slept["n"] >= 2:
+                raise Stop()
+        with unittest.mock.patch("sidecar.time.sleep", fake_sleep):
+            with self.assertRaises(Stop):
+                sidecar.main()
+        # Both passes ran and were swallowed (loop reached sleep each time).
+        self.assertEqual(slept["n"], 2)
+
+    # --- unit-level helpers ------------------------------------------------
+
+    def test_existing_owner_without_label_gets_it(self):
+        backend = FakeImmich(
+            users=[
+                {"email": "owner@example.com", "password": "pw",
+                 "isAdmin": True, "storageLabel": None},
+                {"email": "freeshard-system@system.freeshard.net", "password": "syssecret",
+                 "isAdmin": True},
+            ],
+            owner={"email": "owner@example.com"},
+        )
+        self.wire(backend)
+        sidecar.reconcile()
+        self.assertEqual(non_system(backend)[0]["storageLabel"], "admin")
+        label_puts = [c for c in backend.calls if c[0] == "PUT" and "/api/admin/users/" in c[1]
+                      and c[2] and c[2].get("storageLabel") == "admin"]
+        self.assertTrue(label_puts, "the owner's missing storage label should be set via PUT")
+
+    def test_find_by_email_is_case_insensitive(self):
+        users = [{"id": "u1", "email": "Owner@Example.com"}]
+        self.assertEqual(sidecar._find_by_email(users, "owner@example.com")["id"], "u1")
 
 
 if __name__ == "__main__":
