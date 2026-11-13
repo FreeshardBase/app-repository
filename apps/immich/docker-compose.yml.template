@@ -86,11 +86,12 @@ services:
       - SYSTEM_EMAIL=freeshard-system@system.freeshard.net
     entrypoint: ["/bin/sh", "-c"]
     # NOTE: the Immich DB schema below (table `api_key`, its `key`/`permissions`
-    # columns, the `users` table and its `isAdmin`/`createdAt` columns, and the
-    # base64 SHA-256 key encoding) is Immich's internal schema, pinned here to
-    # v3.3.6. If a future image changes it, this job logs the error and exits 0
-    # (ON_ERROR_STOP=0 + `exit 0`); auto-link on existing shards is delayed until
-    # the schema is re-checked, Immich itself is unaffected.
+    # columns, the `user` table and its `isAdmin`/`createdAt`/`deletedAt` columns,
+    # and the key stored as the raw SHA-256 digest in a bytea column) is Immich's
+    # internal schema, pinned here to v3.3.6. If a future image changes it, this
+    # job logs the error and exits 0 (ON_ERROR_STOP=0 + `exit 0`); auto-link on
+    # existing shards is delayed until the schema is re-checked, Immich itself is
+    # unaffected.
     # Every `$` below is doubled to `$$`: Docker Compose interpolates single
     # `$VAR` in a service command before the shell runs, so `$$` is how a
     # literal `$` (shell expansions, psql dollar-quote) reaches the script.
@@ -123,21 +124,21 @@ services:
           IF to_regclass('public.api_key') IS NULL THEN
             RAISE NOTICE 'api_key table not present yet; nothing to seed'; RETURN;
           END IF;
-          IF EXISTS (SELECT 1 FROM users WHERE email = v_system_email) THEN
+          IF EXISTS (SELECT 1 FROM "user" WHERE email = v_system_email) THEN
             RAISE NOTICE 'freeshard-system already exists; nothing to seed'; RETURN;
           END IF;
           IF EXISTS (SELECT 1 FROM api_key WHERE name = v_key_name) THEN
             RAISE NOTICE 'bootstrap key already present; nothing to seed'; RETURN;
           END IF;
-          SELECT id INTO admin_id FROM users
-            WHERE "isAdmin" = true AND email <> v_system_email
+          SELECT id INTO admin_id FROM "user"
+            WHERE "isAdmin" = true AND "deletedAt" IS NULL AND email <> v_system_email
             ORDER BY "createdAt" LIMIT 1;
           IF admin_id IS NULL THEN
             RAISE NOTICE 'no pre-existing admin; fresh install, nothing to seed'; RETURN;
           END IF;
           INSERT INTO api_key (id, name, key, "userId", permissions, "createdAt", "updatedAt")
             VALUES (gen_random_uuid(), v_key_name,
-                    encode(sha256(v_secret::bytea), 'base64'),
+                    sha256(convert_to(v_secret, 'UTF8')),
                     admin_id, '{all}', now(), now());
           RAISE NOTICE 'seeded bootstrap api key for admin %', admin_id;
         END
