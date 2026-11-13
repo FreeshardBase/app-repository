@@ -106,7 +106,10 @@ services:
           -v key_name="$$BOOTSTRAP_KEY_NAME" \
           -v system_email="$$SYSTEM_EMAIL" \
           -v secret="$$BOOTSTRAP_API_KEY" <<'SQL' || echo "bootstrap: psql failed; leaving auto-link to a later run"
-        CREATE EXTENSION IF NOT EXISTS pgcrypto;
+        -- Yield rather than deadlock Immich's own startup migrations, which run
+        -- concurrently and may hold locks on these tables during a version bump.
+        SET lock_timeout = '3s';
+        SET statement_timeout = '30s';
         SELECT set_config('freeshard.system_email', :'system_email', false);
         SELECT set_config('freeshard.key_name', :'key_name', false);
         SELECT set_config('freeshard.secret', :'secret', false);
@@ -134,7 +137,7 @@ services:
           END IF;
           INSERT INTO api_key (id, name, key, "userId", permissions, "createdAt", "updatedAt")
             VALUES (gen_random_uuid(), v_key_name,
-                    encode(digest(v_secret, 'sha256'), 'base64'),
+                    encode(sha256(v_secret::bytea), 'base64'),
                     admin_id, '{all}', now(), now());
           RAISE NOTICE 'seeded bootstrap api key for admin %', admin_id;
         END
