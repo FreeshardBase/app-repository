@@ -16,6 +16,14 @@ services:
       - redis
       - database
     restart: always
+    # Accept any non-5xx: this only confirms the HTTP server is up and routing,
+    # not a specific endpoint. node is the server image's own runtime.
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:2283/api/server/ping',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
     networks:
       - portal
       - immich
@@ -51,5 +59,119 @@ services:
       - "{{ fs.app_data }}/pgdata:/var/lib/postgresql/data"
     shm_size: 128mb
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${DB_USERNAME} -d $${DB_DATABASE_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
     networks:
+      - immich
+
+  # One-shot DB bootstrap: seeds a throwaway admin API key for the sidecar on an
+  # already-provisioned shard. No-op on a fresh install and once freeshard-system
+  # exists. See agents.md "Sidecar Containers" (DB-exception subsection).
+  immich-oidc-bootstrap:
+    container_name: immich_oidc_bootstrap
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
+    restart: "no"
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - BOOTSTRAP_API_KEY={{ secret('bootstrap_api_key') }}
+      - BOOTSTRAP_KEY_NAME=freeshard-bootstrap
+      - SYSTEM_EMAIL=freeshard-system@system.freeshard.net
+    entrypoint: ["/bin/sh", "-c"]
+    # NOTE: the Immich DB schema below (table `api_key`, its `key`/`permissions`
+    # columns, the `user` table and its `isAdmin`/`createdAt`/`deletedAt` columns,
+    # and the key stored as the raw SHA-256 digest in a bytea column) is Immich's
+    # internal schema, pinned here to v3.3.6. If a future image changes it, this
+    # job logs the error and exits 0 (ON_ERROR_STOP=0 + `exit 0`); auto-link on
+    # existing shards is delayed until the schema is re-checked, Immich itself is
+    # unaffected.
+    # Every `$` below is doubled to `$$`: Docker Compose interpolates single
+    # `$VAR` in a service command before the shell runs, so `$$` is how a
+    # literal `$` (shell expansions, psql dollar-quote) reaches the script.
+    command:
+      - |
+        set -u
+        for i in $$(seq 1 30); do
+          pg_isready -h "$$DB_HOSTNAME" -U "$$DB_USERNAME" -d "$$DB_DATABASE_NAME" && break
+          echo "bootstrap: waiting for database ($$i)"; sleep 2
+        done
+        PGPASSWORD="$$DB_PASSWORD" psql -v ON_ERROR_STOP=0 \
+          -h "$$DB_HOSTNAME" -U "$$DB_USERNAME" -d "$$DB_DATABASE_NAME" \
+          -v key_name="$$BOOTSTRAP_KEY_NAME" \
+          -v system_email="$$SYSTEM_EMAIL" \
+          -v secret="$$BOOTSTRAP_API_KEY" <<'SQL' || echo "bootstrap: psql failed; leaving auto-link to a later run"
+        -- Yield rather than deadlock Immich's own startup migrations, which run
+        -- concurrently and may hold locks on these tables during a version bump.
+        SET lock_timeout = '3s';
+        SET statement_timeout = '30s';
+        SELECT set_config('freeshard.system_email', :'system_email', false);
+        SELECT set_config('freeshard.key_name', :'key_name', false);
+        SELECT set_config('freeshard.secret', :'secret', false);
+        DO $$do$$
+        DECLARE
+          admin_id uuid;
+          v_system_email text := current_setting('freeshard.system_email');
+          v_key_name     text := current_setting('freeshard.key_name');
+          v_secret       text := current_setting('freeshard.secret');
+        BEGIN
+          IF to_regclass('public.api_key') IS NULL THEN
+            RAISE NOTICE 'api_key table not present yet; nothing to seed'; RETURN;
+          END IF;
+          IF EXISTS (SELECT 1 FROM "user" WHERE email = v_system_email) THEN
+            RAISE NOTICE 'freeshard-system already exists; nothing to seed'; RETURN;
+          END IF;
+          IF EXISTS (SELECT 1 FROM api_key WHERE name = v_key_name) THEN
+            RAISE NOTICE 'bootstrap key already present; nothing to seed'; RETURN;
+          END IF;
+          SELECT id INTO admin_id FROM "user"
+            WHERE "isAdmin" = true AND "deletedAt" IS NULL AND email <> v_system_email
+            ORDER BY "createdAt" LIMIT 1;
+          IF admin_id IS NULL THEN
+            RAISE NOTICE 'no pre-existing admin; fresh install, nothing to seed'; RETURN;
+          END IF;
+          INSERT INTO api_key (id, name, key, "userId", permissions, "createdAt", "updatedAt")
+            VALUES (gen_random_uuid(), v_key_name,
+                    sha256(convert_to(v_secret, 'UTF8')),
+                    admin_id, '{all}', now(), now());
+          RAISE NOTICE 'seeded bootstrap api key for admin %', admin_id;
+        END
+        $$do$$;
+        SQL
+        echo "bootstrap: done"
+        exit 0
+    networks:
+      - immich
+
+  # Long-lived OIDC auto-link sidecar. Pushes the shard's OIDC settings into
+  # Immich's stored system config and keeps the owner's account email equal to
+  # their verified email, so Immich's native by-email auto-link fires on the
+  # owner's first OIDC login. See apps/immich/sidecar/.
+  immich-sidecar:
+    container_name: immich_sidecar
+    image: ghcr.io/freeshardbase/immich-sidecar:0.1.0
+    restart: always
+    depends_on:
+      immich-server:
+        condition: service_healthy
+      immich-oidc-bootstrap:
+        condition: service_completed_successfully
+    environment:
+      - IMMICH_URL=http://immich_server:2283
+      - CORE_URL=http://shard_core
+      - SYSTEM_EMAIL=freeshard-system@system.freeshard.net
+      - SYSTEM_PASSWORD={{ secret('system_password') }}
+      - BOOTSTRAP_API_KEY={{ secret('bootstrap_api_key') }}
+      - BOOTSTRAP_KEY_NAME=freeshard-bootstrap
+      - OIDC_ISSUER={{ oidc.issuer }}
+      - OIDC_CLIENT_ID={{ oidc.client_id }}
+      - OIDC_CLIENT_SECRET={{ oidc.client_secret }}
+    networks:
+      - portal
       - immich

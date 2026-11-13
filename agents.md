@@ -449,12 +449,42 @@ shape, not its one-shot lifetime. It is **not** inside `apps/` —
 under `apps/` expecting a real `app_meta.json`, and the template is not an
 installable app.
 
-### Planned consumers
+### Talking to the DB instead of the API (exception)
 
-The first real sidecars (tracked separately, not part of the pipeline work
-itself) are expected to patch Paperless-ngx's and Immich's admin-account
-email to the shard owner's verified email, so each app's native OIDC
-auto-link can fire on first login.
+A sidecar reconciles against its app's own **API**, never its database — the
+API enforces the app's own invariants, a raw DB write bypasses them. One
+narrow exception is allowed: a **one-time bootstrap** that cannot be done
+through the API at all, because the API has no unauthenticated path to the
+privilege the sidecar needs.
+
+Immich is the motivating case. Its admin API needs an authenticated admin
+session, and on an already-provisioned shard the only admin's password was
+chosen by the owner and is unknown to Freeshard; Immich offers no way to mint
+an API key or reset that password out of band. So Immich's app ships a
+separate one-shot job (`immich-oidc-bootstrap` in its compose template) that
+uses `psql` against the pinned Postgres image to seed a single throwaway admin
+API key, which the sidecar then uses to create its own `freeshard-system`
+account and immediately deletes again. Everything after that bootstrap goes
+through the API as normal.
+
+Rules for such a bootstrap, so the exception stays safe:
+
+- It is a **separate** service, not the sidecar itself — the sidecar stays
+  stdlib-only and API-only.
+- It must **never gate the app's own service start** (no `depends_on` from the
+  app onto it) and must **log and exit 0 on any error**, so a future schema
+  change can at worst delay the setup work, never take the app down.
+- It depends on the app's internal DB schema, which is not a public contract.
+  Pin the assumed tables/columns in a comment and treat them as verify-on-bump.
+
+### Consumers
+
+`apps/immich/sidecar/` is a real long-lived consumer: it pushes the shard's
+OIDC settings into Immich's stored system config and keeps the owner's account
+email equal to their verified email, so Immich's native by-email auto-link
+fires on the owner's first OIDC login. It is paired with the one-time DB
+bootstrap described above. Paperless-ngx's equivalent auto-link sidecar lands
+separately.
 
 ## Version Updates
 
