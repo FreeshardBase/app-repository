@@ -16,10 +16,8 @@ services:
       - redis
       - database
     restart: always
-    # Prerequisite for the sidecar's `depends_on: service_healthy`. Accept any
-    # non-5xx: it only needs to confirm the HTTP server is up and routing, not
-    # assert a specific endpoint; the sidecar tolerates transient API errors
-    # itself. node is the server image's own runtime, so no extra tooling.
+    # Accept any non-5xx: this only confirms the HTTP server is up and routing,
+    # not a specific endpoint. node is the server image's own runtime.
     healthcheck:
       test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:2283/api/server/ping',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))\""]
       interval: 10s
@@ -70,14 +68,9 @@ services:
     networks:
       - immich
 
-  # One-shot DB bootstrap: the single step that does not go through Immich's
-  # API. On an already-provisioned shard (an owner account already exists, with
-  # an owner-chosen password Freeshard does not know) it seeds a throwaway admin
-  # API key so the sidecar can create its freeshard-system account. No-op on a
-  # fresh install (no admin yet) and once freeshard-system exists. It must never
-  # fail the stack and deliberately does NOT gate immich-server: a schema change
-  # that breaks it can at worst delay auto-linking on existing shards, never take
-  # Immich down. See agents.md's "Sidecar Containers" section for the exception.
+  # One-shot DB bootstrap: seeds a throwaway admin API key for the sidecar on an
+  # already-provisioned shard. No-op on a fresh install and once freeshard-system
+  # exists. See agents.md "Sidecar Containers" (DB-exception subsection).
   immich-oidc-bootstrap:
     container_name: immich_oidc_bootstrap
     image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0

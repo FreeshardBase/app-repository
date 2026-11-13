@@ -65,9 +65,11 @@ def _api(method: str, url: str, headers: dict | None = None, payload: dict | Non
 
     Returns ``(status_code, parsed_body_or_None)``. An HTTP error status
     (400, 401, 404, ...) is returned as the status, not raised, so callers can
-    branch on it. A transport failure (host unreachable, timeout) raises
-    ``URLError``/``OSError`` for the pass to treat as transient. A 2xx body
-    that is not JSON raises ``RuntimeError`` rather than crashing the loop.
+    branch on it; the error response body is parsed and returned too when it is
+    JSON, so a caller can surface Immich's reason. A transport failure (host
+    unreachable, timeout) raises ``URLError``/``OSError`` for the pass to treat
+    as transient. A 2xx body that is not JSON raises ``RuntimeError`` rather
+    than crashing the loop.
     """
     data = json.dumps(payload).encode() if payload is not None else None
     hdrs = {"Accept": "application/json"}
@@ -81,9 +83,20 @@ def _api(method: str, url: str, headers: dict | None = None, payload: dict | Non
             raw = resp.read()
             return resp.status, (json.loads(raw) if raw else None)
     except urllib.error.HTTPError as exc:
-        return exc.code, None
+        try:
+            raw = exc.read()
+            return exc.code, (json.loads(raw) if raw else None)
+        except (json.JSONDecodeError, OSError):
+            return exc.code, None
     except json.JSONDecodeError as exc:
         raise RuntimeError(f"non-JSON response from {url}: {exc}") from exc
+
+
+def _reason(body) -> str:
+    """A short human reason from an error response body, for failure logs."""
+    if isinstance(body, dict):
+        return str(body.get("message") or body)
+    return "" if body is None else str(body)
 
 
 def _bearer(token: str) -> dict:
@@ -123,7 +136,7 @@ def _admin_sign_up(email: str, password: str, name: str) -> bool:
 def _list_users(headers: dict) -> list:
     status, body = _api("GET", f"{IMMICH_URL}/api/admin/users", headers)
     if status != 200:
-        raise RuntimeError(f"GET /api/admin/users returned HTTP {status}")
+        raise RuntimeError(f"GET /api/admin/users returned HTTP {status}: {_reason(body)}")
     return body or []
 
 
@@ -138,15 +151,15 @@ def _create_admin_user(headers: dict, email: str, password: str, name: str,
     }
     if storage_label is not None:
         payload["storageLabel"] = storage_label
-    status, _ = _api("POST", f"{IMMICH_URL}/api/admin/users", headers, payload)
+    status, body = _api("POST", f"{IMMICH_URL}/api/admin/users", headers, payload)
     if status not in (200, 201):
-        raise RuntimeError(f"POST /api/admin/users for {email} returned HTTP {status}")
+        raise RuntimeError(f"POST /api/admin/users for {email} returned HTTP {status}: {_reason(body)}")
 
 
 def _update_user(headers: dict, user_id: str, fields: dict) -> None:
-    status, _ = _api("PUT", f"{IMMICH_URL}/api/admin/users/{user_id}", headers, fields)
+    status, body = _api("PUT", f"{IMMICH_URL}/api/admin/users/{user_id}", headers, fields)
     if status not in (200, 201):
-        raise RuntimeError(f"PUT /api/admin/users/{user_id} returned HTTP {status}")
+        raise RuntimeError(f"PUT /api/admin/users/{user_id} returned HTTP {status}: {_reason(body)}")
 
 
 def _delete_bootstrap_key(headers: dict) -> None:
@@ -213,7 +226,7 @@ def _reconcile_oauth(headers: dict) -> None:
         return
     status, config = _api("GET", f"{IMMICH_URL}/api/system-config", headers)
     if status != 200 or config is None:
-        raise RuntimeError(f"GET /api/system-config returned HTTP {status}")
+        raise RuntimeError(f"GET /api/system-config returned HTTP {status}: {_reason(config)}")
     current = dict(config.get("oauth") or {})
     desired = dict(current)
     desired.update({
@@ -228,16 +241,17 @@ def _reconcile_oauth(headers: dict) -> None:
         log.info("OIDC system-config already matches desired; nothing to do")
         return
     config["oauth"] = desired
-    status, _ = _api("PUT", f"{IMMICH_URL}/api/system-config", headers, config)
+    status, body = _api("PUT", f"{IMMICH_URL}/api/system-config", headers, config)
     if status not in (200, 201):
-        raise RuntimeError(f"PUT /api/system-config returned HTTP {status}")
+        raise RuntimeError(f"PUT /api/system-config returned HTTP {status}: {_reason(body)}")
     log.info("updated the OIDC (oauth) system-config section")
 
 
 def _fetch_owner() -> dict | None:
     """Return core's owner record, or None when no owner is provisioned yet.
 
-    The record carries a verified-or-``null`` ``email`` per freeshard#307.
+    The record is ``{id, username, display_name, email}`` per freeshard#307,
+    with ``email`` verified-or-``null``.
     """
     status, body = _api("GET", f"{CORE_URL}/internal/owner")
     if status == 404:
@@ -258,7 +272,7 @@ def _find_by_email(users: list, email: str) -> dict | None:
 def _reconcile_owner_account(headers: dict) -> None:
     users = _list_users(headers)
     system = _find_by_email(users, SYSTEM_EMAIL)
-    others = [u for u in users if (u.get("email") or "").lower() != SYSTEM_EMAIL.lower()]
+    non_system_users = [u for u in users if (u.get("email") or "").lower() != SYSTEM_EMAIL.lower()]
 
     # The reserved storage label has to live on the owner's account, so take
     # it off freeshard-system first (admin-sign-up put it there on a fresh
@@ -270,10 +284,9 @@ def _reconcile_owner_account(headers: dict) -> None:
     owner = _fetch_owner()
     owner_email = (owner or {}).get("email")
 
-    if len(others) == 0:
+    if len(non_system_users) == 0:
         if owner_email:
-            name = (owner.get("name") or owner.get("display_name")
-                    or owner.get("username") or owner_email)
+            name = owner.get("display_name") or owner.get("username") or owner_email
             _create_admin_user(headers, owner_email, secrets.token_urlsafe(32), name,
                                storage_label=STORAGE_LABEL)
             log.info("created the owner's Immich account with the verified email and %r storage label",
@@ -282,11 +295,11 @@ def _reconcile_owner_account(headers: dict) -> None:
             log.info("no owner account yet and owner has no verified email; nothing to create")
         return
 
-    if len(others) > 1:
+    if len(non_system_users) > 1:
         log.info("multiple non-system users present; multi-user shards are out of scope, skipping owner reconcile")
         return
 
-    owner_account = others[0]
+    owner_account = non_system_users[0]
     patch: dict = {}
     if owner_email and (owner_account.get("email") or "") != owner_email:
         patch["email"] = owner_email

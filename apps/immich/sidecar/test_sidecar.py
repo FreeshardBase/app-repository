@@ -157,26 +157,26 @@ def non_system(backend):
 
 
 class ReconcileTest(unittest.TestCase):
-    def patch(self, name, value):
+    def set_attr(self, name, value):
         original = getattr(sidecar, name)
         self.addCleanup(setattr, sidecar, name, original)
         setattr(sidecar, name, value)
 
     def wire(self, backend, *, system_pw="syssecret", bootstrap_key="", oidc=True):
-        self.patch("_api", backend.api)
-        self.patch("SYSTEM_PASSWORD", system_pw)
-        self.patch("SYSTEM_EMAIL", "freeshard-system@system.freeshard.net")
-        self.patch("BOOTSTRAP_API_KEY", bootstrap_key)
-        self.patch("STORAGE_LABEL", "admin")
+        self.set_attr("_api", backend.api)
+        self.set_attr("SYSTEM_PASSWORD", system_pw)
+        self.set_attr("SYSTEM_EMAIL", "freeshard-system@system.freeshard.net")
+        self.set_attr("BOOTSTRAP_API_KEY", bootstrap_key)
+        self.set_attr("STORAGE_LABEL", "admin")
         if oidc:
-            self.patch("OIDC_ISSUER", "https://idp.shard.example")
-            self.patch("OIDC_CLIENT_ID", "cid")
-            self.patch("OIDC_CLIENT_SECRET", "csecret")
+            self.set_attr("OIDC_ISSUER", "https://idp.shard.example")
+            self.set_attr("OIDC_CLIENT_ID", "cid")
+            self.set_attr("OIDC_CLIENT_SECRET", "csecret")
 
     # --- fresh install -----------------------------------------------------
 
     def test_fresh_install_signs_up_system_and_creates_owner(self):
-        backend = FakeImmich(users=[], owner={"email": "owner@example.com", "name": "Owner"})
+        backend = FakeImmich(users=[], owner={"email": "owner@example.com", "display_name": "Owner"})
         self.wire(backend)
         sidecar.reconcile()
 
@@ -209,7 +209,7 @@ class ReconcileTest(unittest.TestCase):
         backend = FakeImmich(
             users=[{"email": "someone@gmail.com", "password": "ownerchosen",
                     "isAdmin": True, "storageLabel": "admin"}],
-            owner={"email": "owner@example.com", "name": "Owner"},
+            owner={"email": "owner@example.com", "display_name": "Owner"},
             bootstrap_key="rawkey",
         )
         # The owner may hold their own API key; only the bootstrap key may be deleted.
@@ -337,9 +337,9 @@ class ReconcileTest(unittest.TestCase):
             owner={"email": None},
         )
         self.wire(backend, oidc=False)
-        self.patch("OIDC_ISSUER", "")
-        self.patch("OIDC_CLIENT_ID", "")
-        self.patch("OIDC_CLIENT_SECRET", "")
+        self.set_attr("OIDC_ISSUER", "")
+        self.set_attr("OIDC_CLIENT_ID", "")
+        self.set_attr("OIDC_CLIENT_SECRET", "")
         sidecar.reconcile()
         self.assertEqual(oauth(backend)["enabled"], False)
         config_puts = [c for c in backend.calls if c[0] == "PUT" and c[1].endswith("/api/system-config")]
@@ -380,8 +380,8 @@ class ReconcileTest(unittest.TestCase):
     def test_transport_error_propagates_for_retry(self):
         def boom(*a, **k):
             raise urllib.error.URLError("connection refused")
-        self.patch("_api", boom)
-        self.patch("SYSTEM_PASSWORD", "syssecret")
+        self.set_attr("_api", boom)
+        self.set_attr("SYSTEM_PASSWORD", "syssecret")
         with self.assertRaises(urllib.error.URLError):
             sidecar.reconcile()
 
@@ -396,7 +396,7 @@ class ReconcileTest(unittest.TestCase):
             if url.endswith("/api/auth/admin-sign-up") and payload is not None:
                 payload = {**payload, "password": "different"}
             return orig(method, url, headers, payload)
-        self.patch("_api", api)
+        self.set_attr("_api", api)
         with self.assertRaises(RuntimeError):
             sidecar.reconcile()
 
@@ -414,18 +414,18 @@ class ReconcileTest(unittest.TestCase):
                 sidecar._api("GET", "http://x/internal/owner")
 
     def test_main_refuses_without_system_password(self):
-        self.patch("SYSTEM_PASSWORD", "")
+        self.set_attr("SYSTEM_PASSWORD", "")
         self.assertEqual(sidecar.main(), 1)
 
     def test_main_swallows_transient_and_pass_errors_and_loops(self):
         # The long-lived loop must log-and-continue on both a transport error
         # and a RuntimeError, not crash out of main().
-        self.patch("SYSTEM_PASSWORD", "syssecret")
+        self.set_attr("SYSTEM_PASSWORD", "syssecret")
         errors = iter([urllib.error.URLError("down"), RuntimeError("boom")])
 
         def fake_reconcile():
             raise next(errors)
-        self.patch("reconcile", fake_reconcile)
+        self.set_attr("reconcile", fake_reconcile)
 
         class Stop(Exception):
             pass
