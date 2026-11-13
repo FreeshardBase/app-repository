@@ -63,3 +63,109 @@ services:
     restart: always
     networks:
       - immich
+
+  # One-shot DB bootstrap: the single step that does not go through Immich's
+  # API. On an already-provisioned shard (an owner account already exists, with
+  # an owner-chosen password Freeshard does not know) it seeds a throwaway admin
+  # API key so the sidecar can create its freeshard-system account. No-op on a
+  # fresh install (no admin yet) and once freeshard-system exists. It must never
+  # fail the stack and deliberately does NOT gate immich-server: a schema change
+  # that breaks it can at worst delay auto-linking on existing shards, never take
+  # Immich down. See agents.md's "Sidecar Containers" section for the exception.
+  immich-oidc-bootstrap:
+    container_name: immich_oidc_bootstrap
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
+    restart: "no"
+    env_file:
+      - .env
+    environment:
+      - BOOTSTRAP_API_KEY={{ secret('bootstrap_api_key') }}
+      - BOOTSTRAP_KEY_NAME=freeshard-bootstrap
+      - SYSTEM_EMAIL=freeshard-system@system.freeshard.net
+    entrypoint: ["/bin/sh", "-c"]
+    # NOTE: the Immich DB schema below (table `api_key`, its `key`/`permissions`
+    # columns, the `users` table and its `isAdmin`/`createdAt` columns, and the
+    # base64 SHA-256 key encoding) is Immich's internal schema, pinned here to
+    # v3.3.6. If a future image changes it, this job logs the error and exits 0
+    # (ON_ERROR_STOP=0 + `exit 0`); auto-link on existing shards is delayed until
+    # the schema is re-checked, Immich itself is unaffected.
+    # Every `$` below is doubled to `$$`: Docker Compose interpolates single
+    # `$VAR` in a service command before the shell runs, so `$$` is how a
+    # literal `$` (shell expansions, psql dollar-quote) reaches the script.
+    command:
+      - |
+        set -u
+        for i in $$(seq 1 30); do
+          pg_isready -h "$$DB_HOSTNAME" -U "$$DB_USERNAME" -d "$$DB_DATABASE_NAME" && break
+          echo "bootstrap: waiting for database ($$i)"; sleep 2
+        done
+        PGPASSWORD="$$DB_PASSWORD" psql -v ON_ERROR_STOP=0 \
+          -h "$$DB_HOSTNAME" -U "$$DB_USERNAME" -d "$$DB_DATABASE_NAME" \
+          -v key_name="$$BOOTSTRAP_KEY_NAME" \
+          -v system_email="$$SYSTEM_EMAIL" \
+          -v secret="$$BOOTSTRAP_API_KEY" <<'SQL' || echo "bootstrap: psql failed; leaving auto-link to a later run"
+        CREATE EXTENSION IF NOT EXISTS pgcrypto;
+        SELECT set_config('freeshard.system_email', :'system_email', false);
+        SELECT set_config('freeshard.key_name', :'key_name', false);
+        SELECT set_config('freeshard.secret', :'secret', false);
+        DO $$do$$
+        DECLARE
+          admin_id uuid;
+          v_system_email text := current_setting('freeshard.system_email');
+          v_key_name     text := current_setting('freeshard.key_name');
+          v_secret       text := current_setting('freeshard.secret');
+        BEGIN
+          IF to_regclass('public.api_key') IS NULL THEN
+            RAISE NOTICE 'api_key table not present yet; nothing to seed'; RETURN;
+          END IF;
+          IF EXISTS (SELECT 1 FROM users WHERE email = v_system_email) THEN
+            RAISE NOTICE 'freeshard-system already exists; nothing to seed'; RETURN;
+          END IF;
+          IF EXISTS (SELECT 1 FROM api_key WHERE name = v_key_name) THEN
+            RAISE NOTICE 'bootstrap key already present; nothing to seed'; RETURN;
+          END IF;
+          SELECT id INTO admin_id FROM users
+            WHERE "isAdmin" = true AND email <> v_system_email
+            ORDER BY "createdAt" LIMIT 1;
+          IF admin_id IS NULL THEN
+            RAISE NOTICE 'no pre-existing admin; fresh install, nothing to seed'; RETURN;
+          END IF;
+          INSERT INTO api_key (id, name, key, "userId", permissions, "createdAt", "updatedAt")
+            VALUES (gen_random_uuid(), v_key_name,
+                    encode(digest(v_secret, 'sha256'), 'base64'),
+                    admin_id, '{all}', now(), now());
+          RAISE NOTICE 'seeded bootstrap api key for admin %', admin_id;
+        END
+        $$do$$;
+        SQL
+        echo "bootstrap: done"
+        exit 0
+    networks:
+      - immich
+
+  # Long-lived OIDC auto-link sidecar. Pushes the shard's OIDC settings into
+  # Immich's stored system config and keeps the owner's account email equal to
+  # their verified email, so Immich's native by-email auto-link fires on the
+  # owner's first OIDC login. See apps/immich/sidecar/.
+  immich-sidecar:
+    container_name: immich_sidecar
+    image: ghcr.io/freeshardbase/immich-sidecar:0.1.0
+    restart: always
+    depends_on:
+      immich-server:
+        condition: service_healthy
+      immich-oidc-bootstrap:
+        condition: service_completed_successfully
+    environment:
+      - IMMICH_URL=http://immich_server:2283
+      - CORE_URL=http://shard_core
+      - SYSTEM_EMAIL=freeshard-system@system.freeshard.net
+      - SYSTEM_PASSWORD={{ secret('system_password') }}
+      - BOOTSTRAP_API_KEY={{ secret('bootstrap_api_key') }}
+      - BOOTSTRAP_KEY_NAME=freeshard-bootstrap
+      - OIDC_ISSUER={{ oidc.issuer }}
+      - OIDC_CLIENT_ID={{ oidc.client_id }}
+      - OIDC_CLIENT_SECRET={{ oidc.client_secret }}
+    networks:
+      - portal
+      - immich
