@@ -16,6 +16,16 @@ services:
       - redis
       - database
     restart: always
+    # Prerequisite for the sidecar's `depends_on: service_healthy`. Accept any
+    # non-5xx: it only needs to confirm the HTTP server is up and routing, not
+    # assert a specific endpoint; the sidecar tolerates transient API errors
+    # itself. node is the server image's own runtime, so no extra tooling.
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:2283/api/server/ping',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
     networks:
       - portal
       - immich
