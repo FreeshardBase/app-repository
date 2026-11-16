@@ -12,5 +12,7 @@ services:
         environment:
         - BASE_URL=https://mealie.{{ portal.domain }}
         - ALLOW_SIGNUP=false
+        - REVERSE_PROXY_AUTH_ENABLED=true
+        - REVERSE_PROXY_AUTH_HEADER=X-Ptl-User
         networks:
         - portal
