@@ -5,7 +5,7 @@ networks:
 services:
     2fauth:
         restart: always
-        image: 2fauth/2fauth:8.0.1
+        image: 2fauth/2fauth:9.0.1
         container_name: 2fauth
         user: "0:0"
         entrypoint:
