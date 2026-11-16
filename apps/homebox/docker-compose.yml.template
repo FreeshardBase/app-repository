@@ -5,7 +5,7 @@ networks:
 services:
     homebox:
         restart: always
-        image: ghcr.io/sysadminsmedia/homebox:0.26.2
+        image: ghcr.io/sysadminsmedia/homebox:0.27.1
         container_name: homebox
         entrypoint:
         - /bin/sh
