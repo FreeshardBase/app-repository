@@ -5,7 +5,7 @@ networks:
 services:
     searxng:
         restart: always
-        image: searxng/searxng:2026.8.4-c63835bd2
+        image: searxng/searxng:2026.11.15-2d500cb6b
         container_name: searxng
         volumes:
         - "{{ fs.app_data }}/config:/etc/searxng"
