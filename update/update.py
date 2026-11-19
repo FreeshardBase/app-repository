@@ -38,6 +38,62 @@ def _current_version(app_dir: Path) -> str:
     return meta["app_version"]
 
 
+def _load_support_images(app_dir: Path) -> list[dict]:
+    """Load an app's opt-in support-image declarations, if any.
+
+    `apps/<app>/update_check_support_images.py` is independent of
+    `update_check.py` — it covers images the app pins itself for a sidecar
+    service (a reverse proxy, a database, a cache) that aren't the app's own
+    primary image and so aren't visible to update_check.py at all. An app
+    can opt out of its own version tracking (OptOut) and still have its
+    support images checked here, or vice versa.
+    """
+    script = app_dir / "update_check_support_images.py"
+    if not script.exists():
+        return []
+    spec = importlib.util.spec_from_file_location(
+        f"update_check_support_images_{app_dir.name}", script)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return getattr(mod, "SUPPORT_IMAGES", [])
+
+
+def _check_support_images_one(app_dir: Path) -> list[dict]:
+    from update.update_lib import tag_jump, read_service_image, service_has_volumes
+
+    declared = _load_support_images(app_dir)
+    if not declared:
+        return []
+    compose_text = (app_dir / "docker-compose.yml.template").read_text()
+    results = []
+    for entry in declared:
+        service = entry["service"]
+        base = {"app": app_dir.name, "service": service, "image": entry["image"]}
+        try:
+            image_ref = read_service_image(compose_text, service)
+            current_tag = image_ref.rsplit(":", 1)[1]
+            latest_tag = entry["latest"]()
+            stateful = service_has_volumes(compose_text, service)
+            jump = tag_jump(current_tag, latest_tag)
+            if jump == "same":
+                results.append({**base, "current": current_tag, "latest": latest_tag,
+                                 "status": "up_to_date", "jump": jump, "stateful": stateful})
+            else:
+                always_review = entry.get("always_review_reason")
+                clean = jump in ("patch", "minor") and not always_review
+                reasons = [] if clean else [f"{jump} jump"]
+                if stateful and jump == "major":
+                    reasons.append("stateful: may need a data migration, not a drop-in bump")
+                if always_review:
+                    reasons.append(always_review)
+                results.append({**base, "current": current_tag, "latest": latest_tag,
+                                 "status": "outdated", "jump": jump, "stateful": stateful,
+                                 "candidate_reasons": reasons})
+        except Exception as e:
+            results.append({**base, "status": "error", "error": repr(e)})
+    return results
+
+
 def _classify(app_name: str, current: str, payload: dict) -> dict:
     from update.update_lib import semver_jump, fetch_upstream_compose, compose_diff
 
@@ -120,13 +176,19 @@ def _check_one(app_dir: Path) -> dict:
 def cmd_check(args):
     UPDATE_INFO.mkdir(parents=True, exist_ok=True)
     app_dirs = sorted(d for d in APPS_DIR.iterdir() if d.is_dir())
-    report = {"timestamp": datetime.now(timezone.utc).isoformat(), "apps": {}}
+    report = {"timestamp": datetime.now(timezone.utc).isoformat(), "apps": {}, "support_images": []}
 
     with ThreadPoolExecutor() as ex:
         futs = {ex.submit(_check_one, d): d for d in app_dirs}
         for fut in as_completed(futs):
             entry = fut.result()
             report["apps"][entry["app"]] = entry
+
+    with ThreadPoolExecutor() as ex:
+        futs = {ex.submit(_check_support_images_one, d): d for d in app_dirs}
+        for fut in as_completed(futs):
+            report["support_images"].extend(fut.result())
+    report["support_images"].sort(key=lambda e: (e["app"], e["service"]))
 
     LATEST_CHECK_JSON.write_text(json.dumps(report, indent=2, sort_keys=True))
     if args.json:
@@ -149,6 +211,18 @@ def _print_summary(report: dict):
             print(f"  OPT_OUT   {name:<25} {e.get('reason','')}")
         elif s == "no_script":
             print(f"  NO_SCRIPT {name:<25}")
+
+    support = report.get("support_images", [])
+    if support:
+        print(f"=== Checked {len(support)} support images ===")
+        for e in support:
+            label = f"{e['app']}/{e['service']}"
+            s = e.get("status")
+            if s == "outdated":
+                r = ", ".join(e.get("candidate_reasons", [])) or "clean"
+                print(f"  OUTDATED  {label:<30} {e['current']:<16} -> {e['latest']:<16}  ({r})")
+            elif s == "error":
+                print(f"  ERROR     {label:<30} {e.get('error','')}")
 
 
 FILE_EXTENSIONS = ("yml.template", "json", "env")
@@ -229,6 +303,40 @@ def cmd_apply(args):
     print(f"committed {app} {current} -> {new_version} [{mode}]")
 
 
+def cmd_apply_support_image(args):
+    from update.update_lib import read_service_image, replace_service_image_tag
+
+    app, service, new_tag = args.app, args.service, args.tag
+    mode = "AUTO" if args.auto else "REVIEW"
+    branch = f"updates/{args.branch_ts}"
+
+    app_dir = APPS_DIR / app
+    compose_path = app_dir / "docker-compose.yml.template"
+    if not compose_path.exists():
+        sys.exit(f"unknown app: {app}")
+
+    text = compose_path.read_text()
+    image_ref = read_service_image(text, service)
+    repo, current_tag = image_ref.rsplit(":", 1)
+    if current_tag == new_tag:
+        print(f"{app}/{service}: already at {new_tag}, skipping")
+        return
+
+    _ensure_branch(branch)
+    compose_path.write_text(replace_service_image_tag(text, service, new_tag))
+
+    if not _docker_pull_test(app_dir):
+        subprocess.run(["git", "checkout", "--", f"apps/{app}"])
+        sys.exit(f"{app}/{service}: docker pull --dry-run failed; aborted, no commit")
+
+    subprocess.run(["git", "add", f"apps/{app}"], check=True)
+    msg_lines = [f"update {app}/{service} support image {repo} from {current_tag} to {new_tag} [{mode}]", ""]
+    if mode == "REVIEW" and args.reason:
+        msg_lines.append(args.reason)
+    subprocess.run(["git", "commit", "-m", "\n".join(msg_lines)], check=True)
+    print(f"committed {app}/{service} support image {current_tag} -> {new_tag} [{mode}]")
+
+
 def main():
     p = argparse.ArgumentParser()
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -246,6 +354,17 @@ def main():
     grp.add_argument("--review", action="store_true")
     a.add_argument("--reason", default="")
     a.set_defaults(func=cmd_apply)
+
+    s = sub.add_parser("apply-support-image")
+    s.add_argument("app")
+    s.add_argument("service", help="compose service name, e.g. 'excalidraw' or 'librechat-meilisearch'")
+    s.add_argument("tag", help="new image tag to set")
+    s.add_argument("--branch-ts", required=True, help="iso timestamp for branch name, YYYY-MM-DDTHH-MM-SSZ")
+    grp2 = s.add_mutually_exclusive_group(required=True)
+    grp2.add_argument("--auto", action="store_true")
+    grp2.add_argument("--review", action="store_true")
+    s.add_argument("--reason", default="")
+    s.set_defaults(func=cmd_apply_support_image)
 
     args = p.parse_args()
     args.func(args)
