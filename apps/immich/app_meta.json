@@ -14,6 +14,9 @@
   "paths": {
     "": {
       "access": "public"
+    },
+    "/api/auth/admin-sign-up": {
+      "access": "private"
     }
   },
   "oidc": {
