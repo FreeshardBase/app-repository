@@ -116,6 +116,25 @@ jobs:
           CONTEXT: ${{ matrix.sidecar.context }}
         run: echo "version=$(cat "$CONTEXT/VERSION" | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
 
+      # A Docker image ID/digest isn't stable across two builds of
+      # byte-identical input - BuildKit embeds a build timestamp in the
+      # image config, so rebuilding the exact same Dockerfile+files an hour
+      # later yields a different ID. `publish` needs a way to tell "this is
+      # the same source" that doesn't depend on Docker's own non-determinism,
+      # so it compares this hash (of the context's actual file paths and
+      # contents) instead of the built image's ID.
+      - name: Compute content hash
+        id: hash
+        env:
+          CONTEXT: ${{ matrix.sidecar.context }}
+        run: |
+          hash=$(find "$CONTEXT" -type f \
+              -not -path '*/.pytest_cache/*' -not -path '*/__pycache__/*' -not -name '*.pyc' \
+            | LC_ALL=C sort \
+            | xargs -I{} sh -c 'echo {}; cat {}' \
+            | sha256sum | cut -d' ' -f1)
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -126,6 +145,7 @@ jobs:
           push: false
           load: true
           tags: ghcr.io/freeshardbase/${{ matrix.sidecar.app }}-sidecar:${{ steps.version.outputs.version }}
+          labels: freeshard.content-hash=${{ steps.hash.outputs.hash }}
 
       - name: Save image to an artifact
         env:
@@ -182,6 +202,8 @@ jobs:
           docker load -i "/tmp/${APP}-sidecar.tar"
           id=$(docker images --no-trunc -q --filter "reference=ghcr.io/freeshardbase/${APP}-sidecar" | head -1)
           echo "id=$id" >> "$GITHUB_OUTPUT"
+          hash=$(docker inspect --format '{{ index .Config.Labels "freeshard.content-hash" }}' "$id")
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
@@ -195,11 +217,12 @@ jobs:
           APP: ${{ matrix.sidecar.app }}
           VERSION: ${{ steps.version.outputs.version }}
           LOCAL_ID: ${{ steps.load.outputs.id }}
+          LOCAL_HASH: ${{ steps.load.outputs.hash }}
         run: |
           image="ghcr.io/freeshardbase/${APP}-sidecar:${VERSION}"
           if docker pull "$image" > /dev/null 2>&1; then
-            remote_id=$(docker images --no-trunc -q "$image")
-            if [ "$remote_id" != "$LOCAL_ID" ]; then
+            remote_hash=$(docker inspect --format '{{ index .Config.Labels "freeshard.content-hash" }}' "$image")
+            if [ "$remote_hash" != "$LOCAL_HASH" ]; then
               echo "::error::$image already exists with different content. Bump ${APP}'s VERSION file."
               exit 1
             fi
