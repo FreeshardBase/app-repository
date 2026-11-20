@@ -28,6 +28,9 @@ python3 update/update.py check --json > update/update_info/latest_check.json
 
 (The check subcommand also writes that file; the redirect is belt-and-suspenders for the skill.)
 
+This also runs the **support-image check** (same command, same report, under the
+`support_images` key) — see step 3b.
+
 ### 3. Partition apps
 
 Read `update/update_info/latest_check.json`. For each app entry:
@@ -39,6 +42,35 @@ Read `update/update_info/latest_check.json`. For each app entry:
   - **Clean auto** iff: `semver_jump` ∈ {`patch`, `minor`} AND NOT `release_body_has_breaking` AND NOT `compose_diff_nontrivial`. Action: `apply --auto`.
   - Otherwise → **candidate**. Read `release_body_snippet`, `upstream_compose_diff`, `candidate_reasons`. Judge.
 
+### 3b. Partition support images
+
+A **support image** is a container an app pins directly in its own
+`docker-compose.yml.template` that is not the app's own primary image — a
+reverse proxy (excalidraw's nginx), a cache, a database. `update_check.py`
+only ever sees the app's own primary image, so these are invisible to step 3
+entirely, no matter how big the app's own jump is. An app that declares
+`apps/<app>/update_check_support_images.py` (a `SUPPORT_IMAGES` list, same
+spirit as `update_check.py`'s `filter_regex` pattern — see that file for the
+existing examples) gets these checked independently, on their own cadence,
+whether or not the app's own version moved at all this run.
+
+For each entry under `support_images` in the check report:
+
+- `status == "up_to_date"` → ignore.
+- `status == "error"` → log error; skip; surface in the final summary.
+- `status == "outdated"`:
+  - **Clean auto** iff `candidate_reasons` is empty (the check already folds
+    in `jump` size, `stateful`, and any per-entry `always_review_reason` —
+    don't re-derive these from `jump`/`stateful` directly). Action:
+    `apply-support-image --auto`.
+  - Otherwise → **candidate**, same judging as step 4. A `stateful: true`
+    entry reaching review means a volume-mounted database/cache is jumping
+    in a way that may need a manual data migration before it's safe to
+    merge — treat that note at least as seriously as a major-jump app
+    candidate, and say so explicitly in the PR, don't just wave it through
+    because `docker compose pull --dry-run` passed (that only proves the
+    image exists, not that the app still starts against old data).
+
 ### 4. Judge each candidate
 
 For each candidate app, decide auto vs review by reading the spec'd signals:
@@ -49,7 +81,7 @@ For each candidate app, decide auto vs review by reading the spec'd signals:
 - Compose diff adds an optional env with sensible default → **auto** with one-line reason.
 - Default on ambiguity: **review**.
 
-**Support-image check (major bumps especially).** `update.py` only tracks the app's own image tag — it is blind to the versions of **support images** (mongo, postgres, redis, mariadb, meilisearch, …) pinned in `docker-compose.yml.template`. A major app bump can silently raise the required DB/cache version and the app then won't start. For any **major** jump (and when diagnosing a stuck app): fetch the upstream project's reference `docker-compose.yml`/self-host compose and diff its support-image tags **and init requirements** (e.g. mongo replica set, `pgvector` extension) against ours. If ours is below the requirement → **review**, and fix the support image in the same PR.
+**Support-image compatibility check (major bumps especially).** This is a different failure mode from step 3b's support-image staleness check — that one asks "is there a newer tag for an image we pinned ourselves"; this one asks "does bumping the app's own version silently raise what support-image version it now requires." For any **major** app jump (and when diagnosing a stuck app): fetch the upstream project's reference `docker-compose.yml`/self-host compose and diff its support-image tags **and init requirements** (e.g. mongo replica set, `pgvector` extension) against ours. If ours is below the requirement → **review**, and fix the support image in the same PR.
 
 > Bumping a support image across an **on-disk-incompatible major** (postgres N→N+1, mongo skipping a major, meilisearch dump-version change) breaks existing shards' data volumes — those need a manual per-shard migration and are **not** a drop-in compose edit. A same-major swap (e.g. `postgres:16` → `pgvector/pgvector:pg16`) is drop-in. Call out which case in the PR.
 
@@ -66,6 +98,17 @@ python3 update/update.py apply <app> <latest> --review --branch-ts "$TS" --reaso
 ```
 
 If `apply` exits non-zero (docker pull failure), record and continue with remaining apps.
+
+For each outdated support-image entry from step 3b, in any order:
+
+```bash
+python3 update/update.py apply-support-image <app> <service> <latest> --auto --branch-ts "$TS"
+# or
+python3 update/update.py apply-support-image <app> <service> <latest> --review --branch-ts "$TS" --reason "<one line>"
+```
+
+Same failure handling as `apply`. This only rewrites the one `image:` line
+for that service — it does not touch the app's own `app_version`.
 
 ### 6. Refresh changed app icons
 
@@ -204,4 +247,5 @@ Per-app table: `[AUTO]` / `[REVIEW]` / `[ERROR]`, current → new, reason. Note 
   - ACR-mirrored apps (`filebrowser`, `mirotalk`, `mosquitto` → `portalapps.azurecr.io/ptl-apps/*`): new upstream tag must be pushed into ACR before the runner can pull it.
   - Variant-tag apps (e.g. `glances` `nicolargo/glances:X-full`): the `-full`/`-nginx` variant can lag the plain tag on the registry — `4.5.5-full` failed dry-run while `4.5.4-full` was current. Same transient failure, not a flavor-tag skip.
 - Flavor-tag non-upgrades (same version, different variant suffix, e.g. `baikal 0.10.1 → 0.10.1-nginx`) are not real updates — skip, don't apply.
-- Support-image drift is real and has bitten us: **overleaf** 6.x needed mongo 4.4→8.0 (as a replica set) + redis 6.2→7.4 and wouldn't start until fixed; **affine** pinned plain `postgres:16` but needs `pgvector/pgvector:pg16` (predeploy runs `CREATE EXTENSION vector`); **immich** pins its own postgres/vchord image and bumps it independently of the server version. On any major app bump, run the support-image check in step 4. Sidecar files (e.g. a mongo replica-set init script) ship verbatim next to the compose (`{{ fs.installation_dir }}/<file>`) — see `add-app` digest.
+- Support-image drift is real and has bitten us: **overleaf** 6.x needed mongo 4.4→8.0 (as a replica set) + redis 6.2→7.4 and wouldn't start until fixed; **affine** pinned plain `postgres:16` but needs `pgvector/pgvector:pg16` (predeploy runs `CREATE EXTENSION vector`); **immich** pins its own postgres/vchord image and bumps it independently of the server version. On any major app bump, run the support-image compatibility check in step 4. Sidecar files (e.g. a mongo replica-set init script) ship verbatim next to the compose (`{{ fs.installation_dir }}/<file>`) — see `add-app` digest.
+- The step 3b support-image *staleness* check only covers images an app has opted in via `apps/<app>/update_check_support_images.py`. It is not retroactive: a support image with no such file (most of them, today — see the FreeshardBase/app-repository issue tracker for the backlog of apps not yet wired up) silently keeps whatever tag was last hand-pinned, same as before this mechanism existed.

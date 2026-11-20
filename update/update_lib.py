@@ -198,6 +198,130 @@ def semver_jump(old: str, new: str) -> str:
     return "patch"
 
 
+def _loose_version_tuple(s: str) -> Optional[tuple[int, ...]]:
+    """Leading dot-separated run of integers, tolerating a non-digit prefix
+    (e.g. 'v') and ignoring any suffix after it (e.g. '-alpine'). Image tags
+    for support images rarely follow strict X.Y.Z semver, so this is
+    deliberately loose. Returns None if there is no leading digit at all."""
+    m = re.match(r"^[^\d]*(\d+(?:\.\d+)*)", s)
+    if not m:
+        return None
+    return tuple(int(p) for p in m.group(1).split("."))
+
+
+def tag_jump(old: str, new: str) -> str:
+    """Like semver_jump, but tolerant of the 1-4 numeric components typical
+    of support-image tags (e.g. nginx `1.27`, postgres `15`, meilisearch
+    `v1.12.3`). The first numeric component that differs sets the jump size
+    ('major' for the first, 'minor' for the second, 'patch' for any later
+    one). 'same' if equal once padded; 'unknown' if either tag has no
+    leading numeric run, or `new` does not sort strictly after `old`.
+    """
+    o, n = _loose_version_tuple(old), _loose_version_tuple(new)
+    if o is None or n is None:
+        return "unknown"
+    width = max(len(o), len(n))
+    o = o + (0,) * (width - len(o))
+    n = n + (0,) * (width - len(n))
+    if n == o:
+        return "same"
+    if n < o:
+        return "unknown"
+    for i in range(min(2, width)):
+        if n[i] != o[i]:
+            return "major" if i == 0 else "minor"
+    return "patch"
+
+
+def _find_service_block(compose_text: str, service: str) -> tuple[int, int]:
+    """Return (start, end) line indices (end exclusive) of a compose
+    service's block, keyed on the service name's own indentation level.
+
+    This is a line-level scan, not a full YAML parse — our compose
+    templates are flat enough (no anchors, single document, consistent
+    indent per block) that this is simpler than adding a YAML dependency
+    to a script that otherwise only needs the stdlib.
+
+    The search is scoped to start after the top-level `services:` key:
+    a template's `networks:` block can declare a bare network with the
+    same name as a service (excalidraw does — see its own `excalidraw:`
+    network entry), which would otherwise false-match as the service
+    header.
+    """
+    lines = compose_text.splitlines(keepends=True)
+    services_start = None
+    for i, line in enumerate(lines):
+        if re.match(r"^services:[ \t]*$", line):
+            services_start = i
+            break
+    if services_start is None:
+        raise ValueError("no top-level 'services:' key found in compose template")
+
+    header_re = re.compile(rf"^(\s*){re.escape(service)}:[ \t]*$")
+    start = indent = None
+    for i in range(services_start + 1, len(lines)):
+        m = header_re.match(lines[i])
+        if m:
+            start, indent = i, len(m.group(1))
+            break
+    if start is None:
+        raise ValueError(f"service {service!r} not found in compose template")
+    end = len(lines)
+    for i in range(start + 1, len(lines)):
+        stripped = lines[i].strip()
+        if not stripped:
+            continue
+        cur_indent = len(lines[i]) - len(lines[i].lstrip(" "))
+        if cur_indent <= indent:
+            end = i
+            break
+    return start, end
+
+
+def read_service_image(compose_text: str, service: str) -> str:
+    """Return the `image:` value (`repo:tag`) of a compose service."""
+    start, end = _find_service_block(compose_text, service)
+    for line in compose_text.splitlines(keepends=True)[start:end]:
+        m = re.match(r"^\s*image:\s*(\S+)\s*$", line)
+        if m:
+            return m.group(1)
+    raise ValueError(f"no image: line found for service {service!r}")
+
+
+def service_has_volumes(compose_text: str, service: str) -> bool:
+    """True if the service's block has a non-empty `volumes:` list.
+
+    Used as the generic, structural signal for "this support image holds
+    state" — a volume mount to persistent app data, rather than a per-app
+    hardcoded list of which images are databases.
+    """
+    start, end = _find_service_block(compose_text, service)
+    lines = compose_text.splitlines(keepends=True)
+    for i in range(start, end):
+        if re.match(r"^\s*volumes:\s*$", lines[i]):
+            return i + 1 < end and bool(lines[i + 1].strip())
+    return False
+
+
+def replace_service_image_tag(compose_text: str, service: str, new_tag: str) -> str:
+    """Line-level replace of just the given service's image tag.
+
+    Targets the one `image:` line inside that service's block rather than a
+    blind find-and-replace of the tag string, so an unrelated identical
+    substring elsewhere in the template is never touched.
+    """
+    start, end = _find_service_block(compose_text, service)
+    lines = compose_text.splitlines(keepends=True)
+    image_ref = read_service_image(compose_text, service)
+    repo = image_ref.rsplit(":", 1)[0]
+    line_re = re.compile(r"^\s*image:\s*" + re.escape(image_ref) + r"\s*$")
+    for i in range(start, end):
+        if line_re.match(lines[i]):
+            lines[i] = lines[i].replace(image_ref, f"{repo}:{new_tag}")
+            return "".join(lines)
+    raise ValueError(f"image line for service {service!r} not found")
+
+
 COMPOSE_CACHE_DIR = UPDATE_DIR / "update_info" / "upstream_compose_cache"
 
 

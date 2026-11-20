@@ -4,11 +4,25 @@ name: Sidecars
 # Only the sidecar(s) whose files actually changed are built - never a
 # rebuild-everything job - via the detect job's matrix output.
 #
-# On a pull request: build only (no push), to catch a broken Dockerfile
-# before merge.
-# On push to main: build and push ghcr.io/freeshardbase/<app>-sidecar:<version>,
-# where <version> is read from that sidecar's own VERSION file. Publishing a
-# version that's already in the registry is refused - bump VERSION to publish.
+# Publishes ghcr.io/freeshardbase/<app>-sidecar:<version> (<version> read
+# from that sidecar's own VERSION file) on BOTH a pull request and a push to
+# main - a PR publishes exactly the tag a later merge would also publish, so
+# a PR's own custom-app smoke test, or an ad hoc trial-shard install, can
+# pull a real image before the PR ever merges. That preview tag is a
+# floating one: every push to the PR branch republishes it, same trust
+# level as the PR's own code, no more and no less. "Refuse to republish"
+# (see the `publish` job) only blocks a genuine version-number reuse with
+# different content; publishing identical content to a tag that a PR itself
+# already published is a safe no-op, so a later merge doesn't get blocked by
+# its own PR's preview.
+#
+# Split into `build` (untrusted code execution, zero credentials) and
+# `publish` (trusted static push, zero code execution) because a
+# Dockerfile's RUN instructions execute arbitrary code during `docker build`
+# itself, regardless of push:. A job that builds unreviewed instructions
+# must never also hold a live registry-write token - see `build`'s comment
+# below for how that's enforced, and `publish`'s for why it's safe to hold
+# one.
 
 on:
   push:
@@ -79,16 +93,15 @@ jobs:
           echo "Sidecars matrix: $json"
           echo "sidecars=$json" >> "$GITHUB_OUTPUT"
 
-  # Build-only validation for pull requests. Deliberately holds no
-  # `packages: write` (or any other elevated) permission: this job builds
-  # whatever Dockerfile a PR branch contains, including PRs from a branch in
-  # this same repo, and a Dockerfile's RUN instructions execute arbitrary
-  # code during `docker build` regardless of the push: input. A job that
-  # executes unreviewed build instructions must not also hold a live
-  # registry-write token - see the `publish` job below for that.
+  # Builds whatever Dockerfile the triggering branch contains, for a PR or
+  # for main alike. Deliberately holds no `packages: write` (or any other
+  # elevated) permission - a Dockerfile's RUN instructions execute arbitrary
+  # code during `docker build` itself, regardless of push:, so this job
+  # can't be trusted with a live registry-write token. It hands its result
+  # to `publish` as a plain file artifact instead of pushing it directly.
   build:
     needs: detect
-    if: needs.detect.outputs.sidecars != '[]' && github.event_name == 'pull_request'
+    if: needs.detect.outputs.sidecars != '[]'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -111,14 +124,34 @@ jobs:
         with:
           context: ${{ matrix.sidecar.context }}
           push: false
+          load: true
           tags: ghcr.io/freeshardbase/${{ matrix.sidecar.app }}-sidecar:${{ steps.version.outputs.version }}
 
-  # Build and publish on push to main only. By this point the sidecar's
-  # Dockerfile has already gone through PR review, so this job (and only
-  # this job) is granted packages: write.
+      - name: Save image to an artifact
+        env:
+          APP: ${{ matrix.sidecar.app }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: docker save "ghcr.io/freeshardbase/${APP}-sidecar:${VERSION}" -o "/tmp/${APP}-sidecar.tar"
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sidecar-image-${{ matrix.sidecar.app }}
+          path: /tmp/${{ matrix.sidecar.app }}-sidecar.tar
+          retention-days: 7
+
+  # Never executes any code the triggering branch contributed: no docker
+  # build, no `run:` step that interpolates branch-controlled content. It
+  # only loads the artifact `build` already produced (a plain file, not
+  # something that executes on load) and pushes it statically - so holding
+  # packages: write here is safe even though `build`'s own Dockerfile input
+  # is unreviewed. Skipped entirely for a pull_request from a fork, where
+  # there's no reason to trust the branch at all.
   publish:
-    needs: detect
-    if: needs.detect.outputs.sidecars != '[]' && github.event_name == 'push'
+    needs: [detect, build]
+    if: >-
+      needs.detect.outputs.sidecars != '[]' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -135,8 +168,20 @@ jobs:
           CONTEXT: ${{ matrix.sidecar.context }}
         run: echo "version=$(cat "$CONTEXT/VERSION" | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - name: Download image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sidecar-image-${{ matrix.sidecar.app }}
+          path: /tmp
+
+      - name: Load image
+        id: load
+        env:
+          APP: ${{ matrix.sidecar.app }}
+        run: |
+          docker load -i "/tmp/${APP}-sidecar.tar"
+          id=$(docker images --no-trunc -q --filter "reference=ghcr.io/freeshardbase/${APP}-sidecar" | head -1)
+          echo "id=$id" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
@@ -145,21 +190,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Refuse to republish an existing version
+      - name: Publish, refusing a genuine version-number reuse
         env:
           APP: ${{ matrix.sidecar.app }}
-          CONTEXT: ${{ matrix.sidecar.context }}
           VERSION: ${{ steps.version.outputs.version }}
+          LOCAL_ID: ${{ steps.load.outputs.id }}
         run: |
           image="ghcr.io/freeshardbase/${APP}-sidecar:${VERSION}"
-          if docker manifest inspect "$image" > /dev/null 2>&1; then
-            echo "::error::$image already exists. Bump ${CONTEXT}/VERSION before merging."
-            exit 1
+          if docker pull "$image" > /dev/null 2>&1; then
+            remote_id=$(docker images --no-trunc -q "$image")
+            if [ "$remote_id" != "$LOCAL_ID" ]; then
+              echo "::error::$image already exists with different content. Bump ${APP}'s VERSION file."
+              exit 1
+            fi
+            echo "$image already published with identical content - nothing to do."
+            exit 0
           fi
-
-      - name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          context: ${{ matrix.sidecar.context }}
-          push: true
-          tags: ghcr.io/freeshardbase/${{ matrix.sidecar.app }}-sidecar:${{ steps.version.outputs.version }}
+          docker tag "$LOCAL_ID" "$image"
+          docker push "$image"
