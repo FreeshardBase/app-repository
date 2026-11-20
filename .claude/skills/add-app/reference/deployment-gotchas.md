@@ -32,3 +32,12 @@ An app with a public ingestion endpoint (webhook, analytics beacon, IoT message)
 
 **Fix:** set `lifecycle: { "always_on": true }` whenever any path is `public` and receives traffic at unpredictable times, not just the already-named IoT/messaging bucket. Precedent: `umami`'s `/api/send` beacon endpoint.
 
+## A custom `entrypoint:` shell script with `$VAR` silently loses its variables
+
+`docker compose` interpolates `$VAR`/`${VAR}` in the compose *file itself* before the container ever sees it — the same mechanism that expands a real compose variable. A custom entrypoint's own shell variables (`MARKER=...`, `TOKEN=$(...)`, `$(seq ...)`) go through that same pass. Since nothing defines `MARKER` or `TOKEN` as an actual compose/env variable, each reference silently resolves to an empty string, and the shell script runs with blank values instead of failing loudly.
+
+**Symptom:** `docker compose up` prints `level=warning msg="The \"<NAME>\" variable is not set. Defaulting to a blank string."` for each shell variable in the entrypoint — easy to miss, and `docker run` (used by a naive manual test, bypassing compose's interpolation) won't reproduce it at all.
+
+**Fix:** escape every literal `$` meant for the shell as `$$` in the template (`$$MARKER`, `$$(seq ...)`, `$$(curl ...)`). Precedent: `mealie`'s reverse-proxy password-rotation entrypoint.
+
+**Detect:** test through `docker compose`, not a plain `docker run` with the same script mounted in — the bug only reproduces through compose's own variable-substitution pass.

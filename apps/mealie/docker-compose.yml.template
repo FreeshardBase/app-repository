@@ -1,0 +1,44 @@
+networks:
+    portal:
+        external: true
+
+services:
+    mealie:
+        restart: always
+        image: ghcr.io/mealie-recipes/mealie:v3.31.0
+        container_name: mealie
+        entrypoint:
+        - /bin/sh
+        - -c
+        - |
+          (
+            MARKER=/app/data/.freeshard_password_rotated
+            if [ ! -f "$$MARKER" ]; then
+              for i in $$(seq 1 60); do
+                curl -fs http://localhost:9000/api/app/about >/dev/null 2>&1 && break
+                sleep 1
+              done
+              TOKEN=$$(curl -fs -X POST http://localhost:9000/api/auth/token \
+                --data-urlencode "username=changeme@example.com" \
+                --data-urlencode "password=MyPassword" \
+                | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null)
+              if [ -n "$$TOKEN" ]; then
+                curl -fs -X PUT http://localhost:9000/api/users/password \
+                  -H "Authorization: Bearer $$TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d "{\"currentPassword\":\"MyPassword\",\"newPassword\":\"{{ secret('admin_password') }}\"}" \
+                  >/dev/null 2>&1 && touch "$$MARKER"
+              fi
+            fi
+          ) &
+          exec /app/run.sh
+        volumes:
+        - "{{ fs.app_data }}/data:/app/data"
+        environment:
+        - BASE_URL=https://mealie.{{ portal.domain }}
+        - ALLOW_SIGNUP=false
+        - ALLOW_PASSWORD_LOGIN=false
+        - REVERSE_PROXY_AUTH_ENABLED=true
+        - REVERSE_PROXY_AUTH_HEADER=X-Ptl-User
+        networks:
+        - portal
