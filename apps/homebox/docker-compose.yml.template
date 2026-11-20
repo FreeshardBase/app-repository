@@ -1,0 +1,19 @@
+networks:
+    portal:
+        external: true
+
+services:
+    homebox:
+        restart: always
+        image: ghcr.io/sysadminsmedia/homebox:0.27.1
+        container_name: homebox
+        volumes:
+        - "{{ fs.app_data }}/data:/data"
+        environment:
+        - HBOX_OPTIONS_HOSTNAME=https://homebox.{{ portal.domain }}
+        - HBOX_OPTIONS_TRUST_PROXY=true
+        - HBOX_OPTIONS_ALLOW_ANALYTICS=false
+        - HBOX_OPTIONS_GITHUB_RELEASE_CHECK=false
+        - HBOX_AUTH_API_KEY_PEPPER={{ secret('api_key_pepper') }}
+        networks:
+        - portal
