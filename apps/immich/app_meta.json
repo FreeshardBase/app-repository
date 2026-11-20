@@ -14,7 +14,18 @@
   "paths": {
     "": {
       "access": "public"
+    },
+    "/api/auth/admin-sign-up": {
+      "access": "private"
     }
+  },
+  "oidc": {
+    "redirect_uris": [
+      "https://immich.{{ portal.domain }}/auth/login",
+      "https://immich.{{ portal.domain }}/user-settings",
+      "app.immich:///oauth-callback"
+    ],
+    "backchannel_logout_uri": "https://immich.{{ portal.domain }}/api/oauth/backchannel-logout"
   },
   "minimum_portal_size": "s",
   "lifecycle": {
