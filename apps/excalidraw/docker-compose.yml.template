@@ -6,7 +6,7 @@ networks:
 services:
     excalidraw:
         restart: always
-        image: nginx:1.27-alpine
+        image: nginx:1.30.7-alpine
         container_name: excalidraw
         command:
         - sh
