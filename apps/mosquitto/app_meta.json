@@ -1,8 +1,11 @@
 {
-  "v": "1.0",
-  "app_version": "0.1.0",
+  "v": "1.2",
+  "app_version": "2.0.22",
   "name": "mosquitto",
+  "pretty_name": "Mosquitto",
   "icon": "icon.png",
+  "homepage": "https://mosquitto.org/",
+  "upstream_repo": "https://github.com/eclipse-mosquitto/mosquitto",
   "entrypoints": [
     {
       "container_name": "mosquitto",
@@ -37,5 +40,4 @@
     ],
     "is_featured": true
   }
-
 }
